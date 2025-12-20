@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Ultimate Excuse Generator</title>
+    <style>
+        :root {
+            --primary: #8b5cf6; /* Changed to a more "chaotic" purple */
+            --primary-hover: #7c3aed;
+            --bg: #f3f4f6;
+            --card-bg: #ffffff;
+            --text: #1f2937;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            color: var(--text);
+        }
+
+        .container {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            max-width: 550px;
+            width: 100%;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+            color: var(--primary);
+        }
+
+        p.subtitle {
+            color: #6b7280;
+            margin-bottom: 2rem;
+        }
+
+        /* Slider Styling */
+        .slider-container {
+            margin-bottom: 2rem;
+            text-align: left;
+        }
+
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        #severity-text {
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        input[type=range] {
+            width: 100%;
+            height: 10px;
+            border-radius: 5px;
+            background: #d1d5db;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+        
+        input[type=range]::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+        }
+
+        /* Excuse Display Area */
+        .excuse-box {
+            background: #f9fafb;
+            border: 2px dashed #d1d5db;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            min-height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            font-weight: 600;
+            line-height: 1.4;
+        }
+
+        .excuse-text {
+            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        /* Buttons */
+        .btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 14px 24px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 100%;
+            margin-bottom: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            box-shadow: none;
+        }
+
+        .btn-outline:hover {
+            background-color: #eef2ff;
+        }
+
+        @keyframes popIn {
+            0% { opacity: 0; transform: scale(0.9); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>🙅‍♀️ No-Go Generator</h1>
+        <p class="subtitle">Get out of plans, guilt-free(ish).</p>
+
+        <div class="slider-container">
+            <div class="slider-label">
+                <span>Intensity:</span>
+                <span id="severity-text">Level 4: Absurd (Chaos)</span>
+            </div>
+            <input type="range" min="1" max="4" value="4" class="slider" id="severitySlider">
+        </div>
+
+        <div class="excuse-box">
+            <span id="excuse-display">Hit the button for an excuse...</span>
+        </div>
+
+        <button class="btn" onclick="generateExcuse()">Generate Excuse</button>
+        <button class="btn btn-outline" onclick="copyExcuse()">Copy to Clipboard</button>
+    </div>
+
+    <script>
+        const excuses = {
+            1: [ // Mild (Vague/Tired)
+                "I think I ate something bad, my stomach is turning.",
+                "I have a splitting headache coming on.",
+                "I'm absolutely drained from work, I need to crash.",
+                "I completely forgot I have a package arriving that I need to sign for.",
+                "I'm feeling a bit under the weather, better safe than sorry.",
+                "I didn't sleep at all last night, I'm a zombie.",
+                "I have to be up super early tomorrow.",
+                "I'm just really not feeling social today, sorry!",
+                "I have a mountain of laundry I've been ignoring for weeks.",
+                "I'm waiting for a very important phone call."
+            ],
+            2: [ // Moderate (Errands/Tech/Pets)
+                "My neighbor locked themselves out and I'm helping them wait for a locksmith.",
+                "My WiFi is down and I have to wait for the technician.",
+                "My dog just threw up on the carpet, it's a disaster zone here.",
+                "My car won't start, I think the battery is dead.",
+                "I have a pipe leaking under the sink, waiting for the plumber.",
+                "My laptop crashed and I lost a bunch of work I need to redo.",
+                "I have to take my cat to the vet, she's acting weird.",
+                "The power just went out in my building.",
+                "I lost my keys and I'm currently looking everywhere for them.",
+                "I'm stuck waiting for a furniture delivery that's 4 hours late."
+            ],
+            3: [ // High (Family/Crisis)
+                "My mom just called with a bit of an emergency, I need to go over there.",
+                "My basement is flooding!",
+                "I've been pulled into a last-minute crisis meeting at work.",
+                "A distant relative just showed up at my door unannounced.",
+                "I tweaked my back lifting a box and literally can't move.",
+                "My babysitter just cancelled on me last minute.",
+                "I think I have food poisoning.",
+                "My car just broke down on the highway.",
+                "I have a dental emergency, chipped a tooth!",
+                "My alarm system is going off and I can't stop it."
+            ],
+            4: [ // Absurd (The "Wait, what?" tier)
+                "My cat has been summoned for jury duty.",
+                "I am currently glued to a chair. Don't ask.",
+                "The horoscope said I should not leave the house today.",
+                "I'm teaching my goldfish how to play chess.",
+                "A wizard just appeared and gave me a quest.",
+                "I accidentally joined a cult and today is orientation.",
+                "The floor is lava. Literally.",
+                "I'm currently negotiating a peace treaty between the squirrels in my yard.",
+                "I have been mistaken for a spy and am currently in hiding.",
+                "My future self traveled back in time to warn me not to go.",
+                "I can't find my other shoe and I refuse to go out hopping.",
+                "I'm waiting for my letter from Hogwarts.",
+                "My plant looks sad and I need to provide emotional support.",
+                "I am currently molting."
+            ]
+        };
+
+        const levels = {
+            1: "Level 1: Mild (Vague/Tired)",
+            2: "Level 2: Moderate (Life Happens)",
+            3: "Level 3: Severe (Emergency)",
+            4: "Level 4: Absurd (Chaos)"
+        };
+
+        const slider = document.getElementById('severitySlider');
+        const severityText = document.getElementById('severity-text');
+        const display = document.getElementById('excuse-display');
+
+        slider.oninput = function() {
+            severityText.innerText = levels[this.value];
+        }
+
+        function generateExcuse() {
+            const level = slider.value;
+            const pool = excuses[level];
+            const randomExcuse = pool[Math.floor(Math.random() * pool.length)];
+            
+            // Add class for animation
+            display.classList.remove('excuse-text');
+            void display.offsetWidth; // Trigger reflow
+            display.classList.add('excuse-text');
+            
+            display.innerText = randomExcuse;
+        }
+
+        function copyExcuse() {
+            const text = display.innerText;
+            if(text === "Hit the button for an excuse...") return;
+            
+            navigator.clipboard.writeText(text).then(() => {
+                const originalText = display.innerText;
+                display.innerText = "Copied!";
+                setTimeout(() => {
+                    display.innerText = originalText;
+                }, 1000);
+            });
+        }
+        
+
+        
+// 💒 1. Disable right-click
+document.addEventListener('contextmenu', e => e.preventDefault());
+
+// 💒 2. Disable inspect / save / print shortcuts
+document.addEventListener('keydown', e => {
+  if (
+    (e.ctrlKey && ['s','u','p','S','U','P'].includes(e.key)) || // Ctrl+S, Ctrl+U, Ctrl+P
+    e.key === 'F12' ||                                          // DevTools
+    (e.ctrlKey && e.shiftKey && ['I','J','C'].includes(e.key))  // Ctrl+Shift+I/J/C
+  ) {
+    e.preventDefault();
+    sparkle(e.clientX, e.clientY);
+  }
+});
+
+// 💒 3. Block drag saving of images
+document.addEventListener('dragstart', e => e.preventDefault());
+document.querySelectorAll('img').forEach(img => img.setAttribute('draggable', 'false'));
+
+// 💒 4. Disable text selection & copying
+document.addEventListener('copy', e => e.preventDefault());
+document.addEventListener('cut', e => e.preventDefault());
+document.addEventListener('selectstart', e => e.preventDefault());
+document.body.style.userSelect = 'none';
+document.body.style.webkitUserSelect = 'none';
+
+// 💒 5. Detect if DevTools is open
+setInterval(() => {
+  if (
+    window.outerWidth - window.innerWidth > 160 ||
+    window.outerHeight - window.innerHeight > 160
+  ) {
+    document.body.innerHTML = `
+      <div style="text-align:center;margin-top:20%;font-size:2rem;color:#d6336c;">
+        💖 Please close developer tools to continue 💖
+      </div>`;
+  }
+}, 1000);
+
+
+    </script>
+</body>
+</html>

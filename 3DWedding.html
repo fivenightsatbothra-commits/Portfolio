@@ -1,0 +1,537 @@
+<html><head><style>body { font-family: monospace; background:#141414; color:#fff; }</style></head><body><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AURA: S & D | 2026</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Italiana&family=Manrope:wght@200;400;600&family=Syncopate:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --void: #050505;
+            --glass: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --text-main: #F0F0F0;
+        }
+
+        body {
+            background-color: var(--void);
+            color: var(--text-main);
+            font-family: 'Manrope', sans-serif;
+            overflow-x: hidden;
+        }
+
+        .font-display { font-family: 'Italiana', serif; }
+        .font-cyber { font-family: 'Syncopate', sans-serif; }
+
+        /* --- Ambient Aurora Background --- */
+        .aurora-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            overflow: hidden;
+            background: var(--void);
+        }
+        
+        .aurora-blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.6;
+            animation: float 20s infinite alternate;
+        }
+        .blob-1 {
+            top: -10%; left: -10%; width: 50vw; height: 50vw;
+            background: radial-gradient(circle, #4f46e5, transparent 70%);
+            animation-duration: 25s;
+        }
+        .blob-2 {
+            bottom: -20%; right: -10%; width: 60vw; height: 60vw;
+            background: radial-gradient(circle, #ec4899, transparent 70%);
+            animation-duration: 30s;
+            animation-delay: -5s;
+        }
+        .blob-3 {
+            top: 40%; left: 40%; width: 40vw; height: 40vw;
+            background: radial-gradient(circle, #06b6d4, transparent 70%);
+            animation-duration: 20s;
+            animation-delay: -10s;
+        }
+
+        @keyframes float {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(10%, 10%) scale(1.1); }
+        }
+
+        /* --- Noise Overlay for Texture --- */
+        .noise {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            background: url('https://grainy-gradients.vercel.app/noise.svg');
+            opacity: 0.05;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* --- Glassmorphism Cards --- */
+        .glass-panel {
+            background: var(--glass);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        /* --- Chromatic Aberration Text (Glitch) --- */
+        .chromatic-text {
+            position: relative;
+            mix-blend-mode: screen;
+        }
+        .chromatic-text::before,
+        .chromatic-text::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.8;
+            transition: all 0.3s ease;
+            mix-blend-mode: multiply;
+        }
+        .chromatic-text::before {
+            color: #00ffff;
+            z-index: -1;
+            transform: translate(-2px, 0);
+        }
+        .chromatic-text::after {
+            color: #ff00ff;
+            z-index: -2;
+            transform: translate(2px, 0);
+        }
+        .group:hover .chromatic-text::before {
+            transform: translate(-4px, -2px);
+        }
+        .group:hover .chromatic-text::after {
+            transform: translate(4px, 2px);
+        }
+
+        /* --- Image Prism Effect --- */
+        .prism-img-wrapper {
+            position: relative;
+            overflow: hidden;
+        }
+        .prism-img-wrapper img {
+            transition: transform 0.7s cubic-bezier(0.19, 1, 0.22, 1), filter 0.7s ease;
+        }
+        .prism-img-wrapper:hover img {
+            transform: scale(1.05);
+            filter: hue-rotate(15deg) contrast(1.2);
+        }
+        .prism-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(125deg, rgba(255,255,255,0.2) 0%, transparent 40%, transparent 60%, rgba(255,255,255,0.2) 100%);
+            transform: translateX(-100%);
+            transition: transform 0.7s ease;
+            mix-blend-mode: overlay;
+        }
+        .prism-img-wrapper:hover .prism-overlay {
+            transform: translateX(100%);
+        }
+
+        /* --- 3D Tilt Engine --- */
+        .tilt-element {
+            transform-style: preserve-3d;
+            transition: transform 0.1s ease-out; /* Smooth follow */
+        }
+        
+        .tilt-content {
+            transform: translateZ(30px); /* Lifts content off the card */
+            transform-style: preserve-3d;
+        }
+
+        .tilt-reset {
+             transition: transform 0.5s ease;
+        }
+
+        /* --- Custom Scrollbar --- */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--void); }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #555; }
+
+        /* --- Utility --- */
+        .text-glow {
+            text-shadow: 0 0 20px rgba(255,255,255,0.3);
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Background Elements -->
+    <div class="aurora-container">
+        <div class="aurora-blob blob-1"></div>
+        <div class="aurora-blob blob-2"></div>
+        <div class="aurora-blob blob-3"></div>
+    </div>
+    <div class="noise"></div>
+
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full z-50 p-8 flex justify-between items-center mix-blend-difference text-white">
+        <a href="#" class="font-cyber text-xs tracking-[0.3em] font-bold hover:text-cyan-300 transition-colors">AURA / 2026</a>
+        <div class="hidden md:flex gap-12 font-manrope text-xs tracking-widest uppercase">
+            <a href="#vision" class="hover:text-pink-300 transition-colors">Vision</a>
+            <a href="#timeline" class="hover:text-purple-300 transition-colors">Timeline</a>
+            <a href="#access" class="border border-white/30 px-6 py-2 rounded-full hover:bg-white hover:text-black transition-all">Access / RSVP</a>
+        </div>
+    </nav>
+
+    <!-- Mobile Nav Bar (Bottom) -->
+    <nav class="md:hidden fixed bottom-6 left-6 right-6 z-50 glass-panel rounded-full p-4 flex justify-around items-center">
+        <a href="#hero" class="text-xl"><i class="fas fa-circle-notch"></i></a>
+        <a href="#vision" class="text-xl"><i class="far fa-eye"></i></a>
+        <a href="#timeline" class="text-xl"><i class="fas fa-stream"></i></a>
+        <a href="#access" class="text-xl text-pink-400"><i class="fas fa-fingerprint"></i></a>
+    </nav>
+
+    <!-- Hero Section -->
+    <header id="hero" class="min-h-screen flex flex-col justify-center items-center text-center relative px-6 pt-20">
+        <div class="glass-panel px-6 py-2 rounded-full mb-8 animate-pulse">
+            <span class="font-cyber text-[10px] tracking-[0.2em] uppercase bg-clip-text text-transparent bg-gradient-to-r from-cyan-300 to-purple-400">
+                Immersive Union Experience
+            </span>
+        </div>
+
+        <!-- 3D Title -->
+        <div class="tilt-element p-12">
+            <h1 class="font-display text-7xl md:text-9xl leading-none mb-6 mix-blend-overlay group cursor-default tilt-content">
+                <span class="chromatic-text block" data-text="SILAS">SILAS</span>
+                <span class="chromatic-text block" data-text="& DAPHNE">& DAPHNE</span>
+            </h1>
+        </div>
+
+        <p class="font-manrope font-light text-lg md:text-xl tracking-wide max-w-lg text-white/70 mt-8">
+            Light refracts. Souls connect. <br>
+            Join us in the spectrum.
+        </p>
+
+        <div class="absolute bottom-12 flex flex-col items-center gap-2 opacity-50">
+            <div class="w-[1px] h-16 bg-gradient-to-b from-transparent via-white to-transparent"></div>
+            <span class="font-cyber text-[10px]">SCROLL</span>
+        </div>
+    </header>
+
+    <!-- Vision / The Couple -->
+    <section id="vision" class="py-32 px-6 md:px-24">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
+            <div class="relative group tilt-element p-4">
+                <!-- Large Image with Prism Effect -->
+                <div class="tilt-content">
+                    <div class="prism-img-wrapper rounded-lg aspect-[3/4]">
+                        <div class="prism-overlay"></div>
+                        <img src="https://images.unsplash.com/photo-1591604466107-ec97de577aff?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8d2VkZGluZ3N8ZW58MHx8MHx8fDA%3D" class="w-full h-full object-cover">
+                    </div>
+                </div>
+                <!-- Floating Caption -->
+                <div class="absolute -bottom-6 -right-6 glass-panel p-6 rounded-lg max-w-xs transform group-hover:-translate-y-2 transition-transform duration-500 tilt-content">
+                    <p class="font-display text-2xl italic">"We are made of light."</p>
+                    <p class="font-cyber text-[10px] mt-2 text-cyan-300">REFRACTION INDEX: 1.5</p>
+                </div>
+            </div>
+
+            <div class="space-y-8">
+                <h2 class="font-display text-5xl md:text-6xl text-glow">The Convergence</h2>
+                <div class="w-12 h-[2px] bg-gradient-to-r from-cyan-400 to-pink-500"></div>
+                <p class="font-manrope font-light text-lg text-white/80 leading-relaxed">
+                    It wasn't a spark; it was a beam of light hitting a prism. Suddenly, a single life split into a spectrum of color we didn't know existed. 
+                </p>
+                <p class="font-manrope font-light text-lg text-white/80 leading-relaxed">
+                    On <span class="text-pink-300">September 12th, 2026</span>, we invite you to step into our light. Not just a wedding, but an atmospheric shift.
+                </p>
+
+                <div class="grid grid-cols-2 gap-4 pt-4">
+                    <div class="glass-panel p-4 text-center rounded-lg hover:bg-white/5 transition-colors tilt-element">
+                        <span class="block font-cyber text-2xl font-bold tilt-content">12</span>
+                        <span class="text-[10px] uppercase tracking-widest opacity-60 tilt-content">Sept</span>
+                    </div>
+                    <div class="glass-panel p-4 text-center rounded-lg hover:bg-white/5 transition-colors tilt-element">
+                        <span class="block font-cyber text-2xl font-bold tilt-content">NYC</span>
+                        <span class="text-[10px] uppercase tracking-widest opacity-60 tilt-content">Soho</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Timeline / Holographic Cards -->
+    <section id="timeline" class="py-32 overflow-hidden">
+        <div class="container mx-auto px-6 mb-16 flex items-end justify-between">
+            <h2 class="font-display text-5xl md:text-7xl">The Sequence</h2>
+            <span class="font-cyber text-xs border border-white/20 px-4 py-1 rounded-full">EST 2026</span>
+        </div>
+
+        <!-- Horizontal Scroll Container -->
+        <div class="flex gap-8 px-6 md:px-24 overflow-x-auto pb-12 snap-x" style="perspective: 1000px;">
+            
+            <!-- Card 1 -->
+            <div class="min-w-[85vw] md:min-w-[400px] snap-center glass-panel p-2 rounded-2xl group hover:shadow-[0_0_30px_rgba(79,70,229,0.3)] transition-shadow duration-500 tilt-element">
+                <div class="tilt-content">
+                    <div class="relative h-[300px] rounded-xl overflow-hidden prism-img-wrapper mb-6">
+                        <div class="prism-overlay"></div>
+                        <img src="https://images.unsplash.com/photo-1595407753234-0882f1e77954?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8d2VkZGluZyUyMHJlY2VwdGlvbnxlbnwwfHwwfHx8MA%3D%3D0" class="w-full h-full object-cover">
+                        <div class="absolute top-4 left-4 font-cyber text-xs bg-black/50 backdrop-blur-md px-3 py-1 rounded text-white">16:00</div>
+                    </div>
+                    <div class="px-6 pb-8">
+                        <h3 class="font-display text-3xl mb-2">Ceremony</h3>
+                        <p class="text-sm text-white/60 font-manrope">The Glasshouse, Soho. An open-air exchange of vows amidst refracted sunlight.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 2 -->
+            <div class="min-w-[85vw] md:min-w-[400px] snap-center glass-panel p-2 rounded-2xl group hover:shadow-[0_0_30px_rgba(236,72,153,0.3)] transition-shadow duration-500 tilt-element">
+                <div class="tilt-content">
+                    <div class="relative h-[300px] rounded-xl overflow-hidden prism-img-wrapper mb-6">
+                        <div class="prism-overlay"></div>
+                        <img src="https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" class="w-full h-full object-cover">
+                        <div class="absolute top-4 left-4 font-cyber text-xs bg-black/50 backdrop-blur-md px-3 py-1 rounded text-white">17:30</div>
+                    </div>
+                    <div class="px-6 pb-8">
+                        <h3 class="font-display text-3xl mb-2">Prism Hour</h3>
+                        <p class="text-sm text-white/60 font-manrope">Signature cocktails that change color. Sonic ambience by DJ Aether.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 3 -->
+            <div class="min-w-[85vw] md:min-w-[400px] snap-center glass-panel p-2 rounded-2xl group hover:shadow-[0_0_30px_rgba(6,182,212,0.3)] transition-shadow duration-500 tilt-element">
+                <div class="tilt-content">
+                    <div class="relative h-[300px] rounded-xl overflow-hidden prism-img-wrapper mb-6">
+                        <div class="prism-overlay"></div>
+                        <img src="https://images.unsplash.com/photo-1470225620780-dba8ba36b745?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" class="w-full h-full object-cover">
+                        <div class="absolute top-4 left-4 font-cyber text-xs bg-black/50 backdrop-blur-md px-3 py-1 rounded text-white">19:00</div>
+                    </div>
+                    <div class="px-6 pb-8">
+                        <h3 class="font-display text-3xl mb-2">The Afterglow</h3>
+                        <p class="text-sm text-white/60 font-manrope">Dinner under projection mapping. Dancing until the spectrum fades.</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Access / RSVP (3D Tilt Card) -->
+    <section id="access" class="min-h-screen flex flex-col justify-center items-center py-24 px-6 relative">
+        <h2 class="font-cyber text-xs tracking-[0.5em] mb-12 text-center uppercase">Secure Your Frequency</h2>
+
+        <!-- The 3D Card -->
+        <div class="tilt-element w-full max-w-xl glass-panel rounded-2xl p-8 md:p-12 relative overflow-hidden group">
+            <!-- Iridescent Sheen on Card -->
+            <div class="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-30 pointer-events-none transition-opacity"></div>
+            
+            <div class="tilt-content relative z-10">
+                <div class="flex justify-between items-center mb-8 border-b border-white/10 pb-6">
+                    <h3 class="font-display text-4xl">Access Pass</h3>
+                    <i class="fas fa-qrcode text-4xl opacity-50"></i>
+                </div>
+
+                <form id="rsvp-form" class="space-y-6">
+                    <input type="hidden" name="_captcha" value="false">
+                    <input type="hidden" name="_subject" value="Aura Wedding RSVP">
+
+                    <div class="grid grid-cols-2 gap-6">
+                        <div class="space-y-2">
+                            <label class="font-cyber text-[10px] text-cyan-300 uppercase">Identity</label>
+                            <input type="text" name="firstName" required class="w-full bg-white/5 border border-white/10 rounded p-3 text-sm focus:outline-none focus:border-cyan-400 transition-colors placeholder-white/20" placeholder="First Name">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="font-cyber text-[10px] text-cyan-300 uppercase">&nbsp;</label>
+                            <input type="text" name="lastName" required class="w-full bg-white/5 border border-white/10 rounded p-3 text-sm focus:outline-none focus:border-cyan-400 transition-colors placeholder-white/20" placeholder="Last Name">
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="font-cyber text-[10px] text-pink-300 uppercase">Contact Node</label>
+                        <input type="email" name="email" required class="w-full bg-white/5 border border-white/10 rounded p-3 text-sm focus:outline-none focus:border-pink-400 transition-colors placeholder-white/20" placeholder="email@frequency.com">
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="font-cyber text-[10px] text-purple-300 uppercase">Status</label>
+                        <div class="flex gap-4">
+                            <label class="flex-1 cursor-pointer">
+                                <input type="radio" name="attendance" value="Confirmed" class="peer sr-only" checked>
+                                <div class="bg-white/5 border border-white/10 rounded p-3 text-center text-xs uppercase hover:bg-white/10 peer-checked:bg-gradient-to-r peer-checked:from-cyan-500 peer-checked:to-blue-500 peer-checked:border-transparent transition-all">
+                                    Confirmed
+                                </div>
+                            </label>
+                            <label class="flex-1 cursor-pointer">
+                                <input type="radio" name="attendance" value="Absent" class="peer sr-only">
+                                <div class="bg-white/5 border border-white/10 rounded p-3 text-center text-xs uppercase hover:bg-white/10 peer-checked:bg-white/20 peer-checked:border-transparent transition-all">
+                                    Absent
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="w-full mt-6 bg-white text-black font-cyber font-bold uppercase py-4 rounded hover:bg-cyan-100 transition-colors shadow-[0_0_20px_rgba(255,255,255,0.3)]">
+                        Generate Pass
+                    </button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-12 text-center relative z-10 border-t border-white/5">
+        <h2 class="font-display text-4xl opacity-30">S & D</h2>
+        <p class="font-cyber text-[10px] mt-4 opacity-30">MADE OF STARDUST</p>
+    </footer>
+
+    <!-- Holographic Success Modal -->
+    <div id="modal" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-xl opacity-0 pointer-events-none transition-all duration-500">
+        <div class="glass-panel p-8 md:p-12 rounded-2xl max-w-sm text-center relative overflow-hidden transform scale-90 transition-transform duration-500" id="modal-content">
+            <!-- Animated Gradient Border -->
+            <div class="absolute inset-0 bg-gradient-to-r from-cyan-400 via-pink-500 to-purple-500 opacity-20 animate-spin-slow pointer-events-none" style="filter: blur(20px);"></div>
+            
+            <div class="relative z-10">
+                <i class="fas fa-check-circle text-5xl mb-6 bg-clip-text text-transparent bg-gradient-to-r from-cyan-300 to-pink-300"></i>
+                <h3 class="font-display text-3xl mb-2">Access Granted</h3>
+                <p class="text-white/60 text-sm mb-8 font-manrope">Your frequency has been locked in. Prepare for the spectrum.</p>
+                <button id="close-modal" class="font-cyber text-xs border-b border-white/30 pb-1 hover:text-cyan-300 hover:border-cyan-300 transition-all">Close Transmission</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 1. Universal 3D Tilt Engine
+        // Applies physics-based tilt to any element with class 'tilt-element'
+        const tiltElements = document.querySelectorAll('.tilt-element');
+
+        if (window.matchMedia("(min-width: 768px)").matches) {
+            tiltElements.forEach(el => {
+                el.addEventListener('mousemove', (e) => {
+                    const rect = el.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    
+                    // Center of element
+                    const centerX = rect.width / 2;
+                    const centerY = rect.height / 2;
+                    
+                    // Rotation calculation (increased multiplier for more effect)
+                    const rotateX = ((y - centerY) / centerY) * -10; // Max 10deg
+                    const rotateY = ((x - centerX) / centerX) * 10;
+
+                    // Apply Transform
+                    el.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+                    el.classList.remove('tilt-reset');
+                });
+
+                el.addEventListener('mouseleave', () => {
+                    // Smooth reset
+                    el.classList.add('tilt-reset');
+                    el.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg)`;
+                });
+            });
+        }
+
+        // 2. Form Handling
+        const form = document.getElementById('rsvp-form');
+        const modal = document.getElementById('modal');
+        const modalContent = document.getElementById('modal-content');
+        const closeModal = document.getElementById('close-modal');
+        const btn = form.querySelector('button');
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const originalText = btn.innerText;
+            btn.innerText = "Encrypting...";
+            
+            const formData = new FormData(form);
+
+            fetch("https://formsubmit.co/ajax/shadowshah70@gmail.com", {
+                method: "POST",
+                body: formData,
+                headers: { 'Accept': 'application/json' }
+            })
+            .then(res => res.json())
+            .then(() => {
+                modal.classList.remove('opacity-0', 'pointer-events-none');
+                modalContent.classList.remove('scale-90');
+                modalContent.classList.add('scale-100');
+                form.reset();
+            })
+            .catch(() => {
+                alert('Signal Lost. Please retry.');
+            })
+            .finally(() => {
+                btn.innerText = originalText;
+            });
+        });
+
+        closeModal.addEventListener('click', () => {
+            modal.classList.add('opacity-0', 'pointer-events-none');
+            modalContent.classList.add('scale-90');
+            modalContent.classList.remove('scale-100');
+        });
+
+        
+// 💒 1. Disable right-click
+document.addEventListener('contextmenu', e => e.preventDefault());
+
+// 💒 2. Disable inspect / save / print shortcuts
+document.addEventListener('keydown', e => {
+  if (
+    (e.ctrlKey && ['s','u','p','S','U','P'].includes(e.key)) || // Ctrl+S, Ctrl+U, Ctrl+P
+    e.key === 'F12' ||                                          // DevTools
+    (e.ctrlKey && e.shiftKey && ['I','J','C'].includes(e.key))  // Ctrl+Shift+I/J/C
+  ) {
+    e.preventDefault();
+    sparkle(e.clientX, e.clientY);
+  }
+});
+
+// 💒 3. Block drag saving of images
+document.addEventListener('dragstart', e => e.preventDefault());
+document.querySelectorAll('img').forEach(img => img.setAttribute('draggable', 'false'));
+
+// 💒 4. Disable text selection & copying
+document.addEventListener('copy', e => e.preventDefault());
+document.addEventListener('cut', e => e.preventDefault());
+document.addEventListener('selectstart', e => e.preventDefault());
+document.body.style.userSelect = 'none';
+document.body.style.webkitUserSelect = 'none';
+
+// 💒 5. Detect if DevTools is open
+setInterval(() => {
+  if (
+    window.outerWidth - window.innerWidth > 160 ||
+    window.outerHeight - window.innerHeight > 160
+  ) {
+    document.body.innerHTML = `
+      <div style="text-align:center;margin-top:20%;font-size:2rem;color:#d6336c;">
+        💖 Please close developer tools to continue 💖
+      </div>`;
+  }
+}, 1000);
+
+    </script>
+</body>
+</html><script>console.log('Hello JS');</script></body></html>

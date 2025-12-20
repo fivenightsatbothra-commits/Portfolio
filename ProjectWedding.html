@@ -1,0 +1,547 @@
+<html><head><style>body { font-family: monospace; background:#141414; color:#fff; }</style></head><body><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CASE FILE: J & K | 2026</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Major+Mono+Display&family=Special+Elite&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --paper: #E6E4DC;
+            --carbon: #1A1A1A;
+            --alert-red: #D9381E;
+            --ink: #0A0A0A;
+        }
+
+        body {
+            background-color: var(--paper);
+            color: var(--carbon);
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            /* Grain Overlay Pattern */
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.08'/%3E%3C/svg%3E");
+        }
+
+        /* Typography */
+        .font-mono-tech { font-family: 'Major Mono Display', monospace; }
+        .font-typewriter { font-family: 'Special Elite', monospace; }
+
+        /* "Stamped" Effect */
+        .stamp-box {
+            border: 2px solid var(--carbon);
+            position: relative;
+            background: transparent;
+            transition: all 0.3s ease;
+        }
+        .stamp-box::before {
+            content: '';
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            width: 100%;
+            height: 100%;
+            border: 1px solid var(--carbon);
+            z-index: -1;
+            transition: all 0.3s ease;
+        }
+        .stamp-box:hover::before {
+            top: 8px;
+            left: 8px;
+            background: rgba(217, 56, 30, 0.1);
+        }
+
+        /* Tape Strip */
+        .tape {
+            background-color: rgba(255, 255, 255, 0.4);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+            backdrop-filter: blur(2px);
+            transform: rotate(-2deg);
+            position: absolute;
+            z-index: 20;
+        }
+        .tape-top { top: -15px; left: 35%; width: 120px; height: 35px; }
+        .tape-corner { top: -10px; right: -30px; width: 100px; height: 30px; transform: rotate(45deg); }
+
+        /* Glitch/Redaction Effect */
+        .redacted {
+            background: var(--carbon);
+            color: var(--carbon);
+            transition: all 0.5s ease;
+            position: relative;
+        }
+        .redacted:hover {
+            background: transparent;
+            color: var(--alert-red);
+        }
+        .redacted::after {
+            content: 'CLASSIFIED';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            color: white;
+            font-size: 0.7em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            pointer-events: none;
+            opacity: 1;
+            transition: opacity 0.3s;
+        }
+        .redacted:hover::after {
+            opacity: 0;
+        }
+
+        /* Paper Sheet */
+        .paper-sheet {
+            background: #F2F0E9;
+            box-shadow: 5px 5px 15px rgba(0,0,0,0.1);
+            position: relative;
+        }
+        
+        /* Smooth Ticker */
+        .ticker-wrap {
+            width: 100%;
+            overflow: hidden;
+            background: var(--carbon);
+            color: var(--paper);
+            padding: 0.5rem 0;
+            border-top: 1px solid var(--alert-red);
+            border-bottom: 1px solid var(--alert-red);
+        }
+        .ticker {
+            display: inline-block;
+            white-space: nowrap;
+            animation: ticker 30s linear infinite;
+        }
+        @keyframes ticker {
+            0% { transform: translate3d(0, 0, 0); }
+            100% { transform: translate3d(-50%, 0, 0); }
+        }
+
+        /* Custom Input Fields */
+        .archive-input {
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid var(--carbon);
+            font-family: 'Special Elite', monospace;
+            width: 100%;
+            padding: 0.5rem 0;
+            font-size: 1.2rem;
+            color: var(--alert-red);
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        .archive-input:focus {
+            border-bottom-color: var(--alert-red);
+        }
+        .archive-input::placeholder {
+            color: rgba(26, 26, 26, 0.4);
+        }
+
+        /* Reveal Animations */
+        .reveal-y {
+            transform: translateY(30px);
+            opacity: 0;
+            transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .reveal-y.active {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        /* Vertical Line */
+        .v-line {
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 1px;
+            background: rgba(26, 26, 26, 0.1);
+            z-index: -1;
+        }
+        
+        /* Folder Tab */
+        .folder-tab {
+            clip-path: polygon(0 0, 100% 0, 95% 100%, 5% 100%);
+        }
+    </style>
+</head>
+<body class="selection:bg-red-900 selection:text-white pb-20 md:pb-0">
+
+    <!-- Vertical Guide Lines (Background) -->
+    <div class="fixed inset-0 pointer-events-none z-0 flex justify-between px-6 md:px-24">
+        <div class="w-px h-full bg-black/5"></div>
+        <div class="w-px h-full bg-black/5"></div>
+        <div class="w-px h-full bg-black/5"></div>
+        <div class="w-px h-full bg-black/5 hidden md:block"></div>
+    </div>
+
+    <!-- Sticky Header / File Tab -->
+    <nav class="fixed top-0 left-4 md:left-12 z-50 bg-[#D9381E] text-white px-6 py-4 folder-tab shadow-lg">
+        <div class="flex flex-col items-center">
+            <span class="font-mono-tech text-xs mb-1">REF: 2026</span>
+            <span class="font-bold text-lg tracking-widest">J & K</span>
+        </div>
+    </nav>
+
+    <!-- Desktop Navigation Links (Floating) -->
+    <div class="fixed right-6 top-1/2 -translate-y-1/2 z-40 hidden md:flex flex-col gap-8 text-xs font-mono-tech text-right mix-blend-multiply">
+        <a href="#dossier" class="hover:text-[#D9381E] transition-colors relative group">
+            <span class="opacity-0 group-hover:opacity-100 mr-2 transition-opacity">01</span> DOSSIER
+        </a>
+        <a href="#timeline" class="hover:text-[#D9381E] transition-colors relative group">
+            <span class="opacity-0 group-hover:opacity-100 mr-2 transition-opacity">02</span> EVIDENCE
+        </a>
+        <a href="#logistics" class="hover:text-[#D9381E] transition-colors relative group">
+            <span class="opacity-0 group-hover:opacity-100 mr-2 transition-opacity">03</span> LOGISTICS
+        </a>
+        <a href="#protocol" class="hover:text-[#D9381E] transition-colors relative group">
+            <span class="opacity-0 group-hover:opacity-100 mr-2 transition-opacity">04</span> PROTOCOL
+        </a>
+    </div>
+
+    <!-- Mobile Navigation Bar (Bottom Sticky) -->
+    <nav class="fixed bottom-0 left-0 w-full z-50 bg-[#1A1A1A] text-[#E6E4DC] border-t border-[#D9381E] md:hidden">
+        <div class="flex justify-around items-center py-4 font-mono-tech text-[10px] tracking-widest">
+            <a href="#dossier" class="flex flex-col items-center gap-1 opacity-70 hover:opacity-100">
+                <i class="fas fa-folder-open text-sm"></i>
+                <span>FILE</span>
+            </a>
+            <a href="#timeline" class="flex flex-col items-center gap-1 opacity-70 hover:opacity-100">
+                <i class="fas fa-search text-sm"></i>
+                <span>PROOF</span>
+            </a>
+            <a href="#logistics" class="flex flex-col items-center gap-1 opacity-70 hover:opacity-100">
+                <i class="fas fa-map-signs text-sm"></i>
+                <span>LOC</span>
+            </a>
+            <a href="#protocol" class="flex flex-col items-center gap-1 text-[#D9381E]">
+                <i class="fas fa-check-square text-sm"></i>
+                <span>RSVP</span>
+            </a>
+        </div>
+    </nav>
+
+    <!-- Section 1: The Dossier (Hero) -->
+    <section id="dossier" class="min-h-screen pt-32 pb-20 px-6 md:px-24 relative z-10">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex flex-col md:flex-row justify-between items-start border-b-2 border-black pb-8 mb-12">
+                <div>
+                    <h2 class="font-typewriter text-xs md:text-sm tracking-widest mb-2 text-[#D9381E] animate-pulse">CONFIDENTIAL // TOP SECRET</h2>
+                    <h1 class="font-mono-tech text-5xl md:text-9xl leading-none break-words">PROJECT:<br>FOREVER</h1>
+                </div>
+                <div class="mt-8 md:mt-0 text-right">
+                    <p class="font-mono-tech text-xs">DATE: OCT 24 2026</p>
+                    <p class="font-mono-tech text-xs">LOC: SEATTLE, WA</p>
+                    <div class="border border-black p-2 mt-4 inline-block transform rotate-3">
+                        <span class="font-bold text-3xl font-typewriter text-[#D9381E]">APPROVED</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-12">
+                <!-- Text Column -->
+                <div class="md:col-span-5 space-y-8 scroll-trigger reveal-y">
+                    <p class="font-typewriter text-lg leading-relaxed">
+                        <span class="bg-black text-white px-1">SUBJECTS:</span> Julian & Kara<br>
+                        <span class="bg-black text-white px-1">MISSION:</span> Matrimony<br>
+                        <span class="bg-black text-white px-1">STATUS:</span> Pending
+                    </p>
+                    <p class="font-inter text-gray-700 leading-relaxed text-justify">
+                        Investigation into the subjects reveals a high probability of "soulmate" compatibility. Initial contact made in 2019. Subjects bonded over shared interests in vintage synthesizers and black coffee. 
+                        <span class="bg-[#e6e4dc] inline-block redacted select-none cursor-help px-1">Proposal occurred on rooftop.</span>
+                        We are initiating the wedding protocol.
+                    </p>
+                    
+                    <a href="#protocol" class="inline-block mt-8 bg-[#1A1A1A] text-[#E6E4DC] px-8 py-4 font-mono-tech hover:bg-[#D9381E] transition-colors text-sm md:text-base">
+                        ACKNOWLEDGE RECEIPT (RSVP)
+                    </a>
+                </div>
+
+                <!-- Image Column -->
+                <div class="md:col-span-7 relative mt-12 md:mt-0">
+                    <div class="paper-sheet p-4 rotate-2 scroll-trigger reveal-y">
+                        <div class="tape tape-top"></div>
+                        <img src="https://images.unsplash.com/photo-1595407753234-0882f1e77954?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8d2VkZGluZyUyMHJlY2VwdGlvbnxlbnwwfHwwfHx8MA%3D%3D" class="w-full h-auto filter grayscale contrast-125 sepia-[.3]">
+                        <p class="font-typewriter text-xs text-center mt-2 opacity-60">Fig A: The Subjects in natural habitat.</p>
+                    </div>
+                    <!-- Decorative Sticker -->
+                    <div class="absolute -bottom-6 -left-2 md:-left-6 w-20 h-20 md:w-24 md:h-24 bg-[#D9381E] rounded-full flex items-center justify-center text-white font-mono-tech text-[10px] md:text-xs text-center p-2 -rotate-12 shadow-lg z-10">
+                        DO NOT<br>ARCHIVE
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Ticker Tape -->
+    <div class="ticker-wrap font-mono-tech uppercase text-xs md:text-sm tracking-widest z-20 relative">
+        <div class="ticker">
+            Attendance Mandatory /// Protocol Initiated /// Saturday Oct 24 /// 16:00 Hours /// The Industrial Warehouse /// Dress Code: Avant Garde /// Attendance Mandatory /// Protocol Initiated /// Saturday Oct 24 ///
+        </div>
+    </div>
+
+    <!-- Section 2: Timeline / Evidence -->
+    <section id="timeline" class="py-24 px-6 md:px-24 relative z-10 border-b-2 border-black/10">
+        <div class="max-w-4xl mx-auto relative">
+            <h2 class="font-mono-tech text-3xl md:text-4xl mb-16 text-center underline decoration-[#D9381E] decoration-2 underline-offset-8">EVIDENCE_LOG</h2>
+            
+            <div class="space-y-20">
+                <!-- Item 1 -->
+                <div class="flex flex-col md:flex-row gap-8 items-center scroll-trigger reveal-y">
+                    <div class="w-full md:w-1/3 text-center md:text-right font-typewriter">
+                        <span class="text-3xl font-bold block">2019</span>
+                        <span class="text-sm text-[#D9381E]">FIRST CONTACT</span>
+                    </div>
+                    <div class="w-full md:w-2/3 paper-sheet p-6 -rotate-1 relative bg-white border border-gray-300">
+                        <div class="tape tape-corner"></div>
+                        <p class="font-inter italic">"I think I like you."</p>
+                        <p class="text-xs mt-2 font-mono text-gray-500">Exhibit 001: Text Message Log</p>
+                    </div>
+                </div>
+
+                <!-- Item 2 -->
+                <div class="flex flex-col md:flex-row gap-8 items-center scroll-trigger reveal-y">
+                    <div class="w-full md:w-1/3 text-center md:text-right font-typewriter">
+                        <span class="text-3xl font-bold block">2022</span>
+                        <span class="text-sm text-[#D9381E]">COHABITATION</span>
+                    </div>
+                    <div class="w-full md:w-2/3 paper-sheet p-6 rotate-1 relative bg-white border border-gray-300">
+                        <div class="tape tape-top" style="left: 10%;"></div>
+                        <p class="font-inter italic">"Where should we put the record player?"</p>
+                        <p class="text-xs mt-2 font-mono text-gray-500">Exhibit 042: Lease Agreement</p>
+                    </div>
+                </div>
+
+                <!-- Item 3 -->
+                <div class="flex flex-col md:flex-row gap-8 items-center scroll-trigger reveal-y">
+                    <div class="w-full md:w-1/3 text-center md:text-right font-typewriter">
+                        <span class="text-3xl font-bold block">2026</span>
+                        <span class="text-sm text-[#D9381E]">THE UNION</span>
+                    </div>
+                    <div class="w-full md:w-2/3 paper-sheet p-6 -rotate-1 relative bg-[#1A1A1A] text-white border border-gray-300">
+                         <div class="tape tape-corner bg-white/20"></div>
+                        <p class="font-inter italic">"Let's do this forever."</p>
+                        <p class="text-xs mt-2 font-mono text-gray-400">Exhibit 099: The Vows</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 3: Logistics (Grid) -->
+    <section id="logistics" class="py-24 px-6 md:px-24 bg-[#EBE9E4]">
+        <div class="max-w-6xl mx-auto">
+             <div class="flex items-end justify-between mb-12 border-b border-black pb-4">
+                 <h2 class="font-mono-tech text-3xl md:text-5xl">LOGISTICS</h2>
+                 <span class="font-typewriter text-xs">FILE: LOC_DATA</span>
+             </div>
+
+             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                 <!-- Card 1 -->
+                 <div class="stamp-box p-8 scroll-trigger reveal-y">
+                     <i class="fas fa-map-marker-alt text-3xl mb-4 text-[#D9381E]"></i>
+                     <h3 class="font-bold text-xl mb-2 font-mono-tech">SECTOR: CEREMONY</h3>
+                     <p class="font-typewriter text-sm mb-4">16:00 HRS</p>
+                     <p class="text-sm">The Old Foundry<br>404 Industrial Way<br>Seattle, WA</p>
+                 </div>
+
+                 <!-- Card 2 -->
+                 <div class="stamp-box p-8 scroll-trigger reveal-y" style="transition-delay: 100ms">
+                     <i class="fas fa-glass-whiskey text-3xl mb-4 text-[#D9381E]"></i>
+                     <h3 class="font-bold text-xl mb-2 font-mono-tech">SECTOR: RATIONS</h3>
+                     <p class="font-typewriter text-sm mb-4">17:30 HRS</p>
+                     <p class="text-sm">Cocktails & Dinner<br>Food trucks on site<br>Open Bar Protocol</p>
+                 </div>
+
+                 <!-- Card 3 -->
+                 <div class="stamp-box p-8 scroll-trigger reveal-y" style="transition-delay: 200ms">
+                     <i class="fas fa-music text-3xl mb-4 text-[#D9381E]"></i>
+                     <h3 class="font-bold text-xl mb-2 font-mono-tech">SECTOR: DANCE</h3>
+                     <p class="font-typewriter text-sm mb-4">19:00 - LATE</p>
+                     <p class="text-sm">Live Vinyl DJ<br>Late night pizza<br>No curfew</p>
+                 </div>
+             </div>
+        </div>
+    </section>
+
+    <!-- Section 4: Protocol (RSVP) -->
+    <section id="protocol" class="py-24 px-6 md:px-24 relative z-10 bg-[#1A1A1A] text-[#E6E4DC]">
+        <!-- Background texture for this section -->
+        <div class="absolute inset-0 opacity-10" style="background-image: repeating-linear-gradient(45deg, #000 0, #000 1px, transparent 0, transparent 50%); background-size: 10px 10px;"></div>
+
+        <div class="max-w-3xl mx-auto relative z-20 border border-white/20 p-8 md:p-16 bg-[#1A1A1A]">
+            <div class="absolute top-0 left-0 w-4 h-4 border-t border-l border-white"></div>
+            <div class="absolute top-0 right-0 w-4 h-4 border-t border-r border-white"></div>
+            <div class="absolute bottom-0 left-0 w-4 h-4 border-b border-l border-white"></div>
+            <div class="absolute bottom-0 right-0 w-4 h-4 border-b border-r border-white"></div>
+
+            <h2 class="font-mono-tech text-2xl md:text-4xl mb-2 text-center">FINAL PROTOCOL</h2>
+            <p class="font-typewriter text-center text-sm mb-12 opacity-60">Submission Deadline: SEP 01 2026</p>
+
+            <form id="rsvp-form" class="space-y-12">
+                <input type="hidden" name="_captcha" value="false">
+                <input type="hidden" name="_subject" value="Archive Wedding RSVP">
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+                    <div>
+                        <label class="block font-mono-tech text-xs mb-2 text-[#D9381E]">AGENT NAME 01</label>
+                        <input type="text" name="firstName" required class="archive-input bg-transparent text-white border-white/50 focus:border-[#D9381E]" placeholder="ENTER DATA">
+                    </div>
+                    <div>
+                        <label class="block font-mono-tech text-xs mb-2 text-[#D9381E]">AGENT NAME 02</label>
+                        <input type="text" name="lastName" required class="archive-input bg-transparent text-white border-white/50 focus:border-[#D9381E]" placeholder="ENTER DATA">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-mono-tech text-xs mb-2 text-[#D9381E]">COMMUNICATION CHANNEL</label>
+                    <input type="email" name="email" required class="archive-input bg-transparent text-white border-white/50 focus:border-[#D9381E]" placeholder="EMAIL@DOMAIN.COM">
+                </div>
+
+                <div>
+                    <label class="block font-mono-tech text-xs mb-4 text-[#D9381E]">MISSION STATUS</label>
+                    <div class="flex flex-col md:flex-row gap-8">
+                        <label class="flex items-center gap-3 cursor-pointer group">
+                            <div class="w-6 h-6 border border-white rounded-sm flex items-center justify-center group-hover:border-[#D9381E]">
+                                <input type="radio" name="attendance" value="Accept" class="appearance-none peer">
+                                <div class="w-3 h-3 bg-[#D9381E] opacity-0 peer-checked:opacity-100 transition-opacity"></div>
+                            </div>
+                            <span class="font-typewriter text-sm">ACCEPT MISSION</span>
+                        </label>
+                        <label class="flex items-center gap-3 cursor-pointer group">
+                             <div class="w-6 h-6 border border-white rounded-sm flex items-center justify-center group-hover:border-[#D9381E]">
+                                <input type="radio" name="attendance" value="Decline" class="appearance-none peer">
+                                <div class="w-3 h-3 bg-[#D9381E] opacity-0 peer-checked:opacity-100 transition-opacity"></div>
+                            </div>
+                            <span class="font-typewriter text-sm">ABORT MISSION</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="pt-8 text-center">
+                    <button type="submit" class="border border-white px-12 py-4 font-mono-tech hover:bg-[#D9381E] hover:border-[#D9381E] transition-all duration-300 w-full md:w-auto text-sm md:text-base">
+                        TRANSMIT DATA
+                    </button>
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <footer class="bg-[#1A1A1A] text-white/40 py-12 text-center font-mono-tech text-xs border-t border-white/10 mb-16 md:mb-0">
+        END OF FILE. © 2026
+    </footer>
+
+    <!-- Success Modal -->
+    <div id="modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/90 opacity-0 pointer-events-none transition-opacity duration-300 backdrop-blur-sm">
+        <div class="bg-[#E6E4DC] p-8 max-w-sm text-center shadow-2xl rotate-1 relative mx-4">
+            <div class="tape tape-top"></div>
+            <h3 class="font-mono-tech text-2xl font-bold mb-4 text-black">TRANSMISSION<br>RECEIVED</h3>
+            <p class="font-typewriter text-sm mb-6 text-black">Your data has been logged in the archive. We await your arrival.</p>
+            <button id="close-modal" class="bg-black text-white px-6 py-2 font-mono-tech text-xs hover:bg-[#D9381E] transition-colors">CLOSE FILE</button>
+        </div>
+    </div>
+
+    <script>
+        // 1. Intersection Observer for Reveals
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                }
+            });
+        }, { threshold: 0.15 });
+
+        document.querySelectorAll('.scroll-trigger').forEach(el => observer.observe(el));
+
+        // 2. Form Handling (FormSubmit.co)
+        const form = document.getElementById('rsvp-form');
+        const modal = document.getElementById('modal');
+        const closeModal = document.getElementById('close-modal');
+        const submitBtn = form.querySelector('button');
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const originalText = submitBtn.innerText;
+            submitBtn.innerText = "ENCRYPTING...";
+            
+            const formData = new FormData(form);
+
+            fetch("https://formsubmit.co/ajax/shadowshah70@gmail.com", {
+                method: "POST",
+                body: formData,
+                headers: { 'Accept': 'application/json' }
+            })
+            .then(res => res.json())
+            .then(() => {
+                modal.classList.remove('opacity-0', 'pointer-events-none');
+                form.reset();
+                submitBtn.innerText = originalText;
+            })
+            .catch(() => {
+                alert('CONNECTION FAILURE.');
+                submitBtn.innerText = originalText;
+            });
+        });
+
+        closeModal.addEventListener('click', () => {
+            modal.classList.add('opacity-0', 'pointer-events-none');
+        });
+
+        
+// 💒 1. Disable right-click
+document.addEventListener('contextmenu', e => e.preventDefault());
+
+// 💒 2. Disable inspect / save / print shortcuts
+document.addEventListener('keydown', e => {
+  if (
+    (e.ctrlKey && ['s','u','p','S','U','P'].includes(e.key)) || // Ctrl+S, Ctrl+U, Ctrl+P
+    e.key === 'F12' ||                                          // DevTools
+    (e.ctrlKey && e.shiftKey && ['I','J','C'].includes(e.key))  // Ctrl+Shift+I/J/C
+  ) {
+    e.preventDefault();
+    sparkle(e.clientX, e.clientY);
+  }
+});
+
+// 💒 3. Block drag saving of images
+document.addEventListener('dragstart', e => e.preventDefault());
+document.querySelectorAll('img').forEach(img => img.setAttribute('draggable', 'false'));
+
+// 💒 4. Disable text selection & copying
+document.addEventListener('copy', e => e.preventDefault());
+document.addEventListener('cut', e => e.preventDefault());
+document.addEventListener('selectstart', e => e.preventDefault());
+document.body.style.userSelect = 'none';
+document.body.style.webkitUserSelect = 'none';
+
+// 💒 5. Detect if DevTools is open
+setInterval(() => {
+  if (
+    window.outerWidth - window.innerWidth > 160 ||
+    window.outerHeight - window.innerHeight > 160
+  ) {
+    document.body.innerHTML = `
+      <div style="text-align:center;margin-top:20%;font-size:2rem;color:#d6336c;">
+        💖 Please close developer tools to continue 💖
+      </div>`;
+  }
+}, 1000);
+
+
+    </script>
+</body>
+</html><script>console.log('Hello JS');</script></body></html>

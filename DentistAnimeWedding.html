@@ -1,0 +1,807 @@
+<html><head><style>body { font-family: monospace; background:#141414; color:#fff; }</style></head><body><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CONFIDANT RANK MAX: A & K</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Bangers&family=Roboto+Condensed:ital,wght@0,400;0,700;1,400&family=Black+Ops+One&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --phantom-red: #D81E1E;
+            --phantom-black: #111111;
+            --phantom-white: #F5F5F5;
+            --dental-teal: #00F0FF;
+            --yellow-accent: #FFE600;
+        }
+
+        body {
+            background-color: var(--phantom-black);
+            color: var(--phantom-black);
+            font-family: 'Roboto Condensed', sans-serif;
+            overflow-x: hidden;
+            cursor: none;
+        }
+
+        .font-impact { font-family: 'Anton', sans-serif; text-transform: uppercase; }
+        .font-comic { font-family: 'Bangers', cursive; letter-spacing: 2px; }
+        .font-digital { font-family: 'Black Ops One', cursive; }
+
+        /* --- CRT Turn On Effect --- */
+        body::after {
+            content: " ";
+            display: block;
+            position: fixed;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: rgba(18, 16, 16, 0.1);
+            opacity: 0;
+            z-index: 20000;
+            pointer-events: none;
+            animation: flicker 0.15s infinite, turnOn 0.5s linear forwards;
+        }
+        
+        @keyframes turnOn {
+            0% { transform: scale(1, 0.002); background: white; opacity: 1; }
+            50% { transform: scale(0.2, 0.002); background: white; opacity: 1; }
+            100% { transform: scale(1, 1); background: transparent; opacity: 0; }
+        }
+
+        /* --- Custom Cursor --- */
+        #cursor-dagger {
+            position: fixed;
+            top: 0; left: 0;
+            width: 40px; height: 40px;
+            background: url('https://img.icons8.com/ios-filled/50/00F0FF/tooth.png') no-repeat center;
+            background-size: contain;
+            transform: translate(-50%, -50%) rotate(-45deg);
+            pointer-events: none;
+            z-index: 10000;
+            transition: transform 0.1s;
+            mix-blend-mode: difference;
+        }
+        body:active #cursor-dagger {
+            transform: translate(-50%, -50%) rotate(-90deg) scale(0.8);
+        }
+
+        /* --- Dynamic Background --- */
+        .halftone-bg {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-image: radial-gradient(var(--phantom-white) 15%, transparent 16%);
+            background-size: 20px 20px;
+            opacity: 0.05;
+            z-index: 0;
+            pointer-events: none;
+            animation: bgScroll 20s linear infinite;
+        }
+        @keyframes bgScroll {
+            from { background-position: 0 0; }
+            to { background-position: 40px 40px; }
+        }
+        
+        /* --- Jagged Divider --- */
+        .jagged-divider {
+            position: absolute;
+            bottom: -50px;
+            left: 0;
+            width: 100%;
+            height: 100px;
+            background: var(--phantom-red);
+            clip-path: polygon(0 40%, 15% 10%, 30% 60%, 45% 20%, 60% 70%, 75% 10%, 90% 50%, 100% 0%, 100% 100%, 0% 100%);
+            z-index: 10;
+        }
+        .jagged-top {
+            top: -50px;
+            bottom: auto;
+            transform: scaleY(-1);
+        }
+
+        /* --- Scroll Animations --- */
+        .scroll-hidden {
+            opacity: 0;
+            transform: translateY(100px) skewY(10deg);
+            transition: all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .scroll-show {
+            opacity: 1;
+            transform: translateY(0) skewY(0deg);
+        }
+
+        /* --- Kinetic Typography --- */
+        .skew-text {
+            display: inline-block;
+            transform: skew(-10deg);
+            text-shadow: 4px 4px 0px var(--phantom-black);
+        }
+        .float-anim { animation: float 3s ease-in-out infinite; }
+        @keyframes float {
+            0%, 100% { transform: translateY(0) skew(-10deg); }
+            50% { transform: translateY(-10px) skew(-10deg); }
+        }
+
+        /* --- Menu Overlay --- */
+        #pause-menu {
+            position: fixed;
+            top: 0; right: 0;
+            width: 100%; height: 100%;
+            background: rgba(17, 17, 17, 0.95);
+            z-index: 9000;
+            clip-path: polygon(100% 0, 100% 0, 100% 100%, 100% 100%);
+            transition: clip-path 0.5s cubic-bezier(0.7, 0, 0.3, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        #pause-menu.open {
+            clip-path: polygon(0 0, 100% 0, 100% 100%, 20% 100%);
+        }
+        .menu-item {
+            font-family: 'Anton', sans-serif;
+            font-size: 4rem;
+            color: var(--phantom-white);
+            transform: skew(-10deg) translateX(100px);
+            opacity: 0;
+            transition: all 0.3s;
+            cursor: none;
+            position: relative;
+        }
+        .menu-item:hover {
+            color: var(--phantom-red);
+            transform: skew(-10deg) translateX(50px) scale(1.1);
+        }
+
+        /* --- Comic Action Button --- */
+        .action-btn {
+            background: var(--phantom-black);
+            color: var(--phantom-white);
+            font-family: 'Bangers', cursive;
+            font-size: 2rem;
+            padding: 10px 40px;
+            border: none;
+            position: relative;
+            transform: skew(-10deg);
+            transition: transform 0.1s;
+            box-shadow: 5px 5px 0 var(--phantom-red);
+        }
+        .action-btn:active { transform: skew(-10deg) translate(2px, 2px); box-shadow: 3px 3px 0 var(--phantom-red); }
+        .action-btn:hover { background: var(--phantom-red); color: black; }
+
+        /* --- Chat Bubble --- */
+        .chat-bubble {
+            background: white;
+            border: 3px solid black;
+            padding: 10px;
+            position: relative;
+            font-family: 'Bangers', cursive;
+            transform: rotate(-2deg);
+            box-shadow: 5px 5px 0 rgba(0,0,0,0.2);
+        }
+        .chat-bubble::after {
+            content: '';
+            position: absolute;
+            bottom: -10px; left: 20px;
+            border-width: 10px 10px 0;
+            border-style: solid;
+            border-color: black transparent;
+            display: block;
+            width: 0;
+        }
+
+        /* --- Countdown Styling --- */
+        .countdown-box {
+            background: var(--phantom-black);
+            border: 2px solid var(--dental-teal);
+            color: var(--dental-teal);
+            font-family: 'Black Ops One', cursive;
+            transform: skew(-10deg);
+            box-shadow: 0 0 15px var(--dental-teal);
+        }
+
+        /* --- Timeline Nodes --- */
+        .timeline-line {
+            position: absolute;
+            left: 50%; top: 0; bottom: 0;
+            width: 8px;
+            background: var(--phantom-black);
+            transform: translateX(-50%) skewX(-10deg);
+            z-index: 0;
+        }
+        .timeline-node {
+            background: var(--phantom-white);
+            border: 4px solid var(--phantom-black);
+            z-index: 10;
+            position: relative;
+            transform: rotate(45deg);
+            transition: all 0.3s;
+        }
+        .timeline-row:hover .timeline-node {
+            background: var(--phantom-red);
+            transform: rotate(225deg) scale(1.2);
+        }
+
+        /* --- Comic Gallery --- */
+        .comic-panel {
+            border: 4px solid var(--phantom-black);
+            box-shadow: 10px 10px 0 var(--phantom-red);
+            transition: transform 0.3s;
+            background: white;
+            overflow: hidden;
+        }
+        .comic-panel:hover {
+            transform: scale(1.05) rotate(2deg);
+            z-index: 20;
+            box-shadow: 15px 15px 0 var(--dental-teal);
+        }
+        .comic-panel img {
+            filter: grayscale(100%) contrast(1.2);
+            transition: filter 0.3s;
+        }
+        .comic-panel:hover img {
+            filter: grayscale(0) contrast(1);
+        }
+
+        /* --- Scrollbar --- */
+        ::-webkit-scrollbar { width: 10px; background: #000; }
+        ::-webkit-scrollbar-thumb { background: var(--phantom-red); }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Custom Cursor -->
+    <div id="cursor-dagger"></div>
+
+    <!-- Backgrounds -->
+    <div class="halftone-bg"></div>
+
+    <!-- Nav Button (Hamburger) -->
+    <div id="nav-trigger" class="fixed top-6 right-6 z-[10000] cursor-none group">
+        <div class="bg-black text-white p-4 font-impact text-xl transform skew-x-[-10deg] border-2 border-white hover:bg-[var(--phantom-red)] transition-colors">
+            MENU <i class="fas fa-bars"></i>
+        </div>
+    </div>
+
+    <!-- Pause Menu Overlay -->
+    <div id="pause-menu">
+        <div class="flex flex-col gap-8 items-start">
+            <a href="#hero" class="menu-item" style="transition-delay: 0.1s;">START</a>
+            <a href="#countdown" class="menu-item" style="transition-delay: 0.2s;">MISSION TIMER</a>
+            <a href="#story" class="menu-item" style="transition-delay: 0.3s;">ORAL HISTORY</a>
+            <a href="#timeline" class="menu-item" style="transition-delay: 0.4s;">TREATMENT PLAN</a>
+            <a href="#gallery" class="menu-item" style="transition-delay: 0.5s;">EVIDENCE</a>
+            <a href="#map" class="menu-item" style="transition-delay: 0.6s;">EXTRACTION</a>
+            <a href="#rsvp" class="menu-item text-[var(--dental-teal)]" style="transition-delay: 0.7s;">SAVE POINT</a>
+        </div>
+    </div>
+
+    <!-- Hero Section -->
+    <section id="hero" class="min-h-screen flex items-center justify-center relative overflow-hidden p-6">
+        <!-- Dynamic Background Elements -->
+        <div class="absolute top-20 left-10 bg-black text-white p-2 font-impact text-sm transform rotate-[-5deg]">
+            DATE: 10/24/2026
+        </div>
+        <div class="absolute bottom-20 right-10 bg-[var(--dental-teal)] text-black p-2 font-impact text-sm transform rotate-[5deg]">
+            WEATHER: RADIANT
+        </div>
+
+        <div class="relative z-10 text-center">
+            <!-- Attack Speech Bubble -->
+            <div class="absolute -top-20 -right-10 chat-bubble animate-bounce">
+                CRITICAL HIT!
+            </div>
+
+            <h1 class="font-impact text-7xl md:text-[10rem] leading-[0.8] text-[var(--phantom-red)] skew-text relative z-20 mix-blend-hard-light">
+                TAKE YOUR<br>
+                <span class="text-white" style="text-shadow: 4px 4px 0 #000;">HEART</span>
+            </h1>
+            
+            <div class="bg-black text-white inline-block px-4 py-1 font-comic text-2xl transform skew-x-[-20deg] mt-4 -rotate-2 border-2 border-white">
+                <span class="transform skew-x-[20deg] inline-block">AND BRUSH YOUR TEETH</span>
+            </div>
+
+            <!-- Couple Image (Cutout Style) -->
+            <div class="mt-12 relative w-64 h-64 md:w-96 md:h-96 mx-auto group perspective-1000">
+                <div class="absolute inset-0 bg-black transform translate-x-4 translate-y-4 transition-transform group-hover:translate-x-6 group-hover:translate-y-6" style="clip-path: polygon(10% 0, 100% 0, 90% 100%, 0% 100%);"></div>
+                <div class="absolute inset-0 bg-[var(--dental-teal)] transform -translate-x-2 -translate-y-2 transition-transform group-hover:-translate-x-4 group-hover:-translate-y-4" style="clip-path: polygon(10% 0, 100% 0, 90% 100%, 0% 100%);"></div>
+                <!-- Main Photo -->
+                <div class="absolute inset-0 overflow-hidden bg-white border-4 border-black transition-transform group-hover:scale-105" style="clip-path: polygon(10% 0, 100% 0, 90% 100%, 0% 100%);">
+                    <img src="https://www.tirvingphoto.com/wp-content/uploads/2022/04/tirvingphoto_new-haven-proposal-photo_001-1200x1200-cropped.jpg" class="w-full h-full object-cover grayscale contrast-125 group-hover:grayscale-0 transition-all duration-300">
+                </div>
+                <!-- Hover Reveal Text -->
+                <div class="absolute bottom-4 left-1/2 -translate-x-1/2 font-impact text-white text-4xl opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50" style="text-shadow: 2px 2px 0 var(--phantom-red);">
+                    PERSONA!
+                </div>
+            </div>
+        </div>
+        
+        <div class="jagged-divider"></div>
+    </section>
+
+    <!-- Countdown Section -->
+    <section id="countdown" class="py-20 bg-[var(--phantom-red)] relative overflow-hidden">
+        <div class="container mx-auto px-6 text-center relative z-10 scroll-hidden">
+            <h2 class="font-impact text-white text-4xl mb-8 transform skew-x-[-10deg]">MISSION START IN</h2>
+            
+            <div class="flex justify-center gap-4 md:gap-8 flex-wrap">
+                <div class="countdown-box p-4 w-24 md:w-32">
+                    <span id="days" class="text-4xl md:text-6xl block">00</span>
+                    <span class="text-xs tracking-widest">DAYS</span>
+                </div>
+                <div class="countdown-box p-4 w-24 md:w-32">
+                    <span id="hours" class="text-4xl md:text-6xl block">00</span>
+                    <span class="text-xs tracking-widest">HRS</span>
+                </div>
+                <div class="countdown-box p-4 w-24 md:w-32">
+                    <span id="minutes" class="text-4xl md:text-6xl block">00</span>
+                    <span class="text-xs tracking-widest">MINS</span>
+                </div>
+                <div class="countdown-box p-4 w-24 md:w-32 bg-[var(--yellow-accent)] text-black border-black animate-pulse">
+                    <span id="seconds" class="text-4xl md:text-6xl block">00</span>
+                    <span class="text-xs tracking-widest">SECS</span>
+                </div>
+            </div>
+        </div>
+        <!-- Decorative Lines -->
+        <div class="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/diagmonds-light.png')] opacity-10"></div>
+    </section>
+
+    <!-- Oral History (Story) -->
+    <section id="story" class="py-24 bg-[var(--phantom-white)] relative">
+        <div class="container mx-auto px-6 max-w-4xl">
+            <div class="flex items-center gap-4 mb-12 scroll-hidden">
+                <i class="fas fa-book-medical text-5xl text-[var(--phantom-red)]"></i>
+                <h2 class="font-impact text-5xl md:text-7xl text-black transform skew-x-[-10deg]">ORAL HISTORY</h2>
+            </div>
+
+            <div class="bg-black text-white p-8 transform skew-x-[-2deg] border-l-8 border-[var(--phantom-red)] shadow-[10px_10px_0px_#ccc] scroll-hidden">
+                <p class="font-comic text-2xl mb-4 text-[var(--dental-teal)]">EPISODE 1: THE CHECKUP</p>
+                <p class="font-mono text-lg mb-6 leading-relaxed">
+                    It wasn't a standard cleaning. Dr. Alex met Dr. Kim at a dental conference in Tokyo. They bonded over anime figures and the perfect occlusion. 
+                </p>
+                
+                <p class="font-comic text-2xl mb-4 text-[var(--dental-teal)]">EPISODE 2: THE CO-OP CAMPAIGN</p>
+                <p class="font-mono text-lg mb-6 leading-relaxed">
+                    3 years of raiding dungeons (and root canals). They leveled up together, unlocked the "Shared Practice" achievement, and defeated the boss of Long Distance.
+                </p>
+
+                <div class="flex justify-end">
+                    <div class="bg-[var(--phantom-red)] text-black px-4 py-2 font-impact transform rotate-3">
+                        CONFIDANT RANK: MAX
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Treatment Plan (Timeline) -->
+    <section id="timeline" class="py-24 bg-black relative border-y-4 border-[var(--dental-teal)]">
+        <div class="container mx-auto px-6 max-w-4xl">
+            <h2 class="font-impact text-5xl text-[var(--yellow-accent)] mb-16 text-center transform skew-x-[-10deg]">TREATMENT PLAN (SCHEDULE)</h2>
+            
+            <div class="relative py-8">
+                <div class="timeline-line"></div>
+
+                <!-- Event 1 -->
+                <div class="timeline-row flex items-center justify-between mb-16 relative group scroll-hidden">
+                    <div class="w-5/12 text-right pr-8">
+                        <h3 class="font-impact text-3xl text-white">CEREMONY</h3>
+                        <p class="font-comic text-[var(--dental-teal)] text-xl">THE EXTRACTION</p>
+                    </div>
+                    <div class="w-8 h-8 timeline-node flex items-center justify-center absolute left-1/2 transform -translate-x-1/2"></div>
+                    <div class="w-5/12 pl-8">
+                        <span class="bg-[var(--phantom-red)] text-black font-impact px-2 text-2xl">16:00</span>
+                    </div>
+                </div>
+
+                <!-- Event 2 -->
+                <div class="timeline-row flex items-center justify-between mb-16 relative group scroll-hidden">
+                    <div class="w-5/12 text-right pr-8">
+                        <span class="bg-[var(--phantom-red)] text-black font-impact px-2 text-2xl">17:30</span>
+                    </div>
+                    <div class="w-8 h-8 timeline-node flex items-center justify-center absolute left-1/2 transform -translate-x-1/2"></div>
+                    <div class="w-5/12 pl-8">
+                        <h3 class="font-impact text-3xl text-white">COCKTAILS</h3>
+                        <p class="font-comic text-[var(--dental-teal)] text-xl">ANESTHESIA</p>
+                    </div>
+                </div>
+
+                <!-- Event 3 -->
+                <div class="timeline-row flex items-center justify-between relative group scroll-hidden">
+                    <div class="w-5/12 text-right pr-8">
+                        <h3 class="font-impact text-3xl text-white">RECEPTION</h3>
+                        <p class="font-comic text-[var(--dental-teal)] text-xl">FINAL RESTORATION</p>
+                    </div>
+                    <div class="w-8 h-8 timeline-node flex items-center justify-center absolute left-1/2 transform -translate-x-1/2"></div>
+                    <div class="w-5/12 pl-8">
+                        <span class="bg-[var(--phantom-red)] text-black font-impact px-2 text-2xl">19:00</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Memory Archive (Gallery) -->
+    <section id="gallery" class="py-24 bg-[var(--phantom-white)]">
+        <div class="container mx-auto px-6">
+            <h2 class="font-impact text-5xl text-black mb-12 transform skew-x-[-10deg] border-l-8 border-[var(--phantom-red)] pl-4 inline-block">MEMORY ARCHIVES</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Image 1 -->
+                <div class="comic-panel scroll-hidden h-64">
+                    <img src="https://images.unsplash.com/photo-1519741497674-611481863552?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" class="w-full h-full object-cover">
+                    <div class="absolute bottom-0 right-0 bg-black text-white font-comic px-2 py-1 transform -rotate-2">
+                        FIRST DATE
+                    </div>
+                </div>
+                <!-- Image 2 -->
+                <div class="comic-panel scroll-hidden h-64 md:mt-12">
+                    <img src="https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" class="w-full h-full object-cover">
+                    <div class="absolute top-0 left-0 bg-[var(--phantom-red)] text-black font-comic px-2 py-1 transform rotate-2">
+                        LEVEL UP!
+                    </div>
+                </div>
+                <!-- Image 3 -->
+                <div class="comic-panel scroll-hidden h-64">
+                    <img src="https://images.unsplash.com/photo-1583939003579-730e3918a45a?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" class="w-full h-full object-cover">
+                    <div class="absolute bottom-0 left-0 bg-[var(--dental-teal)] text-black font-comic px-2 py-1 transform rotate-2">
+                        THE RING
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Extraction Point (Map) -->
+    <section id="map" class="py-24 bg-black relative">
+        <div class="jagged-divider jagged-top"></div>
+        
+        <div class="container mx-auto px-6 text-center relative z-20">
+            <h2 class="font-impact text-5xl text-[var(--dental-teal)] mb-8 float-anim">EXTRACTION POINT</h2>
+            
+            <div class="relative max-w-4xl mx-auto border-4 border-white transform rotate-1 bg-[url('https://api.mapbox.com/styles/v1/mapbox/dark-v10/static/-74.006,40.7128,13,0/800x400?access_token=pk.eyJ1IjoidGVtcCIsImEiOiJtemzzIn0.x')] bg-cover h-96 shadow-[10px_10px_0px_var(--phantom-red)] scroll-hidden">
+                
+                <!-- Map Pin -->
+                <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                    <i class="fas fa-map-marker-alt text-6xl text-[var(--phantom-red)] drop-shadow-[2px_2px_0_white] animate-bounce"></i>
+                </div>
+
+                <!-- Info Box -->
+                <div class="absolute bottom-4 left-4 bg-white text-black p-4 font-bold font-mono text-left border-2 border-black transform skew-x-[-5deg]">
+                    LOC: THE INDUSTRIAL LOFT<br>
+                    TIME: 18:00 HOURS<br>
+                    THREAT LEVEL: PARTY
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Inventory (Registry) -->
+    <section id="inventory" class="py-24 bg-[var(--phantom-white)]">
+        <div class="container mx-auto px-6">
+            <h2 class="font-impact text-5xl mb-12 border-b-4 border-black inline-block">ITEM SHOP (REGISTRY)</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Item 1 -->
+                <div class="bg-black text-white p-4 flex items-center gap-4 border-2 border-transparent hover:border-[var(--dental-teal)] transition-colors cursor-none group scroll-hidden">
+                    <div class="w-16 h-16 bg-[var(--phantom-red)] flex items-center justify-center text-3xl border-2 border-white">
+                        <i class="fas fa-plane"></i>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="font-impact text-xl text-[var(--yellow-accent)]">HONEYMOON FUND</h3>
+                        <p class="font-mono text-xs text-gray-400">Restores 100% SP. Essential for post-battle recovery.</p>
+                    </div>
+                    <button class="bg-[var(--dental-teal)] text-black font-bold px-4 py-2 font-impact hover:scale-110 transition-transform">BUY</button>
+                </div>
+
+                <!-- Item 2 -->
+                <div class="bg-black text-white p-4 flex items-center gap-4 border-2 border-transparent hover:border-[var(--dental-teal)] transition-colors cursor-none group scroll-hidden">
+                    <div class="w-16 h-16 bg-[var(--phantom-red)] flex items-center justify-center text-3xl border-2 border-white">
+                        <i class="fas fa-blender"></i>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="font-impact text-xl text-[var(--yellow-accent)]">KITCHEN UPGRADE</h3>
+                        <p class="font-mono text-xs text-gray-400">Cooking Skill +10. Crafted by legendary smiths.</p>
+                    </div>
+                    <button class="bg-[var(--dental-teal)] text-black font-bold px-4 py-2 font-impact hover:scale-110 transition-transform">BUY</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Save Point (RSVP) -->
+    <section id="rsvp" class="min-h-screen bg-[var(--phantom-red)] flex items-center justify-center relative overflow-hidden py-24 px-6">
+        <!-- Background Pattern -->
+        <div class="absolute inset-0 opacity-10" style="background-image: repeating-linear-gradient(45deg, #000 0, #000 10px, transparent 10px, transparent 20px);"></div>
+
+        <div class="bg-black text-white p-8 md:p-16 max-w-2xl w-full relative transform rotate-1 shadow-[20px_20px_0px_var(--phantom-black)] border-4 border-white scroll-hidden">
+            <div class="absolute -top-10 -left-10 text-6xl text-[var(--yellow-accent)] transform -rotate-12 animate-pulse">
+                <i class="fas fa-save"></i>
+            </div>
+
+            <h2 class="font-impact text-5xl mb-2 text-center text-[var(--dental-teal)]">SAVE YOUR GAME</h2>
+            <p class="font-comic text-center text-xl mb-8">CONFIRM ATTENDANCE TO PROCEED</p>
+
+            <form id="rsvp-form" class="space-y-6">
+                <input type="hidden" name="_captcha" value="false">
+                <input type="hidden" name="_subject" value="Anime Wedding RSVP">
+
+                <div class="space-y-2">
+                    <label class="font-impact text-xl tracking-wide">PLAYER NAME</label>
+                    <input type="text" name="name" required class="w-full bg-gray-900 border-b-4 border-[var(--phantom-red)] p-4 font-mono text-lg focus:outline-none focus:bg-gray-800 text-[var(--dental-teal)] transform skew-x-[-10deg]" placeholder="ENTER NAME">
+                </div>
+
+                <div class="space-y-2">
+                    <label class="font-impact text-xl tracking-wide">GUILD (EMAIL)</label>
+                    <input type="email" name="email" required class="w-full bg-gray-900 border-b-4 border-[var(--phantom-red)] p-4 font-mono text-lg focus:outline-none focus:bg-gray-800 text-[var(--dental-teal)] transform skew-x-[-10deg]" placeholder="ENTER EMAIL">
+                </div>
+
+                <div class="flex gap-4 pt-4">
+                    <label class="flex-1 cursor-none">
+                        <input type="radio" name="attendance" value="Yes" class="peer sr-only" checked>
+                        <div class="action-btn text-center peer-checked:bg-[var(--dental-teal)] peer-checked:text-black peer-checked:shadow-[5px_5px_0px_white]">
+                            JOIN PARTY
+                        </div>
+                    </label>
+                    <label class="flex-1 cursor-none">
+                        <input type="radio" name="attendance" value="No" class="peer sr-only">
+                        <div class="action-btn text-center hover:bg-gray-600 peer-checked:bg-gray-500 peer-checked:text-black">
+                            LOG OUT
+                        </div>
+                    </label>
+                </div>
+
+                <button type="submit" class="w-full mt-8 bg-[var(--yellow-accent)] text-black font-impact text-3xl py-4 border-4 border-black shadow-[8px_8px_0px_white] hover:translate-x-1 hover:translate-y-1 hover:shadow-[4px_4px_0px_white] transition-all transform skew-x-[-5deg]">
+                    SEND CALLING CARD
+                </button>
+            </form>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-black text-white py-12 text-center font-mono text-xs border-t-4 border-[var(--dental-teal)]">
+        <p>THE PHANTOM THIEVES OF HEARTS © 2026</p>
+    </footer>
+
+    <!-- All-Out Attack Modal -->
+    <div id="modal" class="fixed inset-0 z-[10000] bg-[var(--phantom-red)] flex items-center justify-center hidden">
+        <div class="text-center transform scale-0 transition-transform duration-300" id="modal-content">
+            <h1 class="font-impact text-[8rem] text-black leading-none text-shadow-white skew-text mb-4">
+                MISSION<br>COMPLETE
+            </h1>
+            <p class="font-comic text-3xl text-white mb-8">RSVP SECURED!</p>
+            <button id="close-modal" class="action-btn bg-black text-white border-2 border-white">RETURN TO BASE</button>
+        </div>
+        <!-- Impact Lines -->
+        <div class="absolute inset-0 pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/shattered-island.png')] opacity-20 mix-blend-multiply"></div>
+    </div>
+
+    <style>
+        .text-shadow-black { text-shadow: 4px 4px 0 #000; }
+        .text-shadow-white { text-shadow: 4px 4px 0 #fff; }
+        .text-shadow-red { text-shadow: 4px 4px 0 var(--phantom-red); }
+    </style>
+
+    <script>
+        /**
+         * 1. Custom Cursor Logic
+         */
+        const cursor = document.getElementById('cursor-dagger');
+        
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+        });
+
+        document.querySelectorAll('a, button, label').forEach(el => {
+            el.addEventListener('mouseenter', () => {
+                cursor.style.transform = 'translate(-50%, -50%) rotate(0deg) scale(1.5)';
+                cursor.style.background = "url('https://img.icons8.com/ios-filled/50/FF0000/heart-health.png') no-repeat center";
+                cursor.style.backgroundSize = "contain";
+            });
+            el.addEventListener('mouseleave', () => {
+                cursor.style.transform = 'translate(-50%, -50%) rotate(-45deg) scale(1)';
+                cursor.style.background = "url('https://img.icons8.com/ios-filled/50/00F0FF/tooth.png') no-repeat center";
+                cursor.style.backgroundSize = "contain";
+            });
+        });
+
+        /**
+         * 2. Menu Overlay
+         */
+        const navTrigger = document.getElementById('nav-trigger');
+        const pauseMenu = document.getElementById('pause-menu');
+        const menuItems = document.querySelectorAll('.menu-item');
+
+        navTrigger.addEventListener('click', () => {
+            pauseMenu.classList.toggle('open');
+            playSfx('menu');
+        });
+
+        menuItems.forEach(item => {
+            item.addEventListener('click', () => {
+                pauseMenu.classList.remove('open');
+                playSfx('select');
+            });
+        });
+
+        /**
+         * 3. Intersection Observer for Scroll Animations
+         */
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('scroll-show');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.scroll-hidden').forEach(el => observer.observe(el));
+
+        /**
+         * 4. Countdown Timer
+         */
+        const weddingDate = new Date("October 24, 2026 16:00:00").getTime();
+        
+        setInterval(() => {
+            const now = new Date().getTime();
+            const dist = weddingDate - now;
+            
+            const days = Math.floor(dist / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((dist % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((dist % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((dist % (1000 * 60)) / 1000);
+            
+            document.getElementById("days").innerText = days < 10 ? "0" + days : days;
+            document.getElementById("hours").innerText = hours < 10 ? "0" + hours : hours;
+            document.getElementById("minutes").innerText = minutes < 10 ? "0" + minutes : minutes;
+            document.getElementById("seconds").innerText = seconds < 10 ? "0" + seconds : seconds;
+        }, 1000);
+
+        /**
+         * 5. Form Handling (Critical Hit)
+         */
+        const form = document.getElementById('rsvp-form');
+        const modal = document.getElementById('modal');
+        const modalContent = document.getElementById('modal-content');
+        const closeModal = document.getElementById('close-modal');
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            playSfx('attack');
+            
+            const formData = new FormData(form);
+
+            fetch("https://formsubmit.co/ajax/shadowshah70@gmail.com", {
+                method: "POST",
+                body: formData,
+                headers: { 'Accept': 'application/json' }
+            })
+            .then(res => res.json())
+            .then(() => {
+                modal.classList.remove('hidden');
+                setTimeout(() => {
+                    modalContent.classList.remove('scale-0');
+                    modalContent.classList.add('scale-100');
+                    playSfx('win');
+                }, 100);
+                form.reset();
+            })
+            .catch(() => alert('Network Error. The Phantom Thieves failed.'))
+        });
+
+        closeModal.addEventListener('click', () => {
+            modal.classList.add('hidden');
+            modalContent.classList.remove('scale-100');
+            modalContent.classList.add('scale-0');
+        });
+
+        /**
+         * 6. Sound Effects
+         */
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        const audioCtx = new AudioContext();
+
+        function playSfx(type) {
+            if(audioCtx.state === 'suspended') audioCtx.resume();
+            
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            const now = audioCtx.currentTime;
+
+            if (type === 'menu') {
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(440, now);
+                osc.frequency.exponentialRampToValueAtTime(880, now + 0.1);
+                gain.gain.setValueAtTime(0.1, now);
+                gain.gain.linearRampToValueAtTime(0, now + 0.1);
+                osc.start(now);
+                osc.stop(now + 0.1);
+            } else if (type === 'select') {
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(880, now);
+                gain.gain.setValueAtTime(0.1, now);
+                gain.gain.linearRampToValueAtTime(0, now + 0.1);
+                osc.start(now);
+                osc.stop(now + 0.1);
+            } else if (type === 'attack') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(100, now);
+                osc.frequency.exponentialRampToValueAtTime(1000, now + 0.3);
+                gain.gain.setValueAtTime(0.3, now);
+                gain.gain.linearRampToValueAtTime(0, now + 0.3);
+                osc.start(now);
+                osc.stop(now + 0.3);
+            } else if (type === 'win') {
+                [523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => {
+                    const o = audioCtx.createOscillator();
+                    const g = audioCtx.createGain();
+                    o.type = 'square';
+                    o.frequency.value = freq;
+                    o.connect(g);
+                    g.connect(audioCtx.destination);
+                    g.gain.setValueAtTime(0.1, now + i*0.1);
+                    g.gain.linearRampToValueAtTime(0, now + i*0.1 + 0.2);
+                    o.start(now + i*0.1);
+                    o.stop(now + i*0.1 + 0.2);
+                });
+            }
+        }
+
+        
+// 💒 1. Disable right-click
+document.addEventListener('contextmenu', e => e.preventDefault());
+
+// 💒 2. Disable inspect / save / print shortcuts
+document.addEventListener('keydown', e => {
+  if (
+    (e.ctrlKey && ['s','u','p','S','U','P'].includes(e.key)) || // Ctrl+S, Ctrl+U, Ctrl+P
+    e.key === 'F12' ||                                          // DevTools
+    (e.ctrlKey && e.shiftKey && ['I','J','C'].includes(e.key))  // Ctrl+Shift+I/J/C
+  ) {
+    e.preventDefault();
+    sparkle(e.clientX, e.clientY);
+  }
+});
+
+// 💒 3. Block drag saving of images
+document.addEventListener('dragstart', e => e.preventDefault());
+document.querySelectorAll('img').forEach(img => img.setAttribute('draggable', 'false'));
+
+// 💒 4. Disable text selection & copying
+document.addEventListener('copy', e => e.preventDefault());
+document.addEventListener('cut', e => e.preventDefault());
+document.addEventListener('selectstart', e => e.preventDefault());
+document.body.style.userSelect = 'none';
+document.body.style.webkitUserSelect = 'none';
+
+// 💒 5. Detect if DevTools is open
+setInterval(() => {
+  if (
+    window.outerWidth - window.innerWidth > 160 ||
+    window.outerHeight - window.innerHeight > 160
+  ) {
+    document.body.innerHTML = `
+      <div style="text-align:center;margin-top:20%;font-size:2rem;color:#d6336c;">
+        💖 Please close developer tools to continue 💖
+      </div>`;
+  }
+}, 1000);
+
+
+    </script>
+</body>
+</html><script>console.log('Hello JS');</script></body></html>

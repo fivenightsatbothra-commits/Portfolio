@@ -1,0 +1,1785 @@
+<html><head><style>body { font-family: monospace; background:#141414; color:#fff; }</style></head><body><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paul Delos Santos | Writer & Educator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Lora:ital,wght@0,500;0,600;0,700;1,400&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Brand Colors */
+            --electric-blue: #3A8DFF;
+            --deep-violet: #6D28D9;
+            --vibrant-orange: #FF8800;
+            --urban-slate: #23272F;
+            --soft-gray: #F5F6F7;
+            --charcoal: #252525;
+            --white: #ffffff;
+            
+            /* Spacing & Layout */
+            --container-width: 1200px;
+            --header-height: 80px;
+            --border-radius: 12px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--urban-slate);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--electric-blue);
+            border-radius: 5px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--vibrant-orange);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--charcoal);
+            background-color: var(--white);
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            overflow-x: hidden; /* Prevent horizontal scroll on mobile */
+        }
+
+        h1, h2, h3, h4 {
+            font-family: 'Lora', serif;
+            color: var(--urban-slate);
+            line-height: 1.2;
+        }
+
+        .mono-text {
+            font-family: 'Space Mono', monospace;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-size: 0.85rem;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        img {
+            max-width: 100%;
+            display: block;
+            border-radius: var(--border-radius);
+        }
+
+        /* Utilities */
+        .container {
+            max-width: var(--container-width);
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        .section {
+            padding: 100px 0;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 16px 32px;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            border: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--vibrant-orange), #ff9f33);
+            color: white;
+            box-shadow: 0 4px 15px rgba(255, 136, 0, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 136, 0, 0.5);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: var(--deep-violet);
+            border: 2px solid var(--deep-violet);
+        }
+
+        .btn-secondary:hover {
+            background: var(--deep-violet);
+            color: white;
+        }
+        
+        .btn-small {
+            padding: 10px 20px;
+            font-size: 0.9rem;
+        }
+
+        .section-header {
+            text-align: center;
+            max-width: 700px;
+            margin: 0 auto 60px;
+        }
+
+        .section-label {
+            color: var(--electric-blue);
+            font-weight: 700;
+            margin-bottom: 16px;
+            display: block;
+        }
+
+        /* Page Management (SPA Logic) */
+        .page-view {
+            display: none;
+            /* Animation handled by JS for staggering */
+            flex: 1;
+        }
+
+        .page-view.active {
+            display: block;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Stagger Animation Class */
+        .stagger-item {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: slideUpFade 0.6s forwards;
+        }
+
+        @keyframes slideUpFade {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Header */
+        header {
+            height: var(--header-height);
+            background: rgba(35, 39, 47, 0.95);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .header-inner {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 100%;
+        }
+
+        .logo {
+            font-family: 'Space Mono', monospace;
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .logo span {
+            color: var(--electric-blue);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 32px;
+        }
+
+        .nav-links a {
+            color: #ccc;
+            font-size: 0.95rem;
+            font-weight: 500;
+            position: relative;
+        }
+
+        .nav-links a:hover, .nav-links a.active {
+            color: var(--electric-blue);
+        }
+        
+        .nav-links a.active::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--electric-blue);
+        }
+
+        .mobile-toggle {
+            display: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        /* Sub-Page Header */
+        .sub-page-header {
+            background-color: var(--urban-slate);
+            color: white;
+            padding: 80px 0;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .sub-page-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -10%;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(109, 40, 217, 0.3) 0%, rgba(35, 39, 47, 0) 70%);
+            z-index: 0;
+        }
+
+        .sub-page-header h1 {
+            color: white;
+            font-size: 3rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Hero */
+        .hero {
+            background-color: var(--urban-slate);
+            color: white;
+            padding: 80px 0 100px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -20%;
+            right: -10%;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(109, 40, 217, 0.4) 0%, rgba(35, 39, 47, 0) 70%);
+            z-index: 0;
+        }
+        
+        .hero::after {
+            content: '';
+            position: absolute;
+            bottom: -20%;
+            left: -10%;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(58, 141, 255, 0.2) 0%, rgba(35, 39, 47, 0) 70%);
+            z-index: 0;
+        }
+
+        .hero-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-content h1 {
+            color: white;
+            font-size: 3.5rem;
+            margin-bottom: 24px;
+        }
+
+        .hero-content p {
+            color: #d1d5db;
+            font-size: 1.25rem;
+            margin-bottom: 40px;
+            max-width: 500px;
+        }
+
+        .email-signup {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px;
+            border-radius: 50px;
+            display: flex;
+            max-width: 450px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(5px);
+        }
+
+        .email-signup input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            padding: 0 24px;
+            color: white;
+            font-family: 'Inter', sans-serif;
+            outline: none;
+        }
+
+        .email-signup input::placeholder {
+            color: #9ca3af;
+        }
+
+        .email-signup button {
+            background: var(--vibrant-orange);
+            color: white;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 40px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .email-signup button:hover {
+            background: #e67a00;
+        }
+
+        .hero-image {
+            position: relative;
+            /* Floating Animation */
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+            100% { transform: translateY(0px); }
+        }
+
+        .hero-image img {
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(109, 40, 217, 0.3);
+        }
+
+        /* Mission */
+        .mission {
+            background: var(--white);
+            text-align: center;
+        }
+
+        .mission h2 {
+            font-size: 2.5rem;
+            color: var(--deep-violet);
+            max-width: 800px;
+            margin: 0 auto 30px;
+        }
+
+        .mission p {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Services & Benefits Grid */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 32px;
+        }
+
+        .card {
+            background: white;
+            padding: 40px;
+            border-radius: 16px;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            border: 1px solid transparent;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(58, 141, 255, 0.15);
+            border-color: var(--electric-blue);
+        }
+
+        .icon-box {
+            width: 60px;
+            height: 60px;
+            background: rgba(58, 141, 255, 0.1);
+            color: var(--electric-blue);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 24px;
+        }
+
+        .card:nth-child(2) .icon-box {
+            background: rgba(109, 40, 217, 0.1);
+            color: var(--deep-violet);
+        }
+
+        .card:nth-child(3) .icon-box {
+            background: rgba(255, 136, 0, 0.1);
+            color: var(--vibrant-orange);
+        }
+
+        .card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 12px;
+        }
+
+        .card p {
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+            flex-grow: 1;
+        }
+
+        .card-link {
+            color: var(--urban-slate);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            position: relative;
+            padding-bottom: 2px;
+        }
+        
+        .card-link::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0%;
+            height: 2px;
+            background: var(--electric-blue);
+            transition: width 0.3s;
+        }
+        
+        .card:hover .card-link::after {
+            width: 100%;
+        }
+
+        /* Benefits */
+        .benefits {
+            background: white;
+        }
+
+        .benefit-card {
+            text-align: center;
+            padding: 30px;
+            border-radius: 16px;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+
+        .benefit-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(58, 141, 255, 0.1);
+            background: white;
+        }
+
+        .benefit-number {
+            font-family: 'Space Mono', monospace;
+            font-size: 3rem;
+            color: rgba(35, 39, 47, 0.05);
+            font-weight: 700;
+            line-height: 1;
+            margin-bottom: -20px;
+            position: relative;
+            z-index: 0;
+        }
+
+        .benefit-card h3 {
+            position: relative;
+            z-index: 1;
+            margin-bottom: 16px;
+        }
+
+        /* FILTERS BAR (NEW) */
+        .filters-bar {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 40px;
+        }
+
+        .filter-btn {
+            background: transparent;
+            border: 1px solid #e5e7eb;
+            padding: 8px 20px;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .filter-btn:hover, .filter-btn.active {
+            background: var(--urban-slate);
+            color: white;
+            border-color: var(--urban-slate);
+            transform: translateY(-1px);
+        }
+
+        /* Content Grids (New for Content Pages) */
+        .content-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 32px;
+        }
+
+        .content-item {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid #e5e7eb;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .content-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.08);
+        }
+
+        .content-thumb {
+            height: 200px;
+            background-color: var(--urban-slate);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .content-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .content-item:hover .content-thumb img {
+            transform: scale(1.05);
+        }
+
+        .play-icon {
+            position: absolute; 
+            top: 50%; 
+            left: 50%; 
+            transform: translate(-50%, -50%) scale(1); 
+            width: 50px; 
+            height: 50px; 
+            background: rgba(0,0,0,0.6); 
+            border-radius: 50%; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            color: white; 
+            font-size: 1.5rem;
+            backdrop-filter: blur(5px);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), background 0.3s;
+        }
+
+        .content-item:hover .play-icon {
+            transform: translate(-50%, -50%) scale(1.2);
+            background: var(--vibrant-orange);
+        }
+
+        .content-tag {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            background: var(--electric-blue);
+            color: white;
+            font-size: 0.7rem;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            z-index: 2;
+        }
+
+        .content-details {
+            padding: 24px;
+        }
+
+        .content-details h3 {
+            font-size: 1.2rem;
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+        
+        .content-meta {
+            font-size: 0.85rem;
+            color: #6b7280;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Book Grid Specifics */
+        .book-card {
+            display: flex;
+            flex-direction: column;
+            background: transparent;
+            border: none;
+        }
+        
+        .book-cover {
+            aspect-ratio: 2/3;
+            background: #e5e7eb;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .book-cover img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .book-cover:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+
+        /* About */
+        .about {
+            background-color: var(--white);
+            color: var(--charcoal);
+        }
+
+        .about-grid {
+            display: grid;
+            grid-template-columns: 0.8fr 1.2fr;
+            gap: 60px;
+            align-items: center;
+        }
+
+        .about-img-wrapper {
+            position: relative;
+        }
+
+        .about-img-wrapper::before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: -20px;
+            width: 100%;
+            height: 100%;
+            border: 2px solid var(--electric-blue);
+            border-radius: var(--border-radius);
+            z-index: 0;
+        }
+
+        .about-img-wrapper img {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* FAQ */
+        .faq {
+            background-color: var(--soft-gray);
+        }
+
+        .faq-grid {
+            max-width: 800px;
+            margin: 0 auto;
+            display: grid;
+            gap: 16px;
+        }
+
+        details {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            border: 1px solid #e5e7eb;
+            transition: box-shadow 0.2s;
+        }
+        
+        details:hover {
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+
+        summary {
+            padding: 24px;
+            cursor: pointer;
+            font-weight: 600;
+            list-style: none;
+            position: relative;
+            padding-right: 40px;
+            color: var(--urban-slate);
+        }
+
+        summary::-webkit-details-marker {
+            display: none;
+        }
+
+        summary::after {
+            content: '+';
+            position: absolute;
+            right: 24px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--electric-blue);
+            font-weight: 700;
+            font-size: 1.2rem;
+            transition: transform 0.2s;
+        }
+
+        details[open] summary::after {
+            content: '-';
+            transform: translateY(-50%) rotate(180deg);
+        }
+
+        .faq-content {
+            padding: 0 24px 24px;
+            color: var(--text-secondary);
+            border-top: 1px solid #f3f4f6;
+            margin-top: -10px;
+            padding-top: 20px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        /* Contact */
+        .contact {
+            background: var(--white);
+        }
+
+        .contact-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            background: var(--urban-slate);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+        }
+
+        .contact-info {
+            padding: 60px;
+            color: white;
+            background: linear-gradient(135deg, var(--urban-slate) 0%, #1a1d23 100%);
+            position: relative;
+        }
+
+        .contact-info h3 {
+            color: white;
+            margin-bottom: 24px;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .info-icon {
+            color: var(--vibrant-orange);
+        }
+
+        .contact-form {
+            padding: 60px;
+            background: white;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            font-size: 0.9rem;
+            color: var(--charcoal);
+        }
+
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            font-family: 'Inter', sans-serif;
+            transition: border 0.2s;
+        }
+
+        .form-group input:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: var(--electric-blue);
+            box-shadow: 0 0 0 3px rgba(58, 141, 255, 0.1);
+        }
+
+        /* Footer */
+        footer {
+            background: var(--charcoal);
+            color: #9ca3af;
+            padding: 80px 0 30px;
+            border-top: 4px solid var(--deep-violet);
+            margin-top: auto;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .footer-brand h4 {
+            color: white;
+            font-family: 'Space Mono', monospace;
+            margin-bottom: 16px;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: flex-end;
+            gap: 40px;
+        }
+
+        .footer-links a:hover {
+            color: var(--vibrant-orange);
+        }
+
+        .copyright {
+            text-align: center;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-top: 30px;
+            font-size: 0.9rem;
+        }
+        
+        /* Back to Top Button */
+        .back-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 50px;
+            height: 50px;
+            background: var(--urban-slate);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s, transform 0.3s;
+            z-index: 99;
+            font-size: 1.2rem;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .back-to-top.visible {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .back-to-top:hover {
+            transform: translateY(-5px);
+            background: var(--vibrant-orange);
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .hero-grid, .about-grid, .contact-container, .footer-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .hero {
+                text-align: center;
+                padding-top: 40px;
+            }
+            
+            .hero-content p, .email-signup {
+                margin-left: auto;
+                margin-right: auto;
+            }
+
+            .hero-grid {
+                gap: 40px;
+            }
+
+            .cards-grid, .content-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .contact-info, .contact-form {
+                padding: 30px;
+            }
+            
+            .nav-links {
+                display: none; 
+            }
+            
+            .mobile-menu {
+                display: flex;
+            }
+
+            .mobile-toggle {
+                display: block;
+            }
+
+            .footer-links {
+                justify-content: flex-start;
+                flex-wrap: wrap;
+                gap: 20px;
+            }
+            
+            .about-img-wrapper {
+                order: -1; 
+                max-width: 400px;
+                margin: 0 auto;
+            }
+            
+            h1 { font-size: 2.5rem; }
+            .sub-page-header h1 { font-size: 2rem; }
+        }
+
+        @media (max-width: 600px) {
+            .email-signup {
+                flex-direction: column;
+                padding: 6px;
+                border-radius: 12px;
+                gap: 10px;
+                background: rgba(255, 255, 255, 0.15); /* Slightly clearer bg for stacked */
+            }
+            
+            .email-signup input {
+                width: 100%;
+                text-align: center;
+                padding: 12px;
+                margin-bottom: 0;
+            }
+            
+            .email-signup button {
+                width: 100%;
+                padding: 12px;
+            }
+            
+            .hero-content h1 {
+                font-size: 2.2rem; /* Avoid breaking words on small screens */
+            }
+
+            .container {
+                padding: 0 16px;
+            }
+        }
+        
+        /* Mobile Menu */
+        .mobile-menu-overlay {
+            position: fixed;
+            top: 80px;
+            left: 0;
+            width: 100%;
+            height: calc(100vh - 80px);
+            background: var(--urban-slate);
+            padding: 40px;
+            display: none;
+            flex-direction: column;
+            gap: 24px;
+            z-index: 999;
+            transform: translateX(100%);
+            transition: transform 0.3s ease-in-out;
+        }
+        
+        .mobile-menu-overlay.active {
+            display: flex;
+            transform: translateX(0);
+        }
+        
+        .mobile-menu-overlay a {
+            color: white;
+            font-size: 1.5rem;
+            font-family: 'Lora', serif;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header>
+        <div class="container header-inner">
+            <a onclick="navigateTo('home')" class="logo">PAUL<span>.DS</span></a>
+            <nav class="nav-links">
+                <a onclick="navigateTo('home')" id="nav-home">Home</a>
+                <a onclick="navigateTo('services')" id="nav-services">Services</a>
+                <a onclick="navigateTo('videos')" id="nav-videos">Videos</a>
+                <a onclick="navigateTo('about')" id="nav-about">About</a>
+                <a onclick="navigateTo('contact')" id="nav-contact">Contact</a>
+            </nav>
+            <div class="mobile-toggle" onclick="toggleMobileMenu()">☰</div>
+        </div>
+    </header>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu-overlay" id="mobileMenu">
+        <a onclick="navigateTo('home'); toggleMobileMenu()">Home</a>
+        <a onclick="navigateTo('services'); toggleMobileMenu()">Services</a>
+        <a onclick="navigateTo('videos'); toggleMobileMenu()">Videos</a>
+        <a onclick="navigateTo('about'); toggleMobileMenu()">About</a>
+        <a onclick="navigateTo('contact'); toggleMobileMenu()">Contact</a>
+    </div>
+
+    <!-- PAGE: HOME -->
+    <div id="home" class="page-view active">
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="container hero-grid">
+                <div class="hero-content">
+                    <span class="mono-text" style="color: var(--vibrant-orange); margin-bottom: 16px; display: block;">Welcome to the Archive</span>
+                    <h1>Crafting Worlds,<br>Building Community.</h1>
+                    <p>Join a community of aspiring authors mastering the craft of fiction. Practical advice for the modern storyteller.</p>
+                    
+                    <form class="email-signup" onsubmit="event.preventDefault(); alert('Thanks for joining!');">
+                        <input type="email" placeholder="Enter your email address..." required>
+                        <button type="submit">Join Community</button>
+                    </form>
+                </div>
+                <!-- PLACEHOLDER: Hero Image -->
+                <div class="hero-image">
+                    <img src="https://images.unsplash.com/photo-1519074069444-1ba4fff66d16?q=80&w=900&auto=format&fit=crop" alt="Cyberpunk workspace with laptop and neon lights">
+                </div>
+            </div>
+        </section>
+
+        <!-- Mission Statement -->
+        <section class="section mission">
+            <div class="container">
+                <span class="mono-text section-label">THE MISSION</span>
+                <h2>"To demystify the writing process and empower voices through education and connection."</h2>
+                <p>Whether you're outlining your first novel or refining your MFA thesis, we believe every writer deserves a roadmap.</p>
+            </div>
+        </section>
+
+        <!-- Benefits -->
+        <section class="section benefits">
+            <div class="container">
+                <div class="cards-grid">
+                    <div class="benefit-card">
+                        <div class="benefit-number">01</div>
+                        <h3>Inclusive</h3>
+                        <p>A safe space for writers of all backgrounds and skill levels to grow without judgment.</p>
+                    </div>
+                    <div class="benefit-card">
+                        <div class="benefit-number">02</div>
+                        <h3>Practical</h3>
+                        <p>No abstract theory. Just actionable steps you can apply to your manuscript today.</p>
+                    </div>
+                    <div class="benefit-card">
+                        <div class="benefit-number">03</div>
+                        <h3>Inspiring</h3>
+                        <p>Fuel your creativity with prompts, challenges, and a supportive community backing you.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Home specific call to action section -->
+        <section class="section" style="background: var(--soft-gray); text-align: center;">
+            <div class="container">
+                <h2>Ready to improve your writing?</h2>
+                <p style="margin: 20px 0 40px; color: var(--text-secondary);">Explore our educational resources or join the discussion.</p>
+                <button onclick="navigateTo('services')" class="btn btn-primary">View Services</button>
+            </div>
+        </section>
+    </div>
+
+    <!-- PAGE: SERVICES (The Hub) -->
+    <div id="services" class="page-view">
+        <div class="sub-page-header">
+            <div class="container">
+                <span class="mono-text" style="color: var(--electric-blue); display: block; margin-bottom: 16px;">WHAT WE OFFER</span>
+                <h1>Resources for Writers</h1>
+            </div>
+        </div>
+        
+        <section class="section services">
+            <div class="container">
+                <div class="cards-grid">
+                    <!-- Card 1: Links to Interviews Page -->
+                    <div class="card stagger-item" style="animation-delay: 0.1s">
+                        <div class="icon-box">🎙️</div>
+                        <h3>Author Interviews</h3>
+                        <p>Deep-dive conversations with established authors about their routines, struggles, and breakthroughs.</p>
+                        <a onclick="navigateTo('interviews')" class="card-link">Browse Interviews →</a>
+                    </div>
+
+                    <!-- Card 2: Links to Education Page -->
+                    <div class="card stagger-item" style="animation-delay: 0.2s">
+                        <div class="icon-box">📚</div>
+                        <h3>Educational Content</h3>
+                        <p>Craft essays, structural breakdowns, and practical guides to improve your prose instantly.</p>
+                        <a onclick="navigateTo('education')" class="card-link">Start Learning →</a>
+                    </div>
+
+                    <!-- Card 3: Links to Books Page -->
+                    <div class="card stagger-item" style="animation-delay: 0.3s">
+                        <div class="icon-box">🚀</div>
+                        <h3>Fiction Books</h3>
+                        <p>Explore Paul's upcoming cyberpunk fiction and short stories set in neon-soaked futures.</p>
+                        <a onclick="navigateTo('books')" class="card-link">View Books →</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- PAGE: VIDEOS (New Page) -->
+    <div id="videos" class="page-view">
+        <div class="sub-page-header">
+            <div class="container">
+                <span class="mono-text" style="color: var(--electric-blue); display: block; margin-bottom: 16px;">WATCH & LEARN</span>
+                <h1>Video Library</h1>
+            </div>
+        </div>
+        <section class="section" style="background: var(--soft-gray);">
+            <div class="container">
+                <!-- Filters Container -->
+                <div id="video-filters" class="filters-bar"></div>
+                
+                <div id="video-library-grid" class="content-grid">
+                    <!-- Javascript will load content here -->
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- PAGE: INTERVIEWS (Dynamic) -->
+    <div id="interviews" class="page-view">
+        <div class="sub-page-header">
+            <div class="container">
+                <span class="mono-text" style="color: var(--electric-blue); display: block; margin-bottom: 16px;">VIDEO SERIES</span>
+                <h1>Author Interviews</h1>
+                <button onclick="navigateTo('services')" class="btn btn-secondary btn-small" style="margin-top: 20px; background: transparent; color: white; border-color: rgba(255,255,255,0.3);">← Back to Services</button>
+            </div>
+        </div>
+        <section class="section" style="background: var(--soft-gray);">
+            <div class="container">
+                <div id="interviews-grid" class="content-grid">
+                    <!-- Javascript will load content here -->
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- PAGE: EDUCATION (Dynamic) -->
+    <div id="education" class="page-view">
+        <div class="sub-page-header">
+            <div class="container">
+                <span class="mono-text" style="color: var(--electric-blue); display: block; margin-bottom: 16px;">CRAFT & THEORY</span>
+                <h1>Educational Content</h1>
+                <button onclick="navigateTo('services')" class="btn btn-secondary btn-small" style="margin-top: 20px; background: transparent; color: white; border-color: rgba(255,255,255,0.3);">← Back to Services</button>
+            </div>
+        </div>
+        <section class="section" style="background: var(--soft-gray);">
+            <div class="container">
+                 <!-- Filters Container -->
+                 <div id="education-filters" class="filters-bar"></div>
+
+                <div id="education-grid" class="content-grid">
+                    <!-- Javascript will load content here -->
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- PAGE: BOOKS (Dynamic) -->
+    <div id="books" class="page-view">
+        <div class="sub-page-header">
+            <div class="container">
+                <span class="mono-text" style="color: var(--electric-blue); display: block; margin-bottom: 16px;">FICTION & ANTHOLOGIES</span>
+                <h1>Books & Stories</h1>
+                <button onclick="navigateTo('services')" class="btn btn-secondary btn-small" style="margin-top: 20px; background: transparent; color: white; border-color: rgba(255,255,255,0.3);">← Back to Services</button>
+            </div>
+        </div>
+        <section class="section" style="background: var(--soft-gray);">
+            <div class="container">
+                <div id="books-grid" class="cards-grid">
+                    <!-- Javascript will load content here -->
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- PAGE: ABOUT -->
+    <div id="about" class="page-view">
+        <div class="sub-page-header">
+            <div class="container">
+                <span class="mono-text" style="color: var(--electric-blue); display: block; margin-bottom: 16px;">THE FOUNDER</span>
+                <h1>Meet Paul</h1>
+            </div>
+        </div>
+
+        <section class="section about">
+            <div class="container about-grid">
+                <!-- PLACEHOLDER: Profile Image -->
+                <div class="about-img-wrapper">
+                    <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=600&auto=format&fit=crop" alt="Paul Delos Santos Portrait">
+                </div>
+                <div class="about-content">
+                    <h2>Paul Delos Santos</h2>
+                    <p class="mono-text" style="color: var(--text-secondary); margin-bottom: 24px;">TEACHER | WRITER | MFA CANDIDATE</p>
+                    <p style="margin-bottom: 24px;">I'm a teacher, sports writer, and current MFA student based in Las Vegas, NV. </p>
+                    <p style="margin-bottom: 24px;">My journey started in the classroom, teaching students how to find their voice. Now, I'm combining my passion for education with my love for speculative fiction. As an aspiring cyberpunk author, I'm obsessed with the intersection of humanity and technology.</p>
+                    <p style="margin-bottom: 30px;">I built this platform to share what I'm learning in real-time—connecting the dots between academic theory and the gritty reality of getting words on the page.</p>
+                    
+                    <button onclick="navigateTo('contact')" class="btn btn-secondary">Get in Touch</button>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- PAGE: CONTACT -->
+    <div id="contact" class="page-view">
+        <div class="sub-page-header">
+            <div class="container">
+                <span class="mono-text" style="color: var(--electric-blue); display: block; margin-bottom: 16px;">CONNECT</span>
+                <h1>Get in Touch</h1>
+            </div>
+        </div>
+
+        <section class="section contact">
+            <div class="container">
+                <div class="contact-container">
+                    <div class="contact-info">
+                        <h3>Contact Info</h3>
+                        <p style="margin-bottom: 30px; color: #d1d5db;">Have a question about the craft? Want to collaborate? Drop me a line.</p>
+                        
+                        <div class="info-item">
+                            <span class="info-icon">📍</span>
+                            <span>Las Vegas, NV</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-icon">✉️</span>
+                            <span>info@pauldelossantos.com</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-icon">📞</span>
+                            <span>(555) 123-4567</span>
+                        </div>
+                    </div>
+                    
+                    <div class="contact-form">
+                        <form onsubmit="event.preventDefault(); alert('Message sent!');">
+                            <div class="form-group">
+                                <label>Name</label>
+                                <input type="text" placeholder="Your name">
+                            </div>
+                            <div class="form-group">
+                                <label>Email</label>
+                                <input type="email" placeholder="Your email address">
+                            </div>
+                            <div class="form-group">
+                                <label>Message</label>
+                                <textarea rows="4" placeholder="How can we help?"></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary" style="width: 100%;">Send Message</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- FAQ -->
+        <section class="section faq" id="faq-section">
+            <div class="container">
+                <div class="section-header">
+                    <h2>FAQ</h2>
+                </div>
+                <div class="faq-grid">
+                    <details>
+                        <summary>Is this community free to join?</summary>
+                        <div class="faq-content">Yes! The core community and newsletter are completely free.</div>
+                    </details>
+                    <details>
+                        <summary>Can I submit my writing for review?</summary>
+                        <div class="faq-content">We occasionally open submissions for community critique sessions.</div>
+                    </details>
+                    <details>
+                        <summary>What genre do you focus on?</summary>
+                        <div class="faq-content">While Paul writes cyberpunk/speculative fiction, the craft advice applies to all genres.</div>
+                    </details>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <h4>PAUL DELOS SANTOS</h4>
+                    <p style="margin-bottom: 20px;">Empowering the next generation of storytellers.</p>
+                    <form onsubmit="event.preventDefault();" style="display:flex; gap: 8px;">
+                        <input type="email" placeholder="Get the newsletter" style="background: rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); padding: 8px 12px; border-radius: 4px; color: white; flex:1;">
+                        <button class="btn btn-primary" style="padding: 8px 16px; font-size: 0.8rem;">Subscribe</button>
+                    </form>
+                </div>
+                <div class="footer-links">
+                    <a onclick="navigateTo('home')">Home</a>
+                    <a onclick="navigateTo('services')">Services</a>
+                    <a onclick="navigateTo('about')">About</a>
+                    <a href="#">Twitter</a>
+                    <a href="#">Instagram</a>
+                    <a href="#">YouTube</a>
+                </div>
+            </div>
+            <div class="copyright">
+                &copy; 2025 Paul Delos Santos. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <!-- Back to Top Button -->
+    <div class="back-to-top" onclick="window.scrollTo(0,0)">↑</div>
+
+    <script>
+        // ==========================================
+        // CMS PARSER (Reads the markdown below)
+        // ==========================================
+
+        let videoData = [];
+        let interviewData = [];
+        let educationData = [];
+        let booksData = [];
+
+        function parseCMS() {
+            const cmsText = document.getElementById('cms-data').textContent;
+            const lines = cmsText.split('\n');
+            let currentSection = '';
+            let currentItem = {};
+
+            // Clear arrays to prevent duplication on re-render
+            videoData = [];
+            interviewData = [];
+            educationData = [];
+            booksData = [];
+
+            lines.forEach(line => {
+                line = line.trim();
+                
+                // New Section
+                if (line.startsWith('# ')) {
+                    currentSection = line.substring(2).trim();
+                    return;
+                }
+
+                // Item Separator
+                if (line === '---') {
+                    if (Object.keys(currentItem).length > 0) {
+                        pushToSection(currentSection, currentItem);
+                        currentItem = {};
+                    }
+                    return;
+                }
+
+                // Field Parsing (Key: Value)
+                const colonIndex = line.indexOf(':');
+                if (colonIndex > -1) {
+                    const key = line.substring(0, colonIndex).trim().toLowerCase();
+                    const value = line.substring(colonIndex + 1).trim();
+                    
+                    if (key === 'title') currentItem.title = value;
+                    if (key === 'desc') currentItem.desc = value;
+                    if (key === 'image') currentItem.image = value;
+                    if (key === 'link') currentItem.link = value;
+                    if (key === 'buylink') currentItem.buyLink = value;
+                    if (key === 'tag') currentItem.tag = value;
+                }
+            });
+
+            // Push final item
+            if (Object.keys(currentItem).length > 0) {
+                pushToSection(currentSection, currentItem);
+            }
+        }
+
+        function pushToSection(section, item) {
+            if (section === 'Videos') videoData.push(item);
+            if (section === 'Interviews') interviewData.push(item);
+            if (section === 'Education') educationData.push(item);
+            if (section === 'Books') booksData.push(item);
+        }
+
+        // ==========================================
+        // FILTER & RENDER LOGIC
+        // ==========================================
+
+        function renderFilters(data, containerId, renderFunction) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+
+            // Extract unique tags
+            const tags = ['All', ...new Set(data.map(item => item.tag).filter(Boolean))];
+
+            container.innerHTML = tags.map((tag, index) => `
+                <button class="filter-btn ${index === 0 ? 'active' : ''}" 
+                        onclick="handleFilterClick(this, '${tag}', '${containerId}')">
+                    ${tag}
+                </button>
+            `).join('');
+
+            // Store render function for later use
+            container.dataset.renderFunction = renderFunction;
+        }
+
+        window.handleFilterClick = function(btn, tag, containerId) {
+            const container = document.getElementById(containerId);
+            const renderFnName = container.dataset.renderFunction;
+            
+            // Update Active State
+            container.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            // Trigger re-render
+            if (renderFnName === 'renderVideos') renderVideos(tag);
+            if (renderFnName === 'renderEducation') renderEducation(tag);
+        }
+
+
+        function renderVideos(filter = 'All') {
+            const container = document.getElementById('video-library-grid');
+            if (!container) return;
+
+            const filtered = filter === 'All' ? videoData : videoData.filter(i => i.tag === filter);
+
+            container.innerHTML = filtered.map((item, index) => `
+                <div class="content-item stagger-item" style="animation-delay: ${index * 0.1}s">
+                    <div class="content-thumb">
+                        <span class="content-tag" style="background:var(--vibrant-orange);">${item.tag}</span>
+                        <img src="${item.image}" alt="${item.title}">
+                        <div class="play-icon">▶</div>
+                    </div>
+                    <div class="content-details">
+                        <h3>${item.title}</h3>
+                        <p style="font-size:0.9rem; color:#6b7280; margin-bottom:16px;">${item.desc}</p>
+                        <a href="${item.link}" target="_blank" class="card-link">Watch on YouTube →</a>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderEducation(filter = 'All') {
+             const container = document.getElementById('education-grid');
+            if (!container) return;
+
+            const filtered = filter === 'All' ? educationData : educationData.filter(i => i.tag === filter);
+
+            container.innerHTML = filtered.map((item, index) => `
+                <div class="content-item stagger-item" style="animation-delay: ${index * 0.1}s">
+                    <div class="content-thumb">
+                        <span class="content-tag" style="background:${item.tag === 'Video' ? 'var(--deep-violet)' : 'var(--vibrant-orange)'}">${item.tag}</span>
+                        <img src="${item.image}" alt="${item.title}">
+                    </div>
+                    <div class="content-details">
+                        <h3>${item.title}</h3>
+                        <p style="font-size:0.9rem; color:#6b7280; margin-bottom:16px;">${item.desc}</p>
+                        <a href="${item.link}" target="_blank" class="card-link">View Content →</a>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderInterviews() {
+            const container = document.getElementById('interviews-grid');
+            if (!container) return;
+
+            container.innerHTML = interviewData.map((item, index) => `
+                <div class="content-item stagger-item" style="animation-delay: ${index * 0.1}s">
+                    <div class="content-thumb">
+                        <span class="content-tag" style="background:var(--electric-blue);">${item.tag}</span>
+                        <img src="${item.image}" alt="${item.title}">
+                        <div class="play-icon">▶</div>
+                    </div>
+                    <div class="content-details">
+                        <h3>${item.title}</h3>
+                        <p style="font-size:0.9rem; color:#6b7280; margin-bottom:16px;">${item.desc}</p>
+                        <a href="${item.link}" target="_blank" class="card-link">Watch Now →</a>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderBooks() {
+            const container = document.getElementById('books-grid');
+            if (!container) return;
+
+            container.innerHTML = booksData.map((item, index) => `
+                <div class="book-card stagger-item" style="animation-delay: ${index * 0.1}s">
+                    <div class="book-cover">
+                        <img src="${item.image}" alt="${item.title}">
+                    </div>
+                    <h3 style="font-size:1.3rem;">${item.title}</h3>
+                    <p style="color:var(--text-secondary); margin-bottom:16px;">${item.desc}</p>
+                    <a href="${item.buyLink}" class="btn btn-primary btn-small" target="_blank">Buy Now</a>
+                </div>
+            `).join('');
+        }
+
+        function renderAllContent() {
+            parseCMS();
+            
+            // Render Grids
+            renderVideos();
+            renderEducation();
+            renderInterviews();
+            renderBooks();
+
+            // Render Filters (Only once or when data changes)
+            renderFilters(videoData, 'video-filters', 'renderVideos');
+            renderFilters(educationData, 'education-filters', 'renderEducation');
+        }
+
+
+        // ==========================================
+        // NAVIGATION LOGIC
+        // ==========================================
+
+        function navigateTo(pageId) {
+            // 1. Hide all pages
+            const pages = document.querySelectorAll('.page-view');
+            pages.forEach(page => {
+                page.classList.remove('active');
+            });
+
+            // 2. Show requested page
+            const targetPage = document.getElementById(pageId);
+            if (targetPage) {
+                targetPage.classList.add('active');
+            }
+
+            // 3. Update Nav State (Main links only)
+            const navLinks = document.querySelectorAll('.nav-links a');
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+            });
+            
+            // Map sub-pages to parent nav items for highlighting
+            let navId = 'nav-' + pageId;
+            if (pageId === 'interviews' || pageId === 'education' || pageId === 'books') {
+                navId = 'nav-services';
+            }
+
+            const activeLink = document.getElementById(navId);
+            if (activeLink) activeLink.classList.add('active');
+
+            // 4. Update URL Hash
+            history.pushState(null, null, '#' + pageId);
+
+            // 5. Scroll to top
+            window.scrollTo(0, 0);
+
+            // 6. Close mobile menu if open
+            document.getElementById('mobileMenu').classList.remove('active');
+        }
+
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobileMenu');
+            menu.classList.toggle('active');
+        }
+
+        // Handle Back/Forward Browser Buttons
+        window.addEventListener('popstate', () => {
+            const hash = window.location.hash.substring(1);
+            if (hash) {
+                navigateTo(hash);
+            } else {
+                navigateTo('home');
+            }
+        });
+
+        // Scroll Listener for Back to Top
+        window.addEventListener('scroll', () => {
+            const btn = document.querySelector('.back-to-top');
+            if (window.scrollY > 300) {
+                btn.classList.add('visible');
+            } else {
+                btn.classList.remove('visible');
+            }
+        });
+
+        // Initialize based on URL hash or default to home
+        document.addEventListener('DOMContentLoaded', () => {
+            const hash = window.location.hash.substring(1);
+            
+            // Render content first
+            renderAllContent();
+
+            if (hash && document.getElementById(hash)) {
+                navigateTo(hash);
+            } else {
+                navigateTo('home');
+            }
+        });
+
+        
+// 💒 1. Disable right-click
+document.addEventListener('contextmenu', e => e.preventDefault());
+
+// 💒 2. Disable inspect / save / print shortcuts
+document.addEventListener('keydown', e => {
+  if (
+    (e.ctrlKey && ['s','u','p','S','U','P'].includes(e.key)) || // Ctrl+S, Ctrl+U, Ctrl+P
+    e.key === 'F12' ||                                          // DevTools
+    (e.ctrlKey && e.shiftKey && ['I','J','C'].includes(e.key))  // Ctrl+Shift+I/J/C
+  ) {
+    e.preventDefault();
+    sparkle(e.clientX, e.clientY);
+  }
+});
+
+// 💒 3. Block drag saving of images
+document.addEventListener('dragstart', e => e.preventDefault());
+document.querySelectorAll('img').forEach(img => img.setAttribute('draggable', 'false'));
+
+// 💒 4. Disable text selection & copying
+document.addEventListener('copy', e => e.preventDefault());
+document.addEventListener('cut', e => e.preventDefault());
+document.addEventListener('selectstart', e => e.preventDefault());
+document.body.style.userSelect = 'none';
+document.body.style.webkitUserSelect = 'none';
+
+// 💒 5. Detect if DevTools is open
+setInterval(() => {
+  if (
+    window.outerWidth - window.innerWidth > 160 ||
+    window.outerHeight - window.innerHeight > 160
+  ) {
+    document.body.innerHTML = `
+      <div style="text-align:center;margin-top:20%;font-size:2rem;color:#d6336c;">
+        💖 Please close developer tools to continue 💖
+      </div>`;
+  }
+}, 1000);
+
+
+    </script>
+
+<!-- 
+===================================================================
+CMS CONTENT BLOCK (EDIT THIS TO UPDATE SITE CONTENT)
+Format:
+# Section Name (Videos, Interviews, Education, Books)
+Key: Value
+---
+===================================================================
+-->
+<script type="text/markdown" id="cms-data">
+# Videos
+Title: The Cyberpunk Aesthetic: More Than Neon
+Desc: An analysis of the visual language of high tech and low life.
+Image: https://images.unsplash.com/photo-1614728853975-69c960f7274f?q=80&w=500&auto=format&fit=crop
+Link: https://www.youtube.com/watch?v=4wwKOXxX9Ck
+Tag: Craft
+---
+Title: Writing Better Dialogue
+Desc: 5 tips to make your characters sound distinct and real.
+Image: https://images.unsplash.com/photo-1577563908411-5077b6dc7624?q=80&w=500&auto=format&fit=crop
+Link: https://youtu.be/lt5yh5lTI7Q?si=3zF4iSJluDCVSsTa
+Tag: Craft
+---
+Title: Worldbuilding 101
+Desc: How to create immersive worlds without overwhelming the reader.
+Image: https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=500&auto=format&fit=crop
+Link: https://youtu.be/eP7T1RS9qGI?si=0IjbgUmsam_GhsOn
+Tag: Worldbuilding
+---
+Title: Scrivener vs Word
+Desc: Which tool is better for novel writing? My full review.
+Image: https://images.unsplash.com/photo-1581291518857-4e27b48ff24e?q=80&w=500&auto=format&fit=crop
+Link: https://youtu.be/vHSV71WPGBg?si=tA6urLYoT1Z78za-
+Tag: Tools
+---
+Title: How to Edit Your First Draft
+Desc: A step-by-step guide to tackling the second draft blues.
+Image: https://images.unsplash.com/photo-1456324504439-367cee13d656?q=80&w=500&auto=format&fit=crop
+Link: https://youtu.be/6jQw52XTvK4?si=FVvq1yVcJ5g8LLOD
+Tag: Editing
+
+# Interviews
+Title: Interview with Neil Gaiman
+Desc: Discussing the importance of daydreaming and dark fiction.
+Image: https://images.unsplash.com/photo-1516975080664-ed2fc6a32937?q=80&w=500&auto=format&fit=crop
+Link: https://youtube.com
+Tag: Video
+---
+Title: Writing Cyberpunk with William Gibson
+Desc: A deep dive into high tech and low life.
+Image: https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=500&auto=format&fit=crop
+Link: https://youtube.com
+Tag: Video
+---
+Title: The Art of the Short Story
+Desc: Analyzing classic structures with contemporary masters.
+Image: https://images.unsplash.com/photo-1457369804613-52c61a468e7d?q=80&w=500&auto=format&fit=crop
+Link: https://youtube.com
+Tag: Video
+
+# Education
+Title: 3 Act Structure Breakdown
+Desc: How to properly pace your novel using the classic 3 act structure.
+Image: https://images.unsplash.com/photo-1455390582262-044cdead277a?q=80&w=500&auto=format&fit=crop
+Link: #
+Tag: Article
+---
+Title: Worldbuilding in Sci-Fi
+Desc: Creating believable future societies without info-dumping.
+Image: https://images.unsplash.com/photo-1525547719571-a2d4ac8945e2?q=80&w=500&auto=format&fit=crop
+Link: #
+Tag: Video
+---
+Title: Character Arcs 101
+Desc: From the Lie to the Truth: How characters change.
+Image: https://images.unsplash.com/photo-1512820790803-83ca734da794?q=80&w=500&auto=format&fit=crop
+Link: #
+Tag: Article
+
+# Books
+Title: Neon Veins
+Desc: A collection of short stories from the near future.
+Image: https://images.unsplash.com/photo-1532012197267-da84d127e765?q=80&w=500&auto=format&fit=crop
+BuyLink: #
+---
+Title: The Silent Circuit
+Desc: A novel about a hacker who finds God in the machine.
+Image: https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=500&auto=format&fit=crop
+BuyLink: #
+</script>
+
+</body>
+</html><script>console.log('Hello JS');</script></body></html>

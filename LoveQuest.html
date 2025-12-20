@@ -1,0 +1,1032 @@
+<html><head><style>body { font-family: monospace; background:#141414; color:#fff; }</style></head><body><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QUEST: J & S | 2026</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --neon-green: #39ff14;
+            --neon-pink: #ff00ff;
+            --neon-blue: #00ffff;
+            --arcade-black: #111;
+            --scanline-color: rgba(0, 0, 0, 0.5);
+        }
+
+        body {
+            background-color: #050505;
+            color: var(--neon-green);
+            font-family: 'VT323', monospace;
+            overflow-x: hidden;
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewport="0 0 24 24" fill="white" stroke="black" stroke-width="2"><path d="M0 0 L12 12 L6 14 L8 20 L4 22 L2 16 L0 24 Z" /></svg>'), auto;
+            user-select: none;
+        }
+
+        .font-8bit { font-family: 'Press Start 2P', cursive; }
+
+        /* --- CRT Monitor Effect --- */
+        .crt-container {
+            position: relative;
+            min-height: 100vh;
+            background: #1a1a1a;
+            overflow: hidden;
+        }
+        
+        .scanlines {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(
+                to bottom,
+                rgba(255,255,255,0),
+                rgba(255,255,255,0) 50%,
+                rgba(0,0,0,0.2) 50%,
+                rgba(0,0,0,0.2)
+            );
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        .flicker-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(18, 16, 16, 0.1);
+            opacity: 0;
+            z-index: 9998;
+            pointer-events: none;
+            animation: flicker 0.15s infinite;
+        }
+
+        @keyframes flicker {
+            0% { opacity: 0.02; }
+            50% { opacity: 0.05; }
+            100% { opacity: 0.02; }
+        }
+
+        /* --- Pixel Borders (NES Style) --- */
+        .nes-container {
+            position: relative;
+            background: white;
+            padding: 4px;
+            margin: 4px;
+            box-shadow: 
+                -4px 0 0 0 black,
+                4px 0 0 0 black,
+                0 -4px 0 0 black,
+                0 4px 0 0 black; 
+        }
+        .nes-container.is-dark {
+            background: #212529;
+            color: white;
+            box-shadow: 
+                -4px 0 0 0 white,
+                4px 0 0 0 white,
+                0 -4px 0 0 white,
+                0 4px 0 0 white; 
+        }
+
+        /* --- Animations --- */
+        .blink { animation: blinker 1s linear infinite; }
+        @keyframes blinker { 50% { opacity: 0; } }
+
+        .float { animation: floating 3s ease-in-out infinite; }
+        @keyframes floating {
+            0% { transform: translate(0, 0px); }
+            50% { transform: translate(0, -10px); }
+            100% { transform: translate(0, 0px); }
+        }
+
+        .shake { animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both; }
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+            40%, 60% { transform: translate3d(4px, 0, 0); }
+        }
+
+        /* --- Start Screen Overlay --- */
+        #start-screen {
+            position: fixed;
+            inset: 0;
+            background-color: #000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            transition: transform 0.5s ease-in-out;
+        }
+        #start-screen.hidden {
+            transform: translateY(-100%);
+        }
+
+        /* --- Pixelated Images --- */
+        .pixel-img {
+            image-rendering: pixelated;
+            filter: contrast(1.2) saturation(1.2);
+        }
+
+        /* --- HP Bar --- */
+        .hp-bar-bg {
+            width: 100%;
+            height: 16px;
+            background: #555;
+            border: 2px solid white;
+            position: relative;
+        }
+        .hp-bar-fill {
+            height: 100%;
+            background: #ff0044;
+            width: 100%;
+            transition: width 0.2s ease-out;
+        }
+
+        /* --- Floating Collectibles --- */
+        .collectible {
+            position: absolute;
+            font-size: 2rem;
+            cursor: pointer;
+            animation: drift 10s linear infinite;
+            z-index: 50;
+            filter: drop-shadow(0 0 5px gold);
+        }
+        @keyframes drift {
+            0% { transform: translateY(0) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
+        }
+
+        /* --- Damage Text --- */
+        .damage-text {
+            position: absolute;
+            color: #ff0000;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1.5rem;
+            pointer-events: none;
+            animation: floatUp 1s ease-out forwards;
+            text-shadow: 2px 2px 0 #fff;
+            z-index: 100;
+        }
+        @keyframes floatUp {
+            0% { transform: translateY(0) scale(1); opacity: 1; }
+            100% { transform: translateY(-50px) scale(1.5); opacity: 0; }
+        }
+
+        /* --- Achievements Popups --- */
+        #achievement-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10001;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .achievement-toast {
+            background: #222;
+            border: 4px solid #ffd700;
+            color: white;
+            padding: 15px;
+            width: 300px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            box-shadow: 8px 8px 0px rgba(0,0,0,0.5);
+            animation: slideIn 0.5s ease-out, fadeOut 0.5s ease-in 4.5s forwards;
+        }
+        @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+        @keyframes fadeOut { to { opacity: 0; transform: translateY(-20px); } }
+
+        /* --- Visual Novel Dialogue Box --- */
+        .dialogue-box {
+            background: #0000cc;
+            border: 4px solid white;
+            color: white;
+            font-family: 'VT323', monospace;
+            font-size: 1.5rem;
+            padding: 20px;
+            box-shadow: 0 0 0 4px #0000cc, 0 0 0 8px white;
+            position: relative;
+        }
+        .dialogue-arrow {
+            position: absolute;
+            bottom: 10px;
+            right: 20px;
+            animation: bounce 1s infinite;
+        }
+
+        /* --- Overworld Map --- */
+        .overworld-map {
+            background-color: #4daaa8; /* Retro grass green */
+            background-image: 
+                linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 40px 40px;
+            position: relative;
+            height: 400px;
+            border: 4px solid white;
+            overflow: hidden;
+        }
+        .map-node {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background: url('https://img.icons8.com/color/48/castle.png') no-repeat center;
+            background-size: contain;
+            cursor: pointer;
+            transition: transform 0.2s;
+            image-rendering: pixelated;
+        }
+        .map-node:hover { transform: scale(1.2); }
+        .map-tooltip {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: black;
+            color: white;
+            border: 2px solid white;
+            padding: 5px;
+            font-size: 12px;
+            white-space: nowrap;
+            display: none;
+            z-index: 10;
+        }
+        .map-node:hover .map-tooltip { display: block; }
+
+        /* --- Timeline (Quest Log) --- */
+        .timeline-connector {
+            position: absolute;
+            left: 28px;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: #fff;
+            z-index: 0;
+        }
+
+        /* --- Custom Scrollbar --- */
+        ::-webkit-scrollbar { width: 12px; background: #000; }
+        ::-webkit-scrollbar-thumb { background: #fff; border: 2px solid #000; }
+    </style>
+</head>
+<body class="selection:bg-white selection:text-black">
+
+    <!-- CRT Effects -->
+    <div class="scanlines"></div>
+    <div class="flicker-overlay"></div>
+
+    <!-- Achievement Container -->
+    <div id="achievement-container"></div>
+
+    <!-- Audio Toggle -->
+    <button id="audio-toggle" class="fixed top-4 left-4 z-[10001] bg-black border-2 border-white p-2 text-white font-8bit text-xs hover:bg-gray-800">
+        <i class="fas fa-volume-mute"></i> SOUND: OFF
+    </button>
+
+    <!-- Start Screen -->
+    <div id="start-screen">
+        <div class="text-center">
+            <h1 class="font-8bit text-4xl md:text-6xl text-yellow-400 mb-8 text-shadow-retro" style="text-shadow: 4px 4px 0px #ff0000;">
+                LOVE QUEST
+            </h1>
+            <div class="mb-12">
+                <i class="fas fa-heart text-red-600 text-6xl animate-pulse"></i>
+            </div>
+            <p id="start-text" class="font-8bit text-xs md:text-sm text-white mb-8 blink">INSERT COIN TO START</p>
+            
+            <button id="start-btn" class="font-8bit bg-white text-black px-8 py-4 border-4 border-gray-400 hover:bg-yellow-400 hover:border-yellow-600 hover:scale-105 transition-transform">
+                PRESS START
+            </button>
+            
+            <div class="mt-12 text-gray-500 font-mono text-sm">
+                © 2026 JON & SARA CORP. <br> ALL RIGHTS RESERVED.
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Game Container -->
+    <div class="crt-container pb-20 relative" id="game-world">
+        
+        <!-- HUD / Navigation -->
+        <nav class="sticky top-0 z-50 bg-black border-b-4 border-white p-4 flex justify-between items-center text-xl md:text-2xl shadow-lg">
+            <div class="flex items-center gap-4">
+                <span class="text-yellow-400"><i class="fas fa-coins"></i> x <span id="coin-count">00</span></span>
+                <span class="text-white">SCORE: <span id="score">000000</span></span>
+            </div>
+            <div class="hidden md:flex gap-8">
+                <a href="#story-mode" class="hover:text-yellow-400 hover:underline decoration-4">STORY</a>
+                <a href="#quests" class="hover:text-yellow-400 hover:underline decoration-4">TIMELINE</a>
+                <a href="#world-map" class="hover:text-yellow-400 hover:underline decoration-4">MAP</a>
+                <a href="#save" class="text-red-500 blink">SAVE GAME (RSVP)</a>
+            </div>
+            <div class="md:hidden text-3xl">
+                <i class="fas fa-bars"></i>
+            </div>
+        </nav>
+
+        <!-- Hero: Player Select -->
+        <header class="min-h-screen flex flex-col justify-center items-center py-20 px-4">
+            <h2 class="font-8bit text-2xl md:text-4xl text-center text-white mb-12">CHOOSE YOUR PLAYERS</h2>
+            
+            <div class="flex flex-col md:flex-row gap-12 items-center">
+                <!-- P1 -->
+                <div class="relative group cursor-pointer player-card" data-player="p1">
+                    <div class="absolute -top-12 left-1/2 -translate-x-1/2 text-red-500 font-8bit text-xs float">▼ P1</div>
+                    <div class="nes-container is-dark w-64 transition-all duration-200">
+                        <img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" class="w-full h-64 object-cover pixel-img mb-4 border-4 border-white">
+                        <div class="text-center">
+                            <h3 class="font-8bit text-yellow-400 mb-2">JON</h3>
+                            <p class="text-gray-400">LVL 28 PALADIN</p>
+                            <div class="mt-2">
+                                <div class="flex justify-between text-xs mb-1"><span>HP</span> <span>100/100</span></div>
+                                <div class="hp-bar-bg"><div class="hp-bar-fill"></div></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VS -->
+                <div class="font-8bit text-4xl text-red-500 animate-pulse">VS</div>
+                <div class="font-8bit text-xl text-green-400 absolute mt-12 bg-black px-2 transform rotate-12 border-2 border-white">CO-OP MODE</div>
+
+                <!-- P2 -->
+                <div class="relative group cursor-pointer player-card" data-player="p2">
+                    <div class="absolute -top-12 left-1/2 -translate-x-1/2 text-blue-500 font-8bit text-xs float" style="animation-delay: 0.5s;">▼ P2</div>
+                    <div class="nes-container is-dark w-64 transition-all duration-200">
+                        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" class="w-full h-64 object-cover pixel-img mb-4 border-4 border-white">
+                        <div class="text-center">
+                            <h3 class="font-8bit text-yellow-400 mb-2">SARA</h3>
+                            <p class="text-gray-400">LVL 27 MAGE</p>
+                            <div class="mt-2">
+                                <div class="flex justify-between text-xs mb-1"><span>HP</span> <span>100/100</span></div>
+                                <div class="hp-bar-bg"><div class="hp-bar-fill" style="width: 100%; background: #0088ff;"></div></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Story Mode (Visual Novel) -->
+        <section id="story-mode" class="py-20 px-4 bg-gray-900 border-t-4 border-b-4 border-white">
+            <div class="max-w-4xl mx-auto text-center">
+                <h2 class="font-8bit text-3xl text-purple-400 mb-12">THE PROPHECY</h2>
+                
+                <div class="flex flex-col md:flex-row gap-8 items-end">
+                    <div class="nes-container is-dark w-full md:w-1/3 p-2">
+                        <img id="speaker-img" src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" class="w-full h-48 object-cover pixel-img border-2 border-white">
+                        <p id="speaker-name" class="font-8bit text-yellow-400 mt-2 text-sm">JON</p>
+                    </div>
+                    
+                    <div class="w-full md:w-2/3 cursor-pointer" id="dialogue-click">
+                        <div class="dialogue-box text-left h-48 relative">
+                            <p id="dialogue-text"></p>
+                            <div class="dialogue-arrow">▼</div>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-2 text-right">CLICK TO ADVANCE ></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Quest Log (Timeline) -->
+        <section id="quests" class="py-20 px-4">
+            <div class="max-w-4xl mx-auto relative">
+                <h2 class="font-8bit text-3xl text-green-400 mb-12 text-center decoration-wavy underline">QUEST LOG (TIMELINE)</h2>
+                
+                <div class="timeline-connector left-8 md:left-[3.25rem]"></div>
+
+                <div class="space-y-12 pl-4">
+                    <!-- Quest 1 -->
+                    <div class="bg-black border-4 border-green-500 p-6 flex flex-col md:flex-row gap-6 items-center shadow-[8px_8px_0px_rgba(0,100,0,0.5)] transform hover:scale-105 transition-transform hover-click relative z-10">
+                        <div class="bg-black p-2 border-2 border-white rounded-full z-20">
+                            <div class="text-2xl text-yellow-400 w-8 h-8 flex items-center justify-center font-8bit">1</div>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="font-8bit text-xl text-white mb-2">LEVEL 1: THE CEREMONY</h3>
+                            <p class="text-green-300 text-lg">16:00 HRS</p>
+                            <p class="text-gray-400 text-sm mb-2">The Old Arcade, 123 Pixel Ave.</p>
+                            <div class="flex gap-2">
+                                <button onclick="showLocationDetails('The Old Arcade', '123 Pixel Ave, Game City', 'Free parking in the rear lot.')" class="bg-gray-800 text-xs px-2 py-1 border border-gray-500 hover:bg-gray-700">DATA FILE</button>
+                                <button onclick="window.alert('Warping to Google Maps...')" class="bg-blue-800 text-white text-xs px-2 py-1 border border-blue-500 hover:bg-blue-700">WARP (MAP)</button>
+                            </div>
+                        </div>
+                        <div class="bg-gray-800 p-2 border-2 border-white text-xs">
+                            LOOT:<br>XP +500
+                        </div>
+                    </div>
+
+                    <!-- Quest 2 -->
+                    <div class="bg-black border-4 border-blue-500 p-6 flex flex-col md:flex-row gap-6 items-center shadow-[8px_8px_0px_rgba(0,0,100,0.5)] transform hover:scale-105 transition-transform hover-click relative z-10">
+                        <div class="bg-black p-2 border-2 border-white rounded-full z-20">
+                            <div class="text-2xl text-yellow-400 w-8 h-8 flex items-center justify-center font-8bit">2</div>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="font-8bit text-xl text-white mb-2">LEVEL 2: POTIONS & ELIXIRS</h3>
+                            <p class="text-blue-300 text-lg">17:30 HRS</p>
+                            <p class="text-gray-400 text-sm mb-2">The Bar (Next Door)</p>
+                            <div class="flex gap-2">
+                                <button onclick="showLocationDetails('The Bar', '125 Pixel Ave, Game City', 'Open bar until 9PM.')" class="bg-gray-800 text-xs px-2 py-1 border border-gray-500 hover:bg-gray-700">DATA FILE</button>
+                            </div>
+                        </div>
+                        <div class="bg-gray-800 p-2 border-2 border-white text-xs">
+                            LOOT:<br>HP +100
+                        </div>
+                    </div>
+
+                    <!-- Quest 3 -->
+                    <div class="bg-black border-4 border-pink-500 p-6 flex flex-col md:flex-row gap-6 items-center shadow-[8px_8px_0px_rgba(100,0,50,0.5)] transform hover:scale-105 transition-transform relative z-10">
+                        <div class="bg-black p-2 border-2 border-white rounded-full z-20">
+                            <div class="text-2xl text-red-600 w-8 h-8 flex items-center justify-center font-8bit">!</div>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="font-8bit text-xl text-white mb-2">BOSS BATTLE: RECEPTION</h3>
+                            <p class="text-pink-300 text-lg">19:00 HRS</p>
+                            <p class="text-gray-400 text-sm mb-4">Main Hall</p>
+                            
+                            <!-- Mini Game UI -->
+                            <div class="bg-gray-900 border-2 border-red-600 p-4 mb-2" id="boss-arena">
+                                <div class="flex justify-between text-white font-8bit text-[10px] mb-1">
+                                    <span>BOSS HP</span>
+                                    <span id="boss-hp-text">500/500</span>
+                                </div>
+                                <div class="w-full h-4 bg-black border-2 border-white mb-2">
+                                    <div id="boss-hp-bar" class="h-full bg-red-600 w-full transition-all duration-100"></div>
+                                </div>
+                                <button id="attack-btn" class="w-full font-8bit bg-red-600 text-white text-sm py-2 border-b-4 border-red-800 active:border-0 active:translate-y-1 transition-all">
+                                    ATTACK (DANCE)
+                                </button>
+                                <div id="loot-box" class="hidden mt-2 text-center text-yellow-400 font-8bit text-xs animate-pulse">
+                                    BOSS DEFEATED! UNLOCKED: CAKE
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- World Map (Fast Travel) -->
+        <section id="world-map" class="py-20 px-4 bg-gray-900 border-t-4 border-b-4 border-white">
+            <div class="max-w-4xl mx-auto">
+                <h2 class="font-8bit text-3xl text-green-400 mb-12 text-center decoration-wavy underline">WORLD MAP</h2>
+                
+                <div class="overworld-map rounded-lg shadow-2xl">
+                    <!-- Venue Node -->
+                    <div class="map-node" style="top: 30%; left: 20%; background-image: url('https://img.icons8.com/color/48/church.png');" onclick="showLocationDetails('The Old Arcade', '123 Pixel Ave', 'Parking in rear')">
+                        <div class="map-tooltip">
+                            <strong class="text-yellow-400">CEREMONY</strong><br>
+                            CLICK FOR INTEL
+                        </div>
+                    </div>
+
+                    <!-- Reception Node -->
+                    <div class="map-node" style="top: 60%; left: 70%; background-image: url('https://img.icons8.com/color/48/bar.png'); animation-delay: 1s;" onclick="showLocationDetails('The Bar', '125 Pixel Ave', 'Open Bar')">
+                        <div class="map-tooltip">
+                            <strong class="text-yellow-400">RECEPTION</strong><br>
+                            CLICK FOR INTEL
+                        </div>
+                    </div>
+
+                    <!-- Hotel Node -->
+                    <div class="map-node" style="top: 20%; left: 80%; background-image: url('https://img.icons8.com/color/48/hotel-star.png'); animation-delay: 2s;" onclick="showLocationDetails('Grand Hotel', '404 Sleep St', 'Shuttle at 3PM')">
+                        <div class="map-tooltip">
+                            <strong class="text-yellow-400">SAVE POINT</strong><br>
+                            CLICK FOR INTEL
+                        </div>
+                    </div>
+
+                    <!-- Path Lines (CSS Art) -->
+                    <svg class="absolute inset-0 pointer-events-none opacity-50" width="100%" height="100%">
+                        <path d="M 220 140 Q 400 200 650 260" stroke="white" stroke-width="4" fill="none" stroke-dasharray="10,10" />
+                    </svg>
+                </div>
+            </div>
+        </section>
+
+        <!-- Gallery (Unlockables) -->
+        <section id="gallery" class="py-20 px-4">
+            <h2 class="font-8bit text-3xl text-center text-purple-400 mb-12 decoration-wavy underline">UNLOCKABLES (GALLERY)</h2>
+            
+            <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Image 1 -->
+                <div class="nes-container is-dark p-2 hover:rotate-2 transition-transform cursor-pointer" onclick="openGallery(this.querySelector('img').src, 'STAGE 1: THE DATE')">
+                    <img src="https://images.unsplash.com/photo-1519741497674-611481863552?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" class="w-full h-64 object-cover pixel-img pointer-events-none">
+                    <p class="text-center mt-2 text-yellow-400 font-8bit text-xs">STAGE 1: THE DATE</p>
+                </div>
+                <!-- Image 2 -->
+                <div class="nes-container is-dark p-2 hover:-rotate-2 transition-transform cursor-pointer" onclick="openGallery(this.querySelector('img').src, 'STAGE 2: THE PROPOSAL')">
+                    <img src="https://www.tirvingphoto.com/wp-content/uploads/2022/04/tirvingphoto_new-haven-proposal-photo_001-1200x1200-cropped.jpg" class="w-full h-64 object-cover pixel-img pointer-events-none">
+                    <p class="text-center mt-2 text-yellow-400 font-8bit text-xs">STAGE 2: THE PROPOSAL</p>
+                </div>
+                <!-- Image 3 -->
+                <div class="nes-container is-dark p-2 hover:rotate-2 transition-transform cursor-pointer" onclick="openGallery(this.querySelector('img').src, 'STAGE 3: LOADING...')">
+                    <img src="https://images.unsplash.com/photo-1470225620780-dba8ba36b745?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" class="w-full h-64 object-cover pixel-img pointer-events-none">
+                    <p class="text-center mt-2 text-yellow-400 font-8bit text-xs">STAGE 3: LOADING...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Save Game (RSVP) -->
+        <section id="save" class="py-20 px-4 flex justify-center">
+            <div class="bg-blue-800 border-8 border-gray-400 p-8 md:p-12 max-w-2xl w-full shadow-[20px_20px_0px_#000] relative">
+                <!-- Memory Card Graphic -->
+                <div class="absolute -top-12 left-1/2 -translate-x-1/2 bg-gray-400 w-48 h-12 rounded-t-lg border-x-4 border-t-4 border-black"></div>
+                
+                <h2 class="font-8bit text-center text-white text-2xl mb-8 blink">SAVE YOUR PROGRESS?</h2>
+                <p class="text-center text-blue-200 mb-8 font-mono text-xl">WARNING: Unsaved progress (RSVP) may result in data loss (No Seat).</p>
+
+                <form id="rsvp-form" class="space-y-6">
+                    <input type="hidden" name="_captcha" value="false">
+                    <input type="hidden" name="_subject" value="Arcade Wedding RSVP">
+
+                    <div class="flex flex-col gap-2">
+                        <label class="font-8bit text-xs text-yellow-400">PLAYER NAME</label>
+                        <input type="text" name="name" required class="bg-black border-4 border-white text-white p-4 font-mono text-xl focus:outline-none focus:border-green-400" placeholder="ENTER NAME...">
+                    </div>
+
+                    <div class="flex flex-col gap-2">
+                        <label class="font-8bit text-xs text-yellow-400">CONTACT FREQUENCY (EMAIL)</label>
+                        <input type="email" name="email" required class="bg-black border-4 border-white text-white p-4 font-mono text-xl focus:outline-none focus:border-green-400" placeholder="ENTER EMAIL...">
+                    </div>
+
+                    <div class="flex flex-col gap-2">
+                        <label class="font-8bit text-xs text-yellow-400">SELECT ACTION</label>
+                        <div class="flex gap-4">
+                            <label class="flex-1 cursor-pointer hover-click">
+                                <input type="radio" name="attendance" value="Yes" class="peer sr-only" checked>
+                                <div class="bg-gray-700 border-4 border-gray-500 p-4 text-center text-white font-8bit text-xs hover:bg-green-600 peer-checked:bg-green-500 peer-checked:border-white">
+                                    YES<br>(CONTINUE)
+                                </div>
+                            </label>
+                            <label class="flex-1 cursor-pointer hover-click">
+                                <input type="radio" name="attendance" value="No" class="peer sr-only">
+                                <div class="bg-gray-700 border-4 border-gray-500 p-4 text-center text-white font-8bit text-xs hover:bg-red-600 peer-checked:bg-red-500 peer-checked:border-white">
+                                    NO<br>(QUIT)
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="w-full bg-yellow-400 text-black font-8bit text-xl py-6 mt-6 border-b-8 border-r-8 border-yellow-600 active:border-0 active:translate-y-2 active:translate-x-2 transition-all hover:brightness-110">
+                        SAVE GAME
+                    </button>
+                </form>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- Modals -->
+    <!-- 1. Game Saved -->
+    <div id="modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/90 hidden">
+        <div class="bg-green-600 border-4 border-white p-8 text-center max-w-sm w-full animate-bounce">
+            <h3 class="font-8bit text-2xl text-white mb-4">GAME SAVED!</h3>
+            <p class="font-mono text-xl text-black mb-6">See you at the final boss level.</p>
+            <button id="close-modal" class="font-8bit bg-black text-white px-6 py-3 border-2 border-white hover:bg-white hover:text-black">OK</button>
+        </div>
+    </div>
+
+    <!-- 2. Location Detail Modal -->
+    <div id="location-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/90 hidden" onclick="closeLocationModal()">
+        <div class="bg-gray-800 border-4 border-white p-8 max-w-md w-full relative shadow-[10px_10px_0px_#000]" onclick="event.stopPropagation()">
+            <div class="absolute -top-6 left-1/2 -translate-x-1/2 bg-yellow-400 text-black font-8bit px-4 py-2 border-2 border-white">DATA FILE</div>
+            <h3 class="font-8bit text-xl text-green-400 mb-4" id="loc-title">LOCATION NAME</h3>
+            <p class="font-mono text-xl text-white mb-2" id="loc-address">123 Address St.</p>
+            <p class="font-mono text-lg text-gray-400 mb-6" id="loc-desc">Description here.</p>
+            <div class="flex gap-4">
+                <button onclick="window.alert('Warping to Map...')" class="flex-1 font-8bit bg-blue-600 text-white py-3 border-2 border-white hover:bg-blue-500">GET DIRECTIONS</button>
+                <button onclick="closeLocationModal()" class="flex-1 font-8bit bg-red-600 text-white py-3 border-2 border-white hover:bg-red-500">CLOSE</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. Gallery Modal -->
+    <div id="gallery-modal" class="fixed inset-0 z-[10002] bg-black/95 hidden flex items-center justify-center p-4 cursor-pointer" onclick="closeGallery()">
+        <div class="relative max-w-4xl w-full border-4 border-white p-2 bg-gray-900 shadow-[10px_10px_0px_rgba(255,255,255,0.2)]" onclick="event.stopPropagation()">
+            <div class="absolute top-0 left-0 bg-white text-black px-4 py-1 font-8bit text-xs transform -translate-y-full border-t-4 border-l-4 border-r-4 border-white" id="gallery-caption">VIEWING_ASSET.PNG</div>
+            <img id="gallery-img" src="" class="w-full h-auto max-h-[80vh] object-contain pixel-img border-2 border-white">
+            <div class="absolute bottom-4 right-4 text-white font-8bit text-xs blink bg-black px-2">CLICK OUTSIDE TO CLOSE</div>
+            <button onclick="closeGallery()" class="absolute -top-12 right-0 text-white font-8bit text-2xl hover:text-red-500">X</button>
+        </div>
+    </div>
+
+    <!-- Cheat Code Overlay -->
+    <div id="cheat-overlay" class="fixed inset-0 z-[10000] pointer-events-none hidden bg-transparent overflow-hidden"></div>
+
+    <script>
+        /**
+         * 1. AUDIO ENGINE
+         */
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        const audioCtx = new AudioContext();
+        let isMuted = true;
+
+        const sfx = {
+            coin: () => {
+                if(isMuted) return;
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(1200, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(2000, audioCtx.currentTime + 0.1);
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.1);
+            },
+            jump: () => {
+                if(isMuted) return;
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(300, audioCtx.currentTime);
+                osc.frequency.linearRampToValueAtTime(600, audioCtx.currentTime + 0.1);
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.1);
+            },
+            hit: () => {
+                if(isMuted) return;
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(50, audioCtx.currentTime + 0.1);
+                gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.1);
+            },
+            win: () => {
+                if(isMuted) return;
+                [523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'square';
+                    osc.frequency.value = freq;
+                    gain.gain.setValueAtTime(0.1, audioCtx.currentTime + i*0.1);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + i*0.1 + 0.3);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(audioCtx.currentTime + i*0.1);
+                    osc.stop(audioCtx.currentTime + i*0.1 + 0.3);
+                });
+            }
+        };
+
+        const audioBtn = document.getElementById('audio-toggle');
+        audioBtn.addEventListener('click', () => {
+            isMuted = !isMuted;
+            if(!isMuted && audioCtx.state === 'suspended') audioCtx.resume();
+            audioBtn.innerHTML = isMuted ? '<i class="fas fa-volume-mute"></i> SOUND: OFF' : '<i class="fas fa-volume-up"></i> SOUND: ON';
+            if(!isMuted) sfx.coin();
+        });
+
+        // 2. Local Storage & Init
+        let score = 0;
+        let unlockedAchievements = JSON.parse(localStorage.getItem('achievements') || '[]');
+        
+        window.addEventListener('load', () => {
+            const savedScore = localStorage.getItem('arcadeScore');
+            const hasRSVP = localStorage.getItem('hasRSVP');
+            
+            if(savedScore) {
+                score = parseInt(savedScore);
+                updateScoreDisplay();
+                document.getElementById('start-text').innerText = "WELCOME BACK PLAYER 1";
+            }
+            if(hasRSVP) {
+                document.querySelector('a[href="#save"]').innerText = "GAME SAVED (RSVP)";
+            }
+        });
+
+        // 3. Achievement System
+        const achievementsList = {
+            'START_GAME': { title: 'Insert Coin', desc: 'Started the adventure.' },
+            'STORY_COMPLETE': { title: 'Loremaster', desc: 'Read the full backstory.' },
+            'BOSS_DEFEATED': { title: 'Party Animal', desc: 'Defeated the Dance Floor.' },
+            'RSVP_SENT': { title: 'Save Point', desc: 'Confirmed your attendance.' },
+            'KONAMI': { title: 'Cheater!', desc: 'Unlocked God Mode.' }
+        };
+
+        function unlockAchievement(id) {
+            if (unlockedAchievements.includes(id)) return;
+            
+            unlockedAchievements.push(id);
+            localStorage.setItem('achievements', JSON.stringify(unlockedAchievements));
+            sfx.win();
+            
+            const container = document.getElementById('achievement-container');
+            const toast = document.createElement('div');
+            toast.className = 'achievement-toast';
+            toast.innerHTML = `
+                <div class="text-4xl">🏆</div>
+                <div>
+                    <div class="font-8bit text-yellow-400 text-xs">ACHIEVEMENT UNLOCKED</div>
+                    <div class="font-bold">${achievementsList[id].title}</div>
+                    <div class="text-xs text-gray-400">${achievementsList[id].desc}</div>
+                </div>
+            `;
+            container.appendChild(toast);
+            
+            setTimeout(() => toast.remove(), 5000);
+        }
+
+        function addScore(points) {
+            score += points;
+            localStorage.setItem('arcadeScore', score);
+            updateScoreDisplay();
+        }
+
+        function updateScoreDisplay() {
+            const scoreEls = document.querySelectorAll('#score');
+            scoreEls.forEach(el => el.innerText = score.toString().padStart(6, '0'));
+            
+            const coinEl = document.getElementById('coin-count');
+            let coins = Math.floor(score / 100);
+            coinEl.innerText = coins.toString().padStart(2, '0');
+        }
+
+        // 4. Start Screen
+        const startBtn = document.getElementById('start-btn');
+        const startScreen = document.getElementById('start-screen');
+        
+        startBtn.addEventListener('click', () => {
+            isMuted = false;
+            audioCtx.resume();
+            audioBtn.innerHTML = '<i class="fas fa-volume-up"></i> SOUND: ON';
+            sfx.win();
+            unlockAchievement('START_GAME');
+            
+            startBtn.style.backgroundColor = '#00ff00';
+            startBtn.innerText = "LOADING...";
+            
+            setTimeout(() => {
+                startScreen.classList.add('hidden');
+                spawnCollectibles();
+            }, 1000);
+        });
+
+        // 5. Visual Novel Story
+        // --- ADD MORE LINES TO THE STORY HERE ---
+        const storyScript = [
+            { speaker: "JON", text: "It all started in level 1-1... a crowded bar in downtown.", img: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" },
+            { speaker: "SARA", text: "You  spilled your potion (beer) on my boots!", img: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" },
+            { speaker: "JON", text: "A critical hit to my charisma stat. But I recovered.", img: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" },
+            { speaker: "SYSTEM", text: "QUEST COMPLETE: THE ORIGIN. XP +1000", img: "https://img.icons8.com/color/96/pixel-heart.png" }
+        ];
+        let storyIndex = 0;
+        const dialogueBox = document.getElementById('dialogue-click');
+        const dText = document.getElementById('dialogue-text');
+        const sName = document.getElementById('speaker-name');
+        const sImg = document.getElementById('speaker-img');
+
+        // Init text
+        dText.innerText = storyScript[0].text;
+
+        dialogueBox.addEventListener('click', () => {
+            storyIndex++;
+            sfx.coin(); // Blip sound
+            if(storyIndex < storyScript.length) {
+                const line = storyScript[storyIndex];
+                sName.innerText = line.speaker;
+                dText.innerText = "";
+                sImg.src = line.img;
+                
+                // Typewriter effect
+                let i = 0;
+                const type = setInterval(() => {
+                    dText.innerText += line.text.charAt(i);
+                    i++;
+                    if(i >= line.text.length) clearInterval(type);
+                }, 30);
+            } else {
+                dText.innerText = "END OF LOG.";
+                unlockAchievement('STORY_COMPLETE');
+                storyIndex = -1; // Loop or stop
+            }
+        });
+
+        // 6. Boss Battle
+        let bossHP = 500;
+        const bossMaxHP = 500;
+        const attackBtn = document.getElementById('attack-btn');
+        const hpBar = document.getElementById('boss-hp-bar');
+        const hpText = document.getElementById('boss-hp-text');
+        const lootBox = document.getElementById('loot-box');
+        const bossArena = document.getElementById('boss-arena');
+
+        attackBtn.addEventListener('click', (e) => {
+            if(bossHP <= 0) return;
+            
+            sfx.hit();
+            bossHP -= 50;
+            if(bossHP < 0) bossHP = 0;
+            
+            const pct = (bossHP / bossMaxHP) * 100;
+            hpBar.style.width = pct + '%';
+            hpText.innerText = bossHP + '/' + bossMaxHP;
+            
+            bossArena.classList.add('shake');
+            setTimeout(() => bossArena.classList.remove('shake'), 500);
+
+            // Dmg text
+            const txt = document.createElement('div');
+            txt.innerText = "-50";
+            txt.className = "damage-text";
+            txt.style.left = (e.clientX - 20) + 'px';
+            txt.style.top = (e.clientY - 40) + 'px';
+            document.body.appendChild(txt);
+            setTimeout(() => txt.remove(), 1000);
+
+            if(bossHP === 0) {
+                sfx.win();
+                attackBtn.style.display = 'none';
+                lootBox.classList.remove('hidden');
+                unlockAchievement('BOSS_DEFEATED');
+                addScore(5000);
+            }
+        });
+
+        // 7. Map & Location Details
+        function showLocationDetails(title, address, desc) {
+            const modal = document.getElementById('location-modal');
+            document.getElementById('loc-title').innerText = title;
+            document.getElementById('loc-address').innerText = address;
+            document.getElementById('loc-desc').innerText = desc;
+            modal.classList.remove('hidden');
+            sfx.coin();
+        }
+
+        function closeLocationModal() {
+            document.getElementById('location-modal').classList.add('hidden');
+        }
+
+        // 8. Gallery
+        function openGallery(src, caption) {
+            const modal = document.getElementById('gallery-modal');
+            const img = document.getElementById('gallery-img');
+            const cap = document.getElementById('gallery-caption');
+            
+            img.src = src;
+            cap.innerText = caption || "VIEWING_ASSET.PNG";
+            modal.classList.remove('hidden');
+            sfx.coin();
+        }
+
+        function closeGallery() {
+            document.getElementById('gallery-modal').classList.add('hidden');
+        }
+
+        // 9. Collectibles
+        function spawnCollectibles() {
+            const symbols = ['❤', '💎', '🪙'];
+            const colors = ['#ff0000', '#00ffff', '#ffff00'];
+            
+            setInterval(() => {
+                if(document.hidden) return;
+                const item = document.createElement('div');
+                const typeIdx = Math.floor(Math.random() * 3);
+                item.innerText = symbols[typeIdx];
+                item.className = 'collectible';
+                item.style.color = colors[typeIdx];
+                item.style.left = Math.random() * 90 + 'vw';
+                item.style.top = (window.scrollY + window.innerHeight) + 'px';
+                
+                item.addEventListener('mouseenter', () => {
+                    sfx.coin();
+                    addScore(50);
+                    item.style.transform = 'scale(2)';
+                    item.style.opacity = '0';
+                    setTimeout(() => item.remove(), 200);
+                });
+
+                document.body.appendChild(item);
+                setTimeout(() => { if(item.parentNode) item.remove(); }, 10000);
+            }, 3000);
+        }
+
+        // 10. RSVP
+        const form = document.getElementById('rsvp-form');
+        const modal = document.getElementById('modal');
+        const closeModal = document.getElementById('close-modal');
+        const btn = form.querySelector('button');
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            btn.innerText = "SAVING...";
+            
+            const formData = new FormData(form);
+
+            fetch("https://formsubmit.co/ajax/shadowshah70@gmail.com", {
+                method: "POST",
+                body: formData,
+                headers: { 'Accept': 'application/json' }
+            })
+            .then(res => res.json())
+            .then(() => {
+                modal.classList.remove('hidden');
+                sfx.win();
+                addScore(5000);
+                localStorage.setItem('hasRSVP', 'true');
+                unlockAchievement('RSVP_SENT');
+                form.reset();
+            })
+            .catch(() => alert('SAVE FAILED.'))
+            .finally(() => btn.innerText = "SAVE GAME");
+        });
+
+        closeModal.addEventListener('click', () => modal.classList.add('hidden'));
+
+        // 11. Konami
+        const cheatCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+        let inputPos = 0;
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === cheatCode[inputPos]) {
+                inputPos++;
+                if (inputPos === cheatCode.length) {
+                    sfx.win();
+                    alert("CHEAT CODE ACTIVATED: GOD MODE!");
+                    document.body.style.filter = "hue-rotate(90deg) contrast(1.5)";
+                    addScore(999999);
+                    unlockAchievement('KONAMI');
+                    inputPos = 0;
+                }
+            } else {
+                inputPos = 0;
+            }
+        });
+
+        
+// 💒 1. Disable right-click
+document.addEventListener('contextmenu', e => e.preventDefault());
+
+// 💒 2. Disable inspect / save / print shortcuts
+document.addEventListener('keydown', e => {
+  if (
+    (e.ctrlKey && ['s','u','p','S','U','P'].includes(e.key)) || // Ctrl+S, Ctrl+U, Ctrl+P
+    e.key === 'F12' ||                                          // DevTools
+    (e.ctrlKey && e.shiftKey && ['I','J','C'].includes(e.key))  // Ctrl+Shift+I/J/C
+  ) {
+    e.preventDefault();
+    sparkle(e.clientX, e.clientY);
+  }
+});
+
+// 💒 3. Block drag saving of images
+document.addEventListener('dragstart', e => e.preventDefault());
+document.querySelectorAll('img').forEach(img => img.setAttribute('draggable', 'false'));
+
+// 💒 4. Disable text selection & copying
+document.addEventListener('copy', e => e.preventDefault());
+document.addEventListener('cut', e => e.preventDefault());
+document.addEventListener('selectstart', e => e.preventDefault());
+document.body.style.userSelect = 'none';
+document.body.style.webkitUserSelect = 'none';
+
+// 💒 5. Detect if DevTools is open
+setInterval(() => {
+  if (
+    window.outerWidth - window.innerWidth > 160 ||
+    window.outerHeight - window.innerHeight > 160
+  ) {
+    document.body.innerHTML = `
+      <div style="text-align:center;margin-top:20%;font-size:2rem;color:#d6336c;">
+        💖 Please close developer tools to continue 💖
+      </div>`;
+  }
+}, 1000);
+
+
+    </script>
+</body>
+</html><script>console.log('Hello JS');</script></body></html>

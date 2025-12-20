@@ -1,0 +1,991 @@
+<html><head><style>body { font-family: monospace; background:#141414; color:#fff; }</style></head><body><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>THE SKETCHBOOK: L & M</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts (Handwritten Styles) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Gloria+Hallelujah&family=Nanum+Pen+Script&family=Shadows+Into+Light&family=Reenie+Beanie&family=Patrick+Hand&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --paper: #fdfbf7;
+            --pencil: #333333;
+            --pencil-light: #666666;
+            --watercolor-pink: rgba(255, 183, 178, 0.4);
+            --watercolor-blue: rgba(162, 228, 255, 0.4);
+            --watercolor-green: rgba(186, 255, 201, 0.4);
+            --tape-color: rgba(255, 255, 255, 0.6);
+            --ballpoint-blue: #002395;
+        }
+
+        body {
+            background-color: var(--paper);
+            color: var(--pencil);
+            font-family: 'Nanum Pen Script', cursive;
+            font-size: 1.5rem;
+            overflow-x: hidden;
+            cursor: none; /* Custom pencil cursor */
+            /* Paper Texture */
+            background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.05'/%3E%3C/svg%3E");
+        }
+
+        h1, h2, h3 { font-family: 'Gloria Hallelujah', cursive; }
+        .font-doodle { font-family: 'Shadows Into Light', cursive; }
+        .font-marker { font-family: 'Reenie Beanie', cursive; }
+        .font-neat { font-family: 'Patrick Hand', cursive; }
+
+        /* --- Loading Animation (The Sketch) --- */
+        #loader {
+            position: fixed;
+            inset: 0;
+            background: var(--paper);
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 1s ease-out;
+        }
+        
+        .sketch-path {
+            stroke: var(--pencil);
+            stroke-width: 2;
+            fill: none;
+            stroke-dasharray: 1000;
+            stroke-dashoffset: 1000;
+            animation: drawLine 3s ease-in-out forwards;
+        }
+        
+        @keyframes drawLine {
+            to { stroke-dashoffset: 0; }
+        }
+
+        /* --- Background Persistent Sketching Animation --- */
+        #bg-sketch-layer {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 0; /* Behind content but above body bg */
+            opacity: 0.15;
+        }
+        .bg-draw-path {
+            fill: none;
+            stroke: #000;
+            stroke-width: 0.5;
+            stroke-linecap: round;
+            stroke-dasharray: 2000;
+            stroke-dashoffset: 2000;
+            animation: slowBackgroundDraw 40s linear infinite alternate;
+        }
+        @keyframes slowBackgroundDraw {
+            0% { stroke-dashoffset: 2000; }
+            100% { stroke-dashoffset: 0; }
+        }
+
+        /* --- Custom Pencil Cursor --- */
+        #cursor-pencil {
+            position: fixed;
+            top: 0; left: 0;
+            width: 32px; height: 32px;
+            background: url('https://img.icons8.com/color/48/pencil--v1.png') no-repeat center;
+            background-size: contain;
+            pointer-events: none;
+            z-index: 10001;
+            transform: translate(0, -32px); /* Tip at cursor point */
+        }
+
+        /* --- Drawing Canvas (Updated to Absolute) --- */
+        #pencil-canvas {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; 
+            /* Height set by JS */
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        /* --- Doodle Borders & Shapes --- */
+        .doodle-box {
+            position: relative;
+            padding: 2rem;
+        }
+        .doodle-border {
+            position: absolute;
+            inset: 0;
+            width: 100%; height: 100%;
+            fill: none;
+            stroke: var(--pencil);
+            stroke-width: 2;
+            stroke-dasharray: 1800;
+            stroke-dashoffset: 1800;
+            transition: stroke-dashoffset 2s ease-out;
+            pointer-events: none;
+        }
+        .doodle-box:hover .doodle-border,
+        .doodle-box.visible .doodle-border {
+            stroke-dashoffset: 0;
+        }
+
+        /* --- Watercolor Splash Backgrounds --- */
+        .watercolor-blob {
+            position: absolute;
+            z-index: -1;
+            filter: blur(30px) opacity(0.6);
+            border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+            animation: morph 8s ease-in-out infinite alternate;
+        }
+        @keyframes morph {
+            0% { border-radius: 40% 60% 60% 40% / 60% 30% 70% 40%; }
+            100% { border-radius: 40% 60%; }
+        }
+
+        /* --- Scrapbook Photo --- */
+        .scrapbook-photo {
+            background: white;
+            padding: 10px;
+            box-shadow: 2px 2px 10px rgba(0,0,0,0.1);
+            transform: rotate(-2deg);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+        }
+        .scrapbook-photo:hover {
+            transform: rotate(0deg) scale(1.05);
+            z-index: 10;
+        }
+        .tape {
+            position: absolute;
+            width: 100px;
+            height: 25px;
+            background: rgba(255, 255, 255, 0.5);
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%) rotate(-2deg);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            backdrop-filter: blur(2px);
+        }
+        .tape-corner-tl { top: -5px; left: -25px; transform: rotate(-45deg); width: 80px; }
+        .tape-corner-br { bottom: -5px; right: -25px; top: auto; transform: rotate(-45deg); width: 80px; }
+
+        /* --- Wobbly Hand-Drawn Animation --- */
+        .wobbly {
+            animation: wobble 4s ease-in-out infinite;
+        }
+        @keyframes wobble {
+            0%, 100% { transform: rotate(-1deg); }
+            50% { transform: rotate(1deg); }
+        }
+
+        /* --- Countdown Circles --- */
+        .count-circle {
+            width: 100px;
+            height: 100px;
+            border-radius: 50% 45% 55% 40% / 50% 55% 45% 50%;
+            border: 3px solid var(--pencil);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            animation: wobble 6s ease-in-out infinite alternate;
+            background: white;
+            box-shadow: 4px 4px 0px rgba(0,0,0,0.1);
+        }
+        .count-circle:nth-child(even) {
+            animation-direction: alternate-reverse;
+            border-radius: 45% 55% 40% 60% / 55% 40% 60% 45%;
+        }
+
+        /* --- Napkin Map --- */
+        .napkin {
+            background: white;
+            padding: 2rem;
+            box-shadow: 5px 5px 15px rgba(0,0,0,0.1);
+            transform: rotate(2deg);
+            background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23f0f0f0' fill-opacity='1' fill-rule='evenodd'%3E%3Cpath d='M0 40L40 0H20L0 20M40 40V20L20 40'/%3E%3C/g%3E%3C/svg%3E");
+            position: relative;
+        }
+        .napkin::after {
+            content: '';
+            position: absolute;
+            top: -15px;
+            right: -15px;
+            width: 120px;
+            height: 30px;
+            background: rgba(255,255,255,0.4);
+            transform: rotate(45deg);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .ballpoint-text {
+            color: var(--ballpoint-blue);
+            font-family: 'Reenie Beanie', cursive;
+            font-size: 1.8rem;
+            line-height: 1.2;
+        }
+
+        /* --- Sticky Notes --- */
+        .sticky-note {
+            width: 200px;
+            height: 200px;
+            background: #fffdc9;
+            box-shadow: 2px 4px 6px rgba(0,0,0,0.1);
+            padding: 20px;
+            font-family: 'Reenie Beanie', cursive;
+            font-size: 1.5rem;
+            transform: rotate(-5deg);
+            transition: transform 0.3s;
+        }
+        .sticky-note:hover {
+            transform: scale(1.1) rotate(0deg);
+            z-index: 20;
+        }
+        .sticky-pink { background: #ffc9e7; }
+        .sticky-blue { background: #c9faff; }
+
+        /* --- Postcard RSVP --- */
+        .postcard-container {
+            perspective: 1000px;
+            width: 100%;
+            max-width: 600px;
+            height: 500px;
+            margin: 0 auto;
+        }
+        .postcard {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: left;
+            transition: transform 0.8s;
+            transform-style: preserve-3d;
+            background: #fff;
+            box-shadow: 5px 5px 15px rgba(0,0,0,0.1);
+        }
+        .postcard.flipped {
+            transform: rotateY(180deg);
+        }
+        .postcard-front, .postcard-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            padding: 2rem;
+            background-image: repeating-linear-gradient(0deg, transparent, transparent 29px, #eee 30px);
+            background-size: 100% 30px;
+        }
+        .postcard-back {
+            transform: rotateY(180deg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            background: #fff; /* Plain white for back */
+            background-image: url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1h2v2H1V1zm4 0h2v2H5V1zm4 0h2v2H9V1z' fill='%23f0f0f0' fill-opacity='0.4'/%3E%3C/svg%3E");
+        }
+
+        .stamp-box {
+            position: absolute;
+            top: 20px; right: 20px;
+            width: 60px; height: 70px;
+            border: 2px dashed #ccc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: #ccc;
+            transform: rotate(2deg);
+        }
+
+        /* --- Nav Menu --- */
+        .notebook-spine {
+            position: fixed;
+            left: 0; top: 0; bottom: 0;
+            width: 40px;
+            background: 
+                radial-gradient(circle at 0% 50%, #333 10%, transparent 11%),
+                radial-gradient(circle at 0% 50%, #333 10%, transparent 11%);
+            background-size: 40px 60px;
+            background-position: 10px 0, 10px 30px;
+            border-right: 2px solid #ccc;
+            z-index: 50;
+            display: none; /* Mobile hidden */
+        }
+        @media(min-width: 768px) { .notebook-spine { display: block; } }
+
+        .nav-sticky {
+            position: fixed;
+            top: 2rem;
+            left: 3rem;
+            z-index: 50;
+            background: #fff;
+            padding: 1rem;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+            transform: rotate(-2deg);
+        }
+        .tape-nav {
+            position: absolute;
+            top: -10px; left: 50%; width: 60px; height: 20px;
+            background: rgba(255,200,200,0.5);
+            transform: translateX(-50%) rotate(2deg);
+        }
+
+        /* --- Hand Drawn Input --- */
+        .sketch-input {
+            background: transparent;
+            border: none;
+            border-bottom: 2px dashed #999;
+            width: 100%;
+            font-family: 'Caveat', cursive;
+            font-size: 1.5rem;
+            color: #333;
+            padding: 5px;
+            margin-bottom: 1rem;
+        }
+        .sketch-input:focus {
+            outline: none;
+            border-bottom: 2px solid #333;
+        }
+
+        /* --- SVG Scribble Animation Classes --- */
+        .scribble-hover {
+            position: relative;
+            display: inline-block;
+        }
+        .scribble-hover svg {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 120%; height: 120%;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .scribble-hover:hover svg {
+            opacity: 1;
+        }
+        .scribble-path {
+            fill: none;
+            stroke: var(--watercolor-pink);
+            stroke-width: 5;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            stroke-dasharray: 100;
+            stroke-dashoffset: 100;
+            transition: stroke-dashoffset 0.5s;
+        }
+        .scribble-hover:hover .scribble-path {
+            stroke-dashoffset: 0;
+        }
+
+        /* --- Event Cards --- */
+        .event-card {
+            background: white;
+            border: 2px solid var(--pencil);
+            border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px;
+            padding: 2rem;
+            position: relative;
+            box-shadow: 4px 4px 0 rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+        .event-card:hover {
+            transform: rotate(-1deg) scale(1.02);
+        }
+        .paper-clip {
+            position: absolute;
+            top: -10px;
+            right: 20px;
+            width: 20px;
+            height: 40px;
+            border: 2px solid #555;
+            border-radius: 10px;
+            z-index: 20;
+        }
+
+        /* --- Paper Plane Animation --- */
+        .paper-plane {
+            position: absolute;
+            width: 60px;
+            pointer-events: none;
+            z-index: 5;
+            animation: flyPlane 15s linear infinite;
+        }
+        @keyframes flyPlane {
+            0% { transform: translate(-100px, 100px) rotate(10deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translate(100vw, -200px) rotate(45deg); opacity: 0; }
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Loading Screen (Drawing the page) -->
+    <div id="loader">
+        <svg width="200" height="200" viewBox="0 0 200 200">
+            <!-- Hand drawn heart -->
+            <path d="M100 180 C 20 100, 0 50, 50 20 C 80 0, 100 40, 100 40 C 100 40, 120 0, 150 20 C 200 50, 180 100, 100 180 Z" class="sketch-path" />
+        </svg>
+        <p class="mt-4 font-doodle text-xl animate-pulse">Sketching the details...</p>
+    </div>
+
+    <!-- Background Drawing Animation -->
+    <svg id="bg-sketch-layer" viewBox="0 0 100 100" preserveAspectRatio="none">
+        <path class="bg-draw-path" d="M0,50 Q25,0 50,50 T100,50" />
+        <path class="bg-draw-path" d="M0,80 Q25,30 50,80 T100,80" style="animation-delay: 2s; animation-duration: 50s;" />
+        <path class="bg-draw-path" d="M0,20 Q25,70 50,20 T100,20" style="animation-delay: 5s; animation-duration: 45s;" />
+    </svg>
+
+    <!-- Pencil Cursor -->
+    <div id="cursor-pencil"></div>
+    <!-- Absolute Canvas for Persistent Drawing -->
+    <canvas id="pencil-canvas"></canvas>
+
+    <!-- Notebook Spine (Left decoration) -->
+    <div class="notebook-spine"></div>
+
+    <!-- Navigation (Sticky Note) -->
+    <nav class="nav-sticky hidden md:block">
+        <div class="tape-nav"></div>
+        <ul class="font-doodle text-xl space-y-2">
+            <li><a href="#hero" class="hover:text-red-400 hover:underline decoration-wavy">Start</a></li>
+            <li><a href="#countdown" class="hover:text-purple-400 hover:underline decoration-wavy">When?</a></li>
+            <li><a href="#story" class="hover:text-blue-400 hover:underline decoration-wavy">Our Story</a></li>
+            <li><a href="#events" class="hover:text-orange-400 hover:underline decoration-wavy">The Plan</a></li>
+            <li><a href="#gallery" class="hover:text-green-400 hover:underline decoration-wavy">Scrapbook</a></li>
+            <li><a href="#wishlist" class="hover:text-indigo-400 hover:underline decoration-wavy">Wishes</a></li>
+            <li><a href="#rsvp" class="hover:text-pink-400 hover:underline decoration-wavy">R.S.V.P.</a></li>
+        </ul>
+    </nav>
+
+    <!-- Mobile Nav -->
+    <nav class="md:hidden fixed top-0 w-full bg-white z-40 p-4 border-b-2 border-dashed border-gray-300 flex justify-between items-center">
+        <span class="font-doodle text-xl">L & M</span>
+        <button class="text-2xl"><i class="fas fa-bars"></i></button>
+    </nav>
+
+    <!-- Hero Section -->
+    <header id="hero" class="min-h-screen flex flex-col justify-center items-center text-center relative px-6 overflow-hidden">
+        <!-- Watercolor Background -->
+        <div class="watercolor-blob bg-[var(--watercolor-pink)] w-[500px] h-[500px] top-[-100px] right-[-100px]"></div>
+        <div class="watercolor-blob bg-[var(--watercolor-blue)] w-[400px] h-[400px] bottom-[-50px] left-[-50px]"></div>
+        
+        <!-- Flying Paper Plane -->
+        <img src="https://img.icons8.com/ios/100/333333/paper-plane.png" class="paper-plane" style="top: 20%; left: 0;">
+
+        <div class="relative z-10 wobbly">
+            <h1 class="font-header text-6xl md:text-8xl mb-2 text-[#333]">
+                Liam & Maya
+            </h1>
+            <p class="font-doodle text-2xl md:text-3xl text-[#555] mb-8 relative inline-block">
+                Are getting married!
+                <!-- Underline scribble -->
+                <svg class="absolute -bottom-2 left-0 w-full h-4" viewBox="0 0 100 10" preserveAspectRatio="none">
+                    <path d="M0 5 Q 50 10, 100 5" stroke="black" stroke-width="2" fill="none" />
+                </svg>
+            </p>
+
+            <div class="mt-8 relative inline-block">
+                <!-- Polaroid Frame -->
+                <div class="scrapbook-photo p-4 pb-12 bg-white transform rotate-3 hover:rotate-0 transition-transform">
+                    <div class="tape"></div>
+                    <img src="https://images.unsplash.com/photo-1519741497674-611481863552?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" class="w-64 h-64 object-cover filter sepia-[.3]">
+                    <div class="absolute bottom-4 left-0 w-full text-center font-doodle text-xl text-gray-600">Us in Paris, 2024</div>
+                </div>
+                
+                <!-- Hand drawn arrow -->
+                <div class="absolute -right-24 top-1/2 hidden md:block">
+                    <svg width="100" height="50">
+                        <path d="M0 0 Q 50 -20, 80 10 L 70 5 M 80 10 L 85 0" stroke="black" stroke-width="2" fill="none" />
+                    </svg>
+                    <span class="font-doodle transform rotate-12 inline-block ml-4">Save the date!</span>
+                </div>
+            </div>
+
+            <div class="mt-12 font-doodle text-xl">
+                Oct 24th, 2026 • The Old Barn
+            </div>
+        </div>
+    </header>
+
+    <!-- Countdown Section -->
+    <section id="countdown" class="py-12 flex justify-center items-center relative">
+        <div class="container text-center">
+            <h2 class="font-doodle text-3xl mb-8">Counting the seconds...</h2>
+            <div class="flex justify-center gap-4 md:gap-8 flex-wrap">
+                <div class="count-circle">
+                    <span id="days" class="font-header text-4xl block">00</span>
+                    <span class="text-sm font-doodle">Days</span>
+                </div>
+                <div class="count-circle">
+                    <span id="hours" class="font-header text-4xl block">00</span>
+                    <span class="text-sm font-doodle">Hours</span>
+                </div>
+                <div class="count-circle">
+                    <span id="minutes" class="font-header text-4xl block">00</span>
+                    <span class="text-sm font-doodle">Mins</span>
+                </div>
+                <div class="count-circle">
+                    <span id="seconds" class="font-header text-4xl block">00</span>
+                    <span class="text-sm font-doodle">Secs</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Our Story (Doodle Map) -->
+    <section id="story" class="py-24 px-6 md:px-24 relative">
+        <div class="container mx-auto max-w-4xl relative">
+            <h2 class="font-header text-4xl text-center mb-16 relative inline-block left-1/2 transform -translate-x-1/2">
+                How it Happened
+                <svg class="absolute -z-10 -top-4 -left-4 w-[120%] h-[120%]" viewBox="0 0 200 60" preserveAspectRatio="none">
+                    <path d="M0 30 Q 100 60, 200 30 Q 100 0, 0 30" stroke="rgba(255,200,200,0.5)" stroke-width="20" fill="none" />
+                </svg>
+            </h2>
+
+            <!-- Timeline Line -->
+            <div class="absolute left-8 md:left-1/2 top-32 bottom-0 w-1 bg-gray-300 border-l-2 border-dashed border-gray-400"></div>
+
+            <div class="space-y-16 relative">
+                <!-- Event 1 -->
+                <div class="flex flex-col md:flex-row gap-8 items-center relative group">
+                    <div class="md:w-1/2 md:text-right order-2 md:order-1">
+                        <h3 class="font-bold text-2xl">First Coffee</h3>
+                        <p>We met at "The Daily Grind". He spilled his latte. I laughed.</p>
+                    </div>
+                    <div class="absolute left-8 md:left-1/2 transform -translate-x-1/2 w-4 h-4 bg-white border-2 border-black rounded-full z-10"></div>
+                    <div class="md:w-1/2 pl-12 md:pl-0 order-3 md:order-2">
+                        <span class="font-doodle text-gray-500">June 2019</span>
+                    </div>
+                </div>
+
+                <!-- Event 2 -->
+                <div class="flex flex-col md:flex-row gap-8 items-center relative group">
+                    <div class="md:w-1/2 md:text-right order-2 md:order-1 md:pr-0 pl-12 md:pl-0">
+                        <span class="font-doodle text-gray-500">Dec 2021</span>
+                    </div>
+                    <div class="absolute left-8 md:left-1/2 transform -translate-x-1/2 w-4 h-4 bg-white border-2 border-black rounded-full z-10"></div>
+                    <div class="md:w-1/2 order-3 md:order-2">
+                        <h3 class="font-bold text-2xl">Moving In</h3>
+                        <p>Combined our book collections. Too many plants, not enough shelves.</p>
+                    </div>
+                </div>
+
+                <!-- Event 3 -->
+                <div class="flex flex-col md:flex-row gap-8 items-center relative group">
+                    <div class="md:w-1/2 md:text-right order-2 md:order-1">
+                        <h3 class="font-bold text-2xl">She Said Yes!</h3>
+                        <p>Under the stars in Joshua Tree. Best. Night. Ever.</p>
+                    </div>
+                    <div class="absolute left-8 md:left-1/2 transform -translate-x-1/2 w-4 h-4 bg-black border-2 border-white rounded-full z-10 ring-4 ring-gray-100"></div>
+                    <div class="md:w-1/2 pl-12 md:pl-0 order-3 md:order-2">
+                        <span class="font-doodle text-gray-500">Aug 2025</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- The Festivities (Events) -->
+    <section id="events" class="py-24 px-6 bg-[#f4f8f4] relative">
+        <div class="watercolor-blob bg-[var(--watercolor-green)] w-[600px] h-[600px] bottom-0 right-0 opacity-30"></div>
+        <div class="container mx-auto relative z-10 max-w-5xl">
+            <h2 class="font-header text-4xl text-center mb-16">The Festivities</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Welcome -->
+                <div class="event-card transform rotate-1">
+                    <div class="paper-clip"></div>
+                    <div class="text-center mb-4">
+                        <i class="fas fa-glass-cheers text-3xl text-green-600"></i>
+                    </div>
+                    <h3 class="font-bold text-2xl text-center mb-2">Welcome Drinks</h3>
+                    <p class="font-doodle text-center mb-4">Friday, Oct 23rd • 6pm</p>
+                    <p class="text-sm leading-relaxed">Join us for casual drinks and tacos at The Local Pub. Come say hi before the big day!</p>
+                </div>
+
+                <!-- Ceremony -->
+                <div class="event-card transform -rotate-1 mt-8 md:mt-0">
+                    <div class="paper-clip"></div>
+                    <div class="text-center mb-4">
+                        <i class="fas fa-heart text-3xl text-red-500"></i>
+                    </div>
+                    <h3 class="font-bold text-2xl text-center mb-2">The 'I Do's'</h3>
+                    <p class="font-doodle text-center mb-4">Saturday, Oct 24th • 4pm</p>
+                    <p class="text-sm leading-relaxed">The main event at The Old Barn. Please arrive 15 minutes early. Tissues provided.</p>
+                </div>
+
+                <!-- Party -->
+                <div class="event-card transform rotate-2">
+                    <div class="paper-clip"></div>
+                    <div class="text-center mb-4">
+                        <i class="fas fa-music text-3xl text-blue-500"></i>
+                    </div>
+                    <h3 class="font-bold text-2xl text-center mb-2">Eat, Drink, Dance</h3>
+                    <p class="font-doodle text-center mb-4">Saturday, Oct 24th • 5pm</p>
+                    <p class="text-sm leading-relaxed">Dinner, speeches, and bad dancing until midnight. Pizza served at 10pm!</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Map (Napkin Sketch) -->
+    <section id="map" class="py-24 bg-[#EAEAEA] relative overflow-hidden">
+        <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/graphy.png')] opacity-20"></div>
+        <div class="container mx-auto px-6 relative z-10 flex justify-center">
+            <div class="napkin max-w-lg w-full">
+                <h3 class="font-header text-2xl text-center mb-4 text-[#002395]">Location Plan</h3>
+                <!-- Hand Drawn Map (SVG) -->
+                <svg viewBox="0 0 300 200" class="w-full h-auto mb-4 border-2 border-dashed border-gray-300">
+                    <path d="M 50 150 L 250 150" stroke="#002395" stroke-width="2" fill="none" /> <!-- Road -->
+                    <path d="M 150 150 L 150 50" stroke="#002395" stroke-width="2" fill="none" /> <!-- Road -->
+                    <rect x="130" y="20" width="40" height="30" stroke="#002395" fill="none" stroke-width="2" /> <!-- Venue -->
+                    <text x="180" y="40" font-family="'Reenie Beanie'" font-size="20" fill="#002395">The Barn</text>
+                    <circle cx="200" cy="120" r="10" stroke="#002395" fill="none" /> <!-- Landmark -->
+                    <text x="220" y="125" font-family="'Reenie Beanie'" font-size="15" fill="#002395">Old Oak</text>
+                    <path d="M 50 160 Q 100 180, 150 160" stroke="red" stroke-width="2" fill="none" stroke-dasharray="5,5" /> <!-- Path -->
+                    <text x="60" y="190" font-family="'Reenie Beanie'" font-size="15" fill="red">Park Here!</text>
+                </svg>
+                <div class="ballpoint-text text-center">
+                    <p>The Old Barn, 123 Country Road.</p>
+                    <p>Turn left at the big oak tree!</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Scrapbook Gallery -->
+    <section id="gallery" class="py-24 bg-[#f4f1ea] relative">
+        <!-- Paper Texture Overlay -->
+        <div class="absolute inset-0 opacity-20" style="background-image: url('https://www.transparenttextures.com/patterns/notebook.png');"></div>
+        
+        <div class="container mx-auto px-6 relative z-10">
+            <h2 class="font-header text-4xl text-center mb-16">The Scrapbook</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
+                
+                <div class="scrapbook-photo transform -rotate-3 hover:rotate-0">
+                    <div class="tape tape-corner-tl"></div>
+                    <img src="https://invisit.in/images/destination/northeast/thumb-couple.jpg" class="w-full h-64 object-cover filter grayscale hover:grayscale-0 transition-all">
+                    <p class="font-doodle text-center mt-2">Adventures</p>
+                </div>
+
+                <div class="scrapbook-photo transform rotate-2 hover:rotate-0 mt-8">
+                    <div class="tape"></div>
+                    <img src="https://images.unsplash.com/photo-1595407753234-0882f1e77954?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8d2VkZGluZyUyMHJlY2VwdGlvbnxlbnwwfHwwfHx8MA%3D%3D" class="w-full h-64 object-cover filter grayscale hover:grayscale-0 transition-all">
+                    <p class="font-doodle text-center mt-2">Laughs</p>
+                </div>
+
+                <div class="scrapbook-photo transform -rotate-1 hover:rotate-0">
+                    <div class="tape tape-corner-br"></div>
+                    <img src="https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" class="w-full h-64 object-cover filter grayscale hover:grayscale-0 transition-all">
+                    <p class="font-doodle text-center mt-2">Forever</p>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Wish List (Registry) -->
+    <section id="wishlist" class="py-24 px-6 relative bg-white">
+        <div class="container mx-auto max-w-4xl text-center">
+            <h2 class="font-header text-4xl mb-12">Our Wish List</h2>
+            
+            <div class="bg-[#fffdf0] p-8 shadow-lg transform rotate-1 border-t-8 border-gray-200" style="background-image: linear-gradient(#e1e1e1 1px, transparent 1px); background-size: 100% 1.5em;">
+                <p class="font-neat text-xl mb-6">Since we have our toaster and plates, we'd love help with these instead!</p>
+                
+                <ul class="text-left inline-block font-marker text-2xl space-y-4 list-disc pl-8">
+                    <li class="cursor-pointer hover:text-blue-600 transition-colors">Honeymoon Fund (Japan!)</li>
+                    <li class="cursor-pointer hover:text-blue-600 transition-colors">New Sofa Fund</li>
+                    <li class="cursor-pointer hover:text-blue-600 transition-colors">Cooking Classes</li>
+                    <li class="cursor-pointer hover:text-blue-600 transition-colors">Charity Donation</li>
+                </ul>
+                
+                <div class="mt-8">
+                    <button class="px-6 py-2 border-2 border-dashed border-gray-400 font-doodle hover:bg-gray-100">View Full Registry</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Guestbook (Sticky Notes) -->
+    <section id="notes" class="py-24 px-6 relative bg-[#fffdf0]">
+        <div class="container mx-auto text-center">
+            <h2 class="font-header text-4xl mb-12">Leave a Note!</h2>
+            <div class="flex flex-wrap justify-center gap-8">
+                <div class="sticky-note sticky-pink">
+                    "So happy for you guys!" <br> - Jen
+                    <div class="text-xs mt-4 text-gray-500">(drawn a cat here)</div>
+                </div>
+                <div class="sticky-note sticky-blue transform rotate-3">
+                    "Can't wait to party!" <br> - Mike
+                </div>
+                <div class="sticky-note transform -rotate-2">
+                    "Love you both so much." <br> - Mom & Dad
+                </div>
+                <div class="sticky-note sticky-pink transform rotate-6">
+                    "Don't forget the cake!"
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- RSVP (Postcard) -->
+    <section id="rsvp" class="py-24 flex justify-center items-center px-6 relative">
+        <div class="watercolor-blob bg-[var(--watercolor-blue)] w-[600px] h-[600px] top-0 left-0 opacity-30"></div>
+
+        <div class="postcard-container">
+            <div class="postcard" id="rsvp-card">
+                
+                <!-- Front -->
+                <div class="postcard-front flex flex-col justify-between border border-gray-300">
+                    <div class="absolute top-4 right-4 w-24 h-28 border-2 border-dashed border-gray-300 flex items-center justify-center bg-gray-50 transform rotate-2">
+                        <span class="text-xs text-gray-400 text-center">Place<br>Stamp<br>Here</span>
+                    </div>
+                    
+                    <h2 class="font-header text-4xl mb-4 mt-8">R.S.V.P.</h2>
+                    
+                    <form id="rsvp-form" class="space-y-4 max-w-sm">
+                        <input type="hidden" name="_captcha" value="false">
+                        <input type="hidden" name="_subject" value="Sketchbook Wedding RSVP">
+
+                        <input type="text" name="name" required class="sketch-input" placeholder="Your Name(s)">
+                        <input type="email" name="email" required class="sketch-input" placeholder="Email Address">
+                        
+                        <div class="flex gap-4 mt-4 font-doodle text-xl">
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="radio" name="attendance" value="Yes" class="accent-black" checked>
+                                <span>I'll be there!</span>
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="radio" name="attendance" value="No" class="accent-black">
+                                <span>Can't make it</span>
+                            </label>
+                        </div>
+
+                        <button type="submit" class="mt-8 px-8 py-2 border-2 border-black font-doodle text-xl hover:bg-black hover:text-white transition-colors transform hover:-rotate-2 scribble-hover">
+                            Send Postcard
+                            <!-- Scribble SVG -->
+                            <svg viewBox="0 0 100 50">
+                                <path d="M0 25 Q 50 0, 100 25" class="scribble-path" />
+                            </svg>
+                        </button>
+                    </form>
+
+                    <div class="text-right font-doodle text-gray-400 text-sm">
+                        Please reply by Sept 1st
+                    </div>
+                </div>
+
+                <!-- Back (Success State) -->
+                <div class="postcard-back border border-gray-300 shadow-inner">
+                    <h2 class="font-header text-3xl text-green-600 mb-4 transform -rotate-3">Sent with Love!</h2>
+                    <p class="font-doodle text-xl text-center px-8">
+                        Thanks for writing back!<br>We can't wait to see you.
+                    </p>
+                    <div class="mt-8 text-4xl animate-bounce">💌</div>
+                    <button id="flip-back" class="mt-8 text-sm underline text-gray-500 hover:text-black">Edit Response</button>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-12 text-center relative z-10">
+        <p class="font-doodle text-gray-500">Handcrafted with ❤️ by L & M</p>
+        <div class="mt-4 flex justify-center gap-4 text-gray-400">
+            <i class="fab fa-instagram hover:text-black transition-colors cursor-pointer"></i>
+            <i class="fab fa-pinterest hover:text-black transition-colors cursor-pointer"></i>
+        </div>
+    </footer>
+
+    <script>
+        /**
+         * 1. Loader & Draw Animation
+         */
+        window.addEventListener('load', () => {
+            const loader = document.getElementById('loader');
+            // Allow SVG drawing to finish
+            setTimeout(() => {
+                loader.style.opacity = '0';
+                setTimeout(() => loader.style.display = 'none', 1000);
+            }, 2500);
+        });
+
+        /**
+         * 2. Pencil Cursor & Drawing Logic
+         */
+        const cursor = document.getElementById('cursor-pencil');
+        const canvas = document.getElementById('pencil-canvas');
+        const ctx = canvas.getContext('2d');
+        let isDrawing = false;
+        let lastX = 0;
+        let lastY = 0;
+
+        // Resize Canvas to Full Page Height
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = Math.max(
+                document.body.scrollHeight, 
+                document.body.offsetHeight, 
+                document.documentElement.clientHeight, 
+                document.documentElement.scrollHeight, 
+                document.documentElement.offsetHeight
+            );
+        }
+        window.addEventListener('resize', resize);
+        // Call resize after load to ensure full height calculation
+        window.addEventListener('load', resize);
+
+        // Mouse Move for Cursor (Fixed Position)
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+        });
+
+        // Drawing Logic (Absolute Position on Page)
+        document.addEventListener('mousedown', (e) => {
+            isDrawing = true;
+            lastX = e.pageX;
+            lastY = e.pageY;
+        });
+        document.addEventListener('mouseup', () => isDrawing = false);
+        document.addEventListener('mousemove', (e) => {
+            if (!isDrawing) return;
+            
+            ctx.beginPath();
+            ctx.moveTo(lastX, lastY);
+            ctx.lineTo(e.pageX, e.pageY);
+            
+            // Randomize stroke slightly for pencil texture
+            ctx.strokeStyle = `rgba(50, 50, 50, ${Math.random() * 0.4 + 0.3})`;
+            ctx.lineWidth = Math.random() * 2 + 1;
+            ctx.lineCap = 'round';
+            ctx.stroke();
+            
+            lastX = e.pageX;
+            lastY = e.pageY;
+        });
+
+        /**
+         * 3. RSVP Card Flip
+         */
+        const form = document.getElementById('rsvp-form');
+        const card = document.getElementById('rsvp-card');
+        const btn = form.querySelector('button');
+        const flipBackBtn = document.getElementById('flip-back');
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const originalText = btn.innerText;
+            btn.innerText = "Scribbling...";
+            
+            const formData = new FormData(form);
+
+            fetch("https://formsubmit.co/ajax/shadowshah70@gmail.com", {
+                method: "POST",
+                body: formData,
+                headers: { 'Accept': 'application/json' }
+            })
+            .then(res => res.json())
+            .then(() => {
+                card.classList.add('flipped');
+                form.reset();
+            })
+            .catch(() => alert('Out of ink! Check connection.'))
+            .finally(() => btn.innerText = originalText);
+        });
+
+        flipBackBtn.addEventListener('click', () => {
+            card.classList.remove('flipped');
+        });
+
+        /**
+         * 4. SVG Doodle Animations on Scroll
+         */
+        const doodleBoxes = document.querySelectorAll('.doodle-box');
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.5 });
+
+        doodleBoxes.forEach(box => observer.observe(box));
+
+        /**
+         * 5. Countdown Timer
+         */
+        const weddingDate = new Date("October 24, 2026 16:00:00").getTime();
+        
+        setInterval(() => {
+            const now = new Date().getTime();
+            const dist = weddingDate - now;
+            
+            const days = Math.floor(dist / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((dist % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((dist % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((dist % (1000 * 60)) / 1000);
+            
+            document.getElementById("days").innerText = days < 10 ? "0" + days : days;
+            document.getElementById("hours").innerText = hours < 10 ? "0" + hours : hours;
+            document.getElementById("minutes").innerText = minutes < 10 ? "0" + minutes : minutes;
+            document.getElementById("seconds").innerText = seconds < 10 ? "0" + seconds : seconds;
+        }, 1000);
+
+
+        
+// 💒 1. Disable right-click
+document.addEventListener('contextmenu', e => e.preventDefault());
+
+// 💒 2. Disable inspect / save / print shortcuts
+document.addEventListener('keydown', e => {
+  if (
+    (e.ctrlKey && ['s','u','p','S','U','P'].includes(e.key)) || // Ctrl+S, Ctrl+U, Ctrl+P
+    e.key === 'F12' ||                                          // DevTools
+    (e.ctrlKey && e.shiftKey && ['I','J','C'].includes(e.key))  // Ctrl+Shift+I/J/C
+  ) {
+    e.preventDefault();
+    sparkle(e.clientX, e.clientY);
+  }
+});
+
+// 💒 3. Block drag saving of images
+document.addEventListener('dragstart', e => e.preventDefault());
+document.querySelectorAll('img').forEach(img => img.setAttribute('draggable', 'false'));
+
+// 💒 4. Disable text selection & copying
+document.addEventListener('copy', e => e.preventDefault());
+document.addEventListener('cut', e => e.preventDefault());
+document.addEventListener('selectstart', e => e.preventDefault());
+document.body.style.userSelect = 'none';
+document.body.style.webkitUserSelect = 'none';
+
+// 💒 5. Detect if DevTools is open
+setInterval(() => {
+  if (
+    window.outerWidth - window.innerWidth > 160 ||
+    window.outerHeight - window.innerHeight > 160
+  ) {
+    document.body.innerHTML = `
+      <div style="text-align:center;margin-top:20%;font-size:2rem;color:#d6336c;">
+        💖 Please close developer tools to continue 💖
+      </div>`;
+  }
+}, 1000);
+
+
+
+    </script>
+</body>
+</html><script>console.log('Hello JS');</script></body></html>

@@ -1,0 +1,852 @@
+<html><head><style>body { font-family: monospace; background:#141414; color:#fff; }</style></head><body><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXUS: R & A | 2026</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kona+One&family=Oswald:wght@200;400;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --acid: #CCFF00;
+            --chrome: #E0E0E0;
+            --void: #080808;
+            --dark-metal: #1a1a1a;
+        }
+
+        body {
+            background-color: var(--void);
+            color: var(--chrome);
+            font-family: 'Space Mono', monospace;
+            overflow-x: hidden;
+            cursor: none; /* Custom cursor */
+        }
+
+        .font-header { font-family: 'Oswald', sans-serif; }
+        .font-display { font-family: 'Kona One', sans-serif; }
+
+        /* --- Custom Cursor --- */
+        #cursor {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--acid);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            z-index: 9999;
+            transition: width 0.3s, height 0.3s, background-color 0.3s;
+            mix-blend-mode: difference;
+        }
+        #cursor.hovered {
+            width: 80px;
+            height: 80px;
+            background-color: var(--acid);
+            border-color: transparent;
+            opacity: 0.8;
+        }
+
+        /* --- Liquid Metal Background Animation --- */
+        .liquid-bg {
+            background: linear-gradient(45deg, #000, #222, #000);
+            background-size: 400% 400%;
+            animation: metalFlow 10s ease infinite;
+        }
+        @keyframes metalFlow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* --- Kinetic Typography Mask --- */
+        .kinetic-text-container {
+            position: relative;
+            overflow: hidden;
+            background: #000;
+        }
+        .kinetic-text {
+            font-size: 15vw;
+            line-height: 0.8;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: transparent;
+            -webkit-text-stroke: 2px var(--chrome);
+            position: relative;
+            z-index: 10;
+            transition: all 0.5s ease;
+        }
+        .kinetic-text::before {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 100%;
+            color: var(--acid);
+            -webkit-text-stroke: 0px;
+            overflow: hidden;
+            transition: width 1s cubic-bezier(0.19, 1, 0.22, 1);
+            white-space: nowrap;
+        }
+        .kinetic-text-container:hover .kinetic-text::before {
+            width: 100%;
+        }
+
+        /* --- Jelly/Velocity Skew Class --- */
+        .skew-on-scroll {
+            transition: transform 0.1s ease-out;
+            will-change: transform;
+        }
+
+        /* --- Image Distortion Hover Effect --- */
+        .distort-img-wrapper {
+            position: relative;
+            overflow: hidden;
+            filter: grayscale(100%) contrast(120%);
+            transition: filter 0.5s ease;
+        }
+        .distort-img-wrapper:hover {
+            filter: grayscale(0%) contrast(100%);
+        }
+        /* SVG Filter applied via ID in HTML */
+
+        /* --- Marquee --- */
+        .marquee-strip {
+            width: 100%;
+            overflow: hidden;
+            white-space: nowrap;
+            background: var(--acid);
+            color: var(--void);
+            padding: 1rem 0;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-family: 'Oswald', sans-serif;
+            font-size: 2rem;
+            transform: rotate(-2deg) scale(1.1);
+            border-top: 4px solid var(--void);
+            border-bottom: 4px solid var(--void);
+        }
+        .marquee-content {
+            display: inline-block;
+            animation: scroll 15s linear infinite;
+        }
+        @keyframes scroll {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        /* --- 3D Terminal Card --- */
+        .terminal-card {
+            background: rgba(10, 10, 10, 0.9);
+            border: 1px solid #333;
+            box-shadow: 0 0 40px rgba(204, 255, 0, 0.1);
+            transform-style: preserve-3d;
+            perspective: 1000px;
+        }
+        .terminal-header {
+            background: #222;
+            padding: 0.5rem;
+            display: flex;
+            gap: 0.5rem;
+            border-bottom: 1px solid #333;
+        }
+        .dot { width: 10px; height: 10px; border-radius: 50%; }
+
+        /* --- Glitch Input --- */
+        .cyber-input {
+            background: transparent;
+            border: 2px solid #333;
+            color: var(--acid);
+            padding: 1rem;
+            width: 100%;
+            font-family: 'Space Mono', monospace;
+            text-transform: uppercase;
+            transition: all 0.3s;
+        }
+        .cyber-input:focus {
+            outline: none;
+            border-color: var(--acid);
+            box-shadow: 5px 5px 0px var(--chrome);
+            transform: translate(-2px, -2px);
+        }
+
+        /* --- Grid Overlay --- */
+        .grid-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* --- Operator Card Stats --- */
+        .stat-bar-bg {
+            width: 100%;
+            height: 4px;
+            background: #333;
+            margin-top: 4px;
+        }
+        .stat-bar-fill {
+            height: 100%;
+            background: var(--acid);
+            width: 0%;
+            transition: width 1s cubic-bezier(0.19, 1, 0.22, 1);
+        }
+        .operator-card:hover .stat-bar-fill {
+            width: var(--stat-width);
+        }
+
+        /* --- Accordion Details --- */
+        details > summary {
+            list-style: none;
+            cursor: none;
+        }
+        details > summary::-webkit-details-marker {
+            display: none;
+        }
+        details[open] summary ~ * {
+            animation: glitchFade 0.3s ease-in-out;
+        }
+        @keyframes glitchFade {
+            0% { opacity: 0; transform: translateX(-10px); }
+            100% { opacity: 1; transform: translateX(0); }
+        }
+    </style>
+</head>
+<body class="selection:bg-[#CCFF00] selection:text-black">
+
+    <!-- SVG Filter Definition for Liquid Distortion -->
+    <svg style="display: none;">
+        <defs>
+            <filter id="liquid">
+                <feTurbulence baseFrequency="0.01 0.01" numOctaves="1" result="noise" seed="1"/>
+                <feDisplacementMap in="SourceGraphic" in2="noise" scale="0" xChannelSelector="R" yChannelSelector="G" id="displacement" />
+            </filter>
+        </defs>
+    </svg>
+
+    <!-- Custom Cursor -->
+    <div id="cursor"></div>
+    
+    <!-- Grid BG -->
+    <div class="grid-overlay"></div>
+
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full z-50 p-8 flex justify-between items-center mix-blend-difference">
+        <a href="#" class="font-display text-2xl tracking-tighter hover-trigger">NEXUS</a>
+        <div class="hidden md:flex gap-6 lg:gap-8 font-header text-sm tracking-widest uppercase items-center">
+            <a href="#source_code" class="hover:text-[var(--acid)] transition-colors hover-trigger">[ Story ]</a>
+            <a href="#operators" class="hover:text-[var(--acid)] transition-colors hover-trigger">[ Crew ]</a>
+            <a href="#data" class="hover:text-[var(--acid)] transition-colors hover-trigger">[ Timeline ]</a>
+            <a href="#avatar_config" class="hover:text-[var(--acid)] transition-colors hover-trigger">[ Gear ]</a>
+            <a href="#upload" class="bg-[var(--acid)] text-black px-4 py-1 font-bold hover:bg-white hover-trigger transition-colors">RSVP</a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="min-h-screen flex flex-col justify-center items-center relative overflow-hidden">
+        <!-- Animated Background Blob -->
+        <div class="absolute inset-0 z-0 opacity-20 liquid-bg"></div>
+
+        <div class="relative z-10 text-center mix-blend-screen skew-on-scroll" id="hero-content">
+            <p class="font-mono text-xs md:text-sm text-[var(--acid)] mb-4 tracking-[0.5em] uppercase">System Override: Wedding Protocol</p>
+            
+            <div class="kinetic-text-container hover-trigger">
+                <h1 class="font-header kinetic-text" data-text="RYAN">RYAN</h1>
+            </div>
+            <div class="kinetic-text-container hover-trigger">
+                <h1 class="font-header kinetic-text" data-text="&">&</h1>
+            </div>
+            <div class="kinetic-text-container hover-trigger">
+                <h1 class="font-header kinetic-text" data-text="ALEXA">ALEXA</h1>
+            </div>
+
+            <div class="mt-12">
+                 <div class="w-[1px] h-24 bg-[var(--acid)] mx-auto animate-pulse"></div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Section: Source_Code (Our Story) -->
+    <section id="source_code" class="py-32 px-6 md:px-24 bg-[#050505] relative z-10 border-t border-[#222]">
+        <div class="container mx-auto max-w-4xl">
+            <h2 class="font-mono text-[var(--acid)] mb-16 tracking-widest uppercase">/// Source_Code (History_Log)</h2>
+            
+            <div class="relative border-l-2 border-[#333] ml-4 md:ml-0 pl-8 md:pl-12 space-y-16">
+                <!-- Commit 1 -->
+                <div class="relative group hover-trigger">
+                    <div class="absolute -left-[41px] md:-left-[57px] top-0 w-6 h-6 bg-black border-2 border-[var(--chrome)] group-hover:border-[var(--acid)] group-hover:bg-[var(--acid)] transition-colors rounded-full"></div>
+                    <div class="font-mono text-xs text-gray-500 mb-2">v1.0 [COMMIT: 2018]</div>
+                    <h3 class="font-header text-4xl mb-4 group-hover:text-[var(--acid)] transition-colors">Initial Connection</h3>
+                    <p class="text-gray-400 max-w-lg">Two separate systems established a handshake protocol at a chaotic rooftop party. Data exchange was immediate. Latency: 0ms.</p>
+                </div>
+
+                <!-- Commit 2 -->
+                <div class="relative group hover-trigger">
+                    <div class="absolute -left-[41px] md:-left-[57px] top-0 w-6 h-6 bg-black border-2 border-[var(--chrome)] group-hover:border-[var(--acid)] group-hover:bg-[var(--acid)] transition-colors rounded-full"></div>
+                    <div class="font-mono text-xs text-gray-500 mb-2">v2.0 [COMMIT: 2021]</div>
+                    <h3 class="font-header text-4xl mb-4 group-hover:text-[var(--acid)] transition-colors">Server Merge</h3>
+                    <p class="text-gray-400 max-w-lg">Migration to a shared database (apartment). Resource allocation optimized. Adopted 'Dog_Unit_01'.</p>
+                </div>
+
+                <!-- Commit 3 -->
+                <div class="relative group hover-trigger">
+                    <div class="absolute -left-[41px] md:-left-[57px] top-0 w-6 h-6 bg-black border-2 border-[var(--chrome)] group-hover:border-[var(--acid)] group-hover:bg-[var(--acid)] transition-colors rounded-full"></div>
+                    <div class="font-mono text-xs text-gray-500 mb-2">v3.0 [COMMIT: 2025]</div>
+                    <h3 class="font-header text-4xl mb-4 group-hover:text-[var(--acid)] transition-colors">Critical Update</h3>
+                    <p class="text-gray-400 max-w-lg">Proposal executed in Tokyo rain. User response: 'TRUE'. Permanent bond initialized.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Marquee Break -->
+    <div class="relative z-20 py-12 overflow-hidden bg-black">
+        <div class="marquee-strip">
+            <div class="marquee-content">
+                TOKYO // OCTOBER 10 // 2026 // NEON CITY // TOKYO // OCTOBER 10 // 2026 // NEON CITY // TOKYO // OCTOBER 10 // 2026 // NEON CITY //
+            </div>
+        </div>
+    </div>
+
+    <!-- Section: The Operators (Wedding Party) -->
+    <section id="operators" class="py-32 px-6 md:px-24 bg-[#0A0A0A] relative z-10">
+        <div class="container mx-auto">
+            <div class="flex flex-col md:flex-row justify-between items-end mb-16">
+                <h2 class="font-mono text-[var(--acid)] tracking-widest uppercase">/// The_Operators</h2>
+                <p class="font-mono text-xs text-gray-500">[ UNIT_STATS_LOADED ]</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Operator 1 -->
+                <div class="operator-card border border-[#333] bg-[#111] p-4 hover:border-[var(--acid)] transition-all group hover-trigger cursor-none">
+                    <div class="aspect-square bg-gray-800 mb-4 overflow-hidden relative">
+                        <img src="https://t4.ftcdn.net/jpg/05/30/01/09/360_F_530010960_WkmW6q8FIZ42LkEQoSRCLTNTw0WgJqKY.jpg" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500">
+                        <div class="absolute bottom-0 left-0 bg-[var(--acid)] text-black font-bold px-2 py-1 text-xs">MAID_OF_HONOR</div>
+                    </div>
+                    <h3 class="font-header text-2xl">SARAH_J</h3>
+                    <div class="mt-4 space-y-3 font-mono text-[10px] text-gray-400 uppercase">
+                        <div>
+                            <div class="flex justify-between"><span>Organization</span> <span>98%</span></div>
+                            <div class="stat-bar-bg"><div class="stat-bar-fill" style="--stat-width: 98%"></div></div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between"><span>Chaos_Resist</span> <span>85%</span></div>
+                            <div class="stat-bar-bg"><div class="stat-bar-fill" style="--stat-width: 85%"></div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Operator 2 -->
+                <div class="operator-card border border-[#333] bg-[#111] p-4 hover:border-[var(--acid)] transition-all group hover-trigger cursor-none">
+                    <div class="aspect-square bg-gray-800 mb-4 overflow-hidden relative">
+                        <img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500">
+                        <div class="absolute bottom-0 left-0 bg-white text-black font-bold px-2 py-1 text-xs">BEST_MAN</div>
+                    </div>
+                    <h3 class="font-header text-2xl">MARK_D</h3>
+                    <div class="mt-4 space-y-3 font-mono text-[10px] text-gray-400 uppercase">
+                        <div>
+                            <div class="flex justify-between"><span>Speech_Skill</span> <span>45%</span></div>
+                            <div class="stat-bar-bg"><div class="stat-bar-fill" style="--stat-width: 45%"></div></div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between"><span>Party_Fuel</span> <span>100%</span></div>
+                            <div class="stat-bar-bg"><div class="stat-bar-fill" style="--stat-width: 100%"></div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Operator 3 -->
+                <div class="operator-card border border-[#333] bg-[#111] p-4 hover:border-[var(--acid)] transition-all group hover-trigger cursor-none">
+                    <div class="aspect-square bg-gray-800 mb-4 overflow-hidden relative">
+                        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500">
+                        <div class="absolute bottom-0 left-0 bg-gray-700 text-white font-bold px-2 py-1 text-xs">UNIT_03</div>
+                    </div>
+                    <h3 class="font-header text-2xl">ELENA_R</h3>
+                    <div class="mt-4 space-y-3 font-mono text-[10px] text-gray-400 uppercase">
+                        <div>
+                            <div class="flex justify-between"><span>Dance_XP</span> <span>92%</span></div>
+                            <div class="stat-bar-bg"><div class="stat-bar-fill" style="--stat-width: 92%"></div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Operator 4 -->
+                <div class="operator-card border border-[#333] bg-[#111] p-4 hover:border-[var(--acid)] transition-all group hover-trigger cursor-none">
+                    <div class="aspect-square bg-gray-800 mb-4 overflow-hidden relative">
+                        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500">
+                        <div class="absolute bottom-0 left-0 bg-gray-700 text-white font-bold px-2 py-1 text-xs">UNIT_04</div>
+                    </div>
+                    <h3 class="font-header text-2xl">JASON_K</h3>
+                    <div class="mt-4 space-y-3 font-mono text-[10px] text-gray-400 uppercase">
+                        <div>
+                            <div class="flex justify-between"><span>Security</span> <span>88%</span></div>
+                            <div class="stat-bar-bg"><div class="stat-bar-fill" style="--stat-width: 88%"></div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section: Data (Timeline) -->
+    <section id="data" class="py-32 bg-[var(--void)] border-t border-[#222]">
+        <div class="container mx-auto px-6 md:px-24">
+            <h2 class="font-mono text-[var(--acid)] mb-16 tracking-widest uppercase">/// Execution Sequence</h2>
+
+            <div class="relative grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Timeline Connector Line -->
+                <div class="absolute top-1/2 left-0 w-full h-[2px] bg-[#222] hidden md:block -z-0"></div>
+
+                <!-- Card 1 -->
+                <div class="bg-[#111] p-8 border border-[#333] hover:border-[var(--acid)] transition-colors group skew-on-scroll hover-trigger relative z-10">
+                    <div class="font-header text-6xl text-[#333] group-hover:text-[var(--acid)] transition-colors mb-4">01</div>
+                    <h3 class="font-bold text-2xl mb-2 uppercase">Initialization</h3>
+                    <p class="text-sm text-gray-500 font-mono mb-4">16:00 @ Shibuya Sky</p>
+                    <p class="text-gray-400">Vows exchanged at altitude. High winds, higher spirits.</p>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="bg-[#111] p-8 border border-[#333] hover:border-[var(--acid)] transition-colors group skew-on-scroll hover-trigger relative z-10" style="transition-delay: 100ms;">
+                    <div class="font-header text-6xl text-[#333] group-hover:text-[var(--acid)] transition-colors mb-4">02</div>
+                    <h3 class="font-bold text-2xl mb-2 uppercase">Refueling</h3>
+                    <p class="text-sm text-gray-500 font-mono mb-4">18:00 @ Cyber-Izakaya</p>
+                    <p class="text-gray-400">Neon lights, yakitori, and sake protocols engaged.</p>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="bg-[#111] p-8 border border-[#333] hover:border-[var(--acid)] transition-colors group skew-on-scroll hover-trigger relative z-10" style="transition-delay: 200ms;">
+                    <div class="font-header text-6xl text-[#333] group-hover:text-[var(--acid)] transition-colors mb-4">03</div>
+                    <h3 class="font-bold text-2xl mb-2 uppercase">Overdrive</h3>
+                    <p class="text-sm text-gray-500 font-mono mb-4">20:00 - ERROR</p>
+                    <p class="text-gray-400">Underground club access. Bass frequency maximum.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section: Avatar Config (Dress Code) -->
+    <section id="avatar_config" class="py-32 bg-[#050505] border-t border-[#222]">
+        <div class="container mx-auto px-6 md:px-24">
+            <h2 class="font-mono text-[var(--acid)] mb-16 tracking-widest uppercase">/// Avatar_Config (Dress_Code)</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                <div class="space-y-8">
+                    <div>
+                        <h3 class="font-header text-4xl mb-2 text-white">Cyber-Formal</h3>
+                        <p class="text-gray-400 font-mono text-sm leading-relaxed">
+                            Standard black-tie hardware, upgraded with futuristic accents. Chrome accessories, structured silhouettes, and avant-garde eyewear encouraged.
+                        </p>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <div class="flex items-center gap-4">
+                            <div class="w-8 h-8 bg-black border border-[#333]"></div>
+                            <span class="font-mono text-xs uppercase text-gray-500">Matte Black</span>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <div class="w-8 h-8 bg-[var(--chrome)]"></div>
+                            <span class="font-mono text-xs uppercase text-gray-500">Polished Silver</span>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <div class="w-8 h-8 bg-[var(--acid)]"></div>
+                            <span class="font-mono text-xs uppercase text-gray-500">Acid Accent (Optional)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Visual Loadout -->
+                <div class="relative border-2 border-[#333] p-8 bg-[#111] hover-trigger skew-on-scroll">
+                    <div class="absolute top-4 right-4 text-[var(--acid)] text-2xl"><i class="fas fa-tshirt"></i></div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="aspect-[3/4] bg-gray-800 relative group overflow-hidden">
+                            <img src="https://i.pinimg.com/736x/be/6a/cb/be6acb40c4d9722045bd36f6a9873fcb.jpg" class="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity">
+                            <span class="absolute bottom-2 left-2 font-mono text-[10px] bg-black px-1 text-white">MASC_MESH</span>
+                        </div>
+                        <div class="aspect-[3/4] bg-gray-800 relative group overflow-hidden">
+                            <img src="https://images.unsplash.com/photo-1539008835657-9e8e9680c956?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" class="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity">
+                            <span class="absolute bottom-2 left-2 font-mono text-[10px] bg-black px-1 text-white">FEM_STRUCTURE</span>
+                        </div>
+                    </div>
+                    <div class="mt-4 border-t border-[#333] pt-2 flex justify-between font-mono text-[10px] text-gray-500">
+                        <span>ARMOR_RATING: 0</span>
+                        <span>STYLE: MAX</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section: Visual Logs (Gallery) -->
+    <section id="gallery" class="py-32 bg-[#050505] border-t border-[#222] relative z-10">
+        <div class="container mx-auto px-6 md:px-24">
+             <div class="flex justify-between items-end mb-16">
+                <h2 class="font-mono text-[var(--acid)] tracking-widest uppercase">/// Visual_Logs</h2>
+                <div class="font-header text-sm text-gray-500">[ ARCHIVE_MODE ]</div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+                <!-- Large Item -->
+                <div class="md:col-span-8 relative group hover-trigger cursor-none">
+                    <div class="distort-img-wrapper w-full h-[400px] border border-[#333]">
+                         <img src="https://images.unsplash.com/photo-1591604466107-ec97de577aff?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8d2VkZGluZ3N8ZW58MHx8MHx8fDA%3D" class="w-full h-full object-cover liquid-img" style="filter: url(#liquid);">
+                         <div class="absolute inset-0 bg-black/50 group-hover:bg-transparent transition-colors duration-500"></div>
+                    </div>
+                </div>
+                 <!-- Small Item -->
+                <div class="md:col-span-4 relative group hover-trigger cursor-none">
+                    <div class="distort-img-wrapper w-full h-[400px] border border-[#333]">
+                         <img src="https://images.unsplash.com/photo-1595407753234-0882f1e77954?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8d2VkZGluZyUyMHJlY2VwdGlvbnxlbnwwfHwwfHx8MA%3D%3D" class="w-full h-full object-cover liquid-img" style="filter: url(#liquid);">
+                         <div class="absolute inset-0 bg-black/50 group-hover:bg-transparent transition-colors duration-500"></div>
+                    </div>
+                </div>
+                <!-- Small Item -->
+                <div class="md:col-span-4 relative group hover-trigger cursor-none">
+                    <div class="distort-img-wrapper w-full h-[400px] border border-[#333]">
+                         <img src="https://images.unsplash.com/photo-1583939003579-730e3918a45a?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" class="w-full h-full object-cover liquid-img" style="filter: url(#liquid);">
+                         <div class="absolute inset-0 bg-black/50 group-hover:bg-transparent transition-colors duration-500"></div>
+                    </div>
+                </div>
+                <!-- Large Item -->
+                <div class="md:col-span-8 relative group hover-trigger cursor-none">
+                    <div class="distort-img-wrapper w-full h-[400px] border border-[#333]">
+                         <img src="https://i.ytimg.com/vi/HglTkx9CSIA/hq720.jpg?sqp=-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD&rs=AOn4CLBDHVRTZYJLYkHpbhcYz7HatH0WhQ" class="w-full h-full object-cover liquid-img" style="filter: url(#liquid);">
+                         <div class="absolute inset-0 bg-black/50 group-hover:bg-transparent transition-colors duration-500"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section: Supply Drop (Registry) -->
+    <section id="registry" class="py-32 bg-[var(--void)] border-t border-[#222] relative">
+        <div class="container mx-auto px-6 md:px-24">
+            <h2 class="font-mono text-[var(--acid)] mb-16 tracking-widest uppercase">/// Supply_Drop</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Registry Item 1 -->
+                <div class="border border-[#333] p-8 hover:bg-[#111] transition-colors group hover-trigger relative overflow-hidden">
+                     <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-100 transition-opacity">
+                        <i class="fas fa-plane-departure text-6xl text-[var(--acid)]"></i>
+                     </div>
+                     <h3 class="font-header text-3xl mb-2 text-white group-hover:text-[var(--acid)] transition-colors">Honey_Moon.exe</h3>
+                     <p class="font-mono text-sm text-gray-500 mb-6 max-w-sm">Fuel our escape velocity. Destination: Classified.</p>
+                     <button class="bg-[var(--chrome)] text-black font-bold px-6 py-4 w-full hover:bg-[var(--acid)] transition-colors font-mono uppercase tracking-widest">INITIATE TRANSFER</button>
+                </div>
+                <!-- Registry Item 2 -->
+                <div class="border border-[#333] p-8 hover:bg-[#111] transition-colors group hover-trigger relative overflow-hidden">
+                     <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-100 transition-opacity">
+                        <i class="fas fa-home text-6xl text-[var(--acid)]"></i>
+                     </div>
+                     <h3 class="font-header text-3xl mb-2 text-white group-hover:text-[var(--acid)] transition-colors">Base_Upgrades</h3>
+                     <p class="font-mono text-sm text-gray-500 mb-6 max-w-sm">Hardware upgrades for the new HQ. Furniture & Tech.</p>
+                     <button class="border border-[var(--chrome)] text-[var(--chrome)] font-bold px-6 py-4 w-full hover:bg-[var(--acid)] hover:text-black hover:border-[var(--acid)] transition-colors font-mono uppercase tracking-widest">VIEW BLUEPRINTS</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section: Troubleshooting (FAQ) -->
+    <section id="troubleshooting" class="py-32 px-6 md:px-24 bg-[#0A0A0A] border-t border-[#222]">
+        <div class="container mx-auto max-w-3xl">
+            <h2 class="font-mono text-[var(--acid)] mb-16 tracking-widest uppercase">/// Troubleshooting (FAQ)</h2>
+
+            <div class="space-y-4">
+                <details class="group bg-[#111] border border-[#333] open:border-[var(--acid)] transition-colors hover-trigger cursor-none">
+                    <summary class="flex justify-between items-center p-6 font-header text-xl cursor-pointer select-none text-gray-300 group-hover:text-white">
+                        <span>ERROR: Plus_One_Not_Found</span>
+                        <span class="text-[var(--acid)] transform group-open:rotate-45 transition-transform">+</span>
+                    </summary>
+                    <div class="p-6 pt-0 font-mono text-sm text-gray-400 border-t border-[#222] mt-2">
+                        <p>RESOLUTION: Invitation matrix is strictly locked to addressed units only. Space constraints active.</p>
+                    </div>
+                </details>
+
+                <details class="group bg-[#111] border border-[#333] open:border-[var(--acid)] transition-colors hover-trigger cursor-none">
+                    <summary class="flex justify-between items-center p-6 font-header text-xl cursor-pointer select-none text-gray-300 group-hover:text-white">
+                        <span>QUERY: Child_Units_Allowed?</span>
+                        <span class="text-[var(--acid)] transform group-open:rotate-45 transition-transform">+</span>
+                    </summary>
+                    <div class="p-6 pt-0 font-mono text-sm text-gray-400 border-t border-[#222] mt-2">
+                        <p>RESOLUTION: Negative. This event is rated 18+. Child units must remain in stasis at home base.</p>
+                    </div>
+                </details>
+
+                <details class="group bg-[#111] border border-[#333] open:border-[var(--acid)] transition-colors hover-trigger cursor-none">
+                    <summary class="flex justify-between items-center p-6 font-header text-xl cursor-pointer select-none text-gray-300 group-hover:text-white">
+                        <span>QUERY: Transport_Vectors</span>
+                        <span class="text-[var(--acid)] transform group-open:rotate-45 transition-transform">+</span>
+                    </summary>
+                    <div class="p-6 pt-0 font-mono text-sm text-gray-400 border-t border-[#222] mt-2">
+                        <p>RESOLUTION: Shuttles depart from The Main Hub at 15:00 sharp. Do not be late or you will be left in the void.</p>
+                    </div>
+                </details>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section: Upload (RSVP) -->
+    <section id="upload" class="min-h-screen flex items-center justify-center py-24 px-6 relative overflow-hidden border-t border-[#222]">
+        <!-- Background Grid Animation -->
+        <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/diagmonds-light.png')] opacity-10 animate-pulse"></div>
+
+        <div class="tilt-element max-w-2xl w-full relative z-10 group">
+            <div class="terminal-card p-0 hover-trigger">
+                <!-- Terminal Header -->
+                <div class="terminal-header">
+                    <div class="dot bg-red-500"></div>
+                    <div class="dot bg-yellow-500"></div>
+                    <div class="dot bg-green-500"></div>
+                    <span class="ml-auto text-xs text-gray-500 font-mono">user@nexus:~/rsvp</span>
+                </div>
+                
+                <!-- Terminal Body -->
+                <div class="p-8 md:p-12 tilt-content">
+                    <h2 class="font-header text-4xl mb-2 uppercase text-[var(--acid)]">> Upload Data</h2>
+                    <p class="font-mono text-xs text-gray-500 mb-8">SECURE CONNECTION ESTABLISHED...</p>
+
+                    <form id="rsvp-form" class="space-y-6">
+                        <input type="hidden" name="_captcha" value="false">
+                        <input type="hidden" name="_subject" value="Nexus Wedding RSVP">
+
+                        <div class="grid grid-cols-2 gap-6">
+                            <div>
+                                <label class="block font-mono text-[10px] uppercase mb-2 text-gray-400">Unit_ID_1 (Name)</label>
+                                <input type="text" name="firstName" required class="cyber-input" placeholder="ENTER NAME">
+                            </div>
+                            <div>
+                                <label class="block font-mono text-[10px] uppercase mb-2 text-gray-400">Unit_ID_2 (Last)</label>
+                                <input type="text" name="lastName" required class="cyber-input" placeholder="ENTER NAME">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block font-mono text-[10px] uppercase mb-2 text-gray-400">Signal_Path (Email)</label>
+                            <input type="email" name="email" required class="cyber-input" placeholder="USER@NET.COM">
+                        </div>
+
+                        <div>
+                            <label class="block font-mono text-[10px] uppercase mb-2 text-gray-400">Directive</label>
+                            <div class="flex gap-4">
+                                <label class="flex-1 cursor-none">
+                                    <input type="radio" name="attendance" value="Execute" class="peer sr-only" checked>
+                                    <div class="cyber-input text-center hover:bg-[var(--acid)] hover:text-black peer-checked:bg-[var(--acid)] peer-checked:text-black transition-all">
+                                        EXECUTE
+                                    </div>
+                                </label>
+                                <label class="flex-1 cursor-none">
+                                    <input type="radio" name="attendance" value="Abort" class="peer sr-only">
+                                    <div class="cyber-input text-center hover:bg-red-500 hover:text-black peer-checked:bg-red-500 peer-checked:text-black transition-all">
+                                        ABORT
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="w-full bg-[var(--chrome)] text-black font-header font-bold text-xl py-4 hover:bg-[var(--acid)] transition-all shadow-[5px_5px_0px_#333] hover:shadow-[5px_5px_0px_white] hover:translate-x-[-2px] hover:translate-y-[-2px]">
+                            TRANSMIT PACKET
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-12 text-center border-t border-[#222]">
+        <h2 class="font-display text-2xl text-[#333]">NEXUS</h2>
+    </footer>
+
+    <!-- Terminal Success Modal -->
+    <div id="modal" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="border-2 border-[var(--acid)] p-8 max-w-sm w-full bg-black text-center relative overflow-hidden shadow-[0_0_50px_rgba(204,255,0,0.2)]">
+            <!-- Scanning Line Animation -->
+            <div class="absolute top-0 left-0 w-full h-1 bg-[var(--acid)] opacity-50 animate-[scan_2s_linear_infinite]"></div>
+            
+            <h3 class="font-header text-3xl text-[var(--acid)] mb-4">UPLOAD COMPLETE</h3>
+            <p class="font-mono text-sm text-gray-400 mb-8">Data packet received. Integration pending.</p>
+            <button id="close-modal" class="font-mono text-xs border border-[var(--acid)] text-[var(--acid)] px-6 py-2 hover:bg-[var(--acid)] hover:text-black transition-colors">TERMINATE</button>
+        </div>
+    </div>
+    
+    <style>
+        @keyframes scan {
+            0% { top: 0%; }
+            100% { top: 100%; }
+        }
+    </style>
+
+    <script>
+        // 1. Jelly Scroll (Velocity Skew)
+        let currentScroll = 0;
+        let skew = 0;
+        const skewElements = document.querySelectorAll('.skew-on-scroll');
+
+        function loop() {
+            const newScroll = window.scrollY;
+            const diff = newScroll - currentScroll;
+            
+            // Limit skew max/min
+            skew = diff * 0.15; // sensitivity
+            skew = Math.min(Math.max(skew, -10), 10); // cap at 10deg
+
+            skewElements.forEach(el => {
+                el.style.transform = `skewY(${skew}deg)`;
+            });
+
+            currentScroll = newScroll;
+            requestAnimationFrame(loop);
+        }
+        loop();
+
+
+        // 2. Liquid Distortion Filter (SVG)
+        // Dynamically animate the displacement map scale
+        const filter = document.querySelector('#displacement');
+        let frame = 0;
+        
+        function animateFilter() {
+            frame += 0.05;
+            // Oscillate scale slightly
+            const scale = 20 + Math.sin(frame) * 10; 
+            filter.setAttribute('scale', scale);
+            requestAnimationFrame(animateFilter);
+        }
+        animateFilter();
+
+
+        // 3. Custom Cursor Logic
+        const cursor = document.getElementById('cursor');
+        const triggers = document.querySelectorAll('.hover-trigger');
+
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+        });
+
+        triggers.forEach(trigger => {
+            trigger.addEventListener('mouseenter', () => cursor.classList.add('hovered'));
+            trigger.addEventListener('mouseleave', () => cursor.classList.remove('hovered'));
+        });
+
+
+        // 4. 3D Tilt for Terminal (Reused Logic)
+        const tiltElement = document.querySelector('.tilt-element');
+        const tiltContent = document.querySelector('.tilt-content');
+
+        if (window.matchMedia("(min-width: 768px)").matches && tiltElement) {
+            tiltElement.addEventListener('mousemove', (e) => {
+                const rect = tiltElement.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+                
+                const rotateX = ((y - centerY) / centerY) * -15; 
+                const rotateY = ((x - centerX) / centerX) * 15;
+
+                tiltElement.children[0].style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+            });
+
+            tiltElement.addEventListener('mouseleave', () => {
+                tiltElement.children[0].style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg)`;
+            });
+        }
+
+
+        // 5. Form Handling
+        const form = document.getElementById('rsvp-form');
+        const modal = document.getElementById('modal');
+        const closeModal = document.getElementById('close-modal');
+        const btn = form.querySelector('button');
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const originalText = btn.innerText;
+            btn.innerText = "UPLOADING...";
+            
+            const formData = new FormData(form);
+
+            fetch("https://formsubmit.co/ajax/shadowshah70@gmail.com", {
+                method: "POST",
+                body: formData,
+                headers: { 'Accept': 'application/json' }
+            })
+            .then(res => res.json())
+            .then(() => {
+                modal.classList.remove('opacity-0', 'pointer-events-none');
+                form.reset();
+            })
+            .catch(() => {
+                alert('Upload Failed.');
+            })
+            .finally(() => {
+                btn.innerText = originalText;
+            });
+        });
+
+        closeModal.addEventListener('click', () => {
+            modal.classList.add('opacity-0', 'pointer-events-none');
+        });
+
+        
+// 💒 1. Disable right-click
+document.addEventListener('contextmenu', e => e.preventDefault());
+
+// 💒 2. Disable inspect / save / print shortcuts
+document.addEventListener('keydown', e => {
+  if (
+    (e.ctrlKey && ['s','u','p','S','U','P'].includes(e.key)) || // Ctrl+S, Ctrl+U, Ctrl+P
+    e.key === 'F12' ||                                          // DevTools
+    (e.ctrlKey && e.shiftKey && ['I','J','C'].includes(e.key))  // Ctrl+Shift+I/J/C
+  ) {
+    e.preventDefault();
+    sparkle(e.clientX, e.clientY);
+  }
+});
+
+// 💒 3. Block drag saving of images
+document.addEventListener('dragstart', e => e.preventDefault());
+document.querySelectorAll('img').forEach(img => img.setAttribute('draggable', 'false'));
+
+// 💒 4. Disable text selection & copying
+document.addEventListener('copy', e => e.preventDefault());
+document.addEventListener('cut', e => e.preventDefault());
+document.addEventListener('selectstart', e => e.preventDefault());
+document.body.style.userSelect = 'none';
+document.body.style.webkitUserSelect = 'none';
+
+// 💒 5. Detect if DevTools is open
+setInterval(() => {
+  if (
+    window.outerWidth - window.innerWidth > 160 ||
+    window.outerHeight - window.innerHeight > 160
+  ) {
+    document.body.innerHTML = `
+      <div style="text-align:center;margin-top:20%;font-size:2rem;color:#d6336c;">
+        💖 Please close developer tools to continue 💖
+      </div>`;
+  }
+}, 1000);
+
+
+    </script>
+</body>
+</html><script>console.log('Hello JS');</script></body></html>

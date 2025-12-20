@@ -1,0 +1,908 @@
+<html><head><style>body { font-family: monospace; background:#141414; color:#fff; }</style></head><body><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced ASCII Drawing Board</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- Firebase Imports -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Set Firebase Globals so they can be accessed by the script
+        window.initializeApp = initializeApp;
+        window.getAuth = getAuth;
+        window.signInAnonymously = signInAnonymously;
+        window.signInWithCustomToken = signInWithCustomToken;
+        window.onAuthStateChanged = onAuthStateChanged;
+        window.getFirestore = getFirestore;
+        window.doc = doc;
+        window.setDoc = setDoc;
+        window.getDoc = getDoc;
+        window.setLogLevel = setLogLevel;
+    </script>
+    
+    <style>
+        /* Define a classic terminal aesthetic */
+        :root {
+            --bg-dark: #1f2937; /* Gray-800 */
+            --text-green: #34d399; /* Emerald-400 */
+            --accent-yellow: #facc15; /* Yellow-400 */
+            --canvas-bg: #000000;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-green);
+            font-family: 'Inter', monospace;
+        }
+
+        /* The core grid container */
+        #ascii-canvas {
+            display: grid;
+            font-family: 'Monospace', 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1; 
+            user-select: none;
+            background-color: var(--canvas-bg);
+            border: 4px solid var(--text-green);
+            box-shadow: 0 0 20px rgba(52, 211, 153, 0.5);
+            overflow: hidden;
+            touch-action: none; 
+            cursor: crosshair;
+        }
+        
+        /* Individual grid cell (single character) */
+        .cell {
+            text-align: center;
+            width: 100%; 
+            height: 100%;
+            min-height: 14px; 
+            padding: 0;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .tool-button {
+            transition: all 0.1s;
+            border: 2px solid var(--text-green);
+            background-color: var(--bg-dark);
+        }
+        .tool-button:hover {
+            background-color: #374151; /* Gray-700 */
+        }
+        .tool-button.active {
+            background-color: var(--text-green);
+            color: var(--bg-dark);
+            box-shadow: 0 0 8px var(--text-green);
+            font-weight: bold;
+        }
+
+        .action-button {
+            background-color: var(--accent-yellow);
+            color: var(--bg-dark);
+            border: 2px solid var(--text-green);
+            box-shadow: 4px 4px 0 0 var(--text-green);
+            transition: all 0.1s;
+        }
+
+        .action-button:active:not(:disabled) {
+            box-shadow: 1px 1px 0 0 var(--text-green);
+            transform: translate(3px, 3px);
+        }
+        
+        .action-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+
+        #live-output {
+            background-color: var(--canvas-bg);
+            border: 1px solid var(--text-green);
+            white-space: pre;
+            overflow: auto;
+            font-family: 'Monospace', monospace;
+            font-size: 12px;
+            color: var(--text-green);
+            padding: 8px;
+            border-radius: 8px;
+        }
+
+        /* Responsive Grid Setup */
+        @media (min-width: 640px) {
+            #ascii-canvas {
+                /* Desktop/Tablet: 50 columns */
+                grid-template-columns: repeat(50, 1fr);
+            }
+        }
+        @media (max-width: 639px) {
+            #ascii-canvas {
+                /* Mobile: Reduced to 30 columns for better fit */
+                grid-template-columns: repeat(30, 1fr);
+                font-size: 10px;
+            }
+        }
+    </style>
+</head>
+<body class="p-4 sm:p-8 flex flex-col items-center justify-center min-h-screen">
+
+    <div class="w-full max-w-5xl space-y-6">
+
+        <!-- Header and Title -->
+        <h1 class="text-3xl sm:text-4xl font-extrabold text-center text-white tracking-wider uppercase">
+            <span class="text-accent-yellow">A S C I I</span> Art Terminal 2.0
+        </h1>
+        <p id="auth-status" class="text-center text-xs text-gray-400"></p>
+
+        <!-- Controls Panel -->
+        <div class="p-4 bg-gray-800 rounded-xl border border-gray-700 shadow-lg space-y-4">
+            
+            <!-- Tool Selection & Character Input -->
+            <div class="flex flex-wrap items-center gap-4">
+                <span class="text-sm font-semibold text-gray-300 mr-2">Tools:</span>
+                
+                <!-- Pencil -->
+                <button id="tool-pencil" onclick="setTool('pencil')" class="tool-button active px-4 py-2 rounded-lg text-sm flex items-center">
+                    <i class="ph ph-pencil-simple text-lg mr-1"></i> Pencil
+                </button>
+                
+                <!-- Eraser -->
+                <button id="tool-eraser" onclick="setTool('eraser')" class="tool-button px-4 py-2 rounded-lg text-sm flex items-center">
+                    <i class="ph ph-eraser text-lg mr-1"></i> Eraser
+                </button>
+                
+                <!-- Fill Bucket -->
+                <button id="tool-fill" onclick="setTool('fill')" class="tool-button px-4 py-2 rounded-lg text-sm flex items-center">
+                    <i class="ph ph-paint-bucket text-lg mr-1"></i> Fill
+                </button>
+
+                <!-- Current Character Input -->
+                <div class="flex items-center space-x-2 ml-auto">
+                    <label for="char-input" class="text-sm font-semibold text-gray-300">Active Char:</label>
+                    <input id="char-input" type="text" maxlength="1" value="#"
+                           class="w-12 h-10 text-center font-bold text-lg rounded bg-gray-700 border-2 border-text-green focus:border-accent-yellow focus:outline-none"
+                           style="color: var(--text-green); font-family: 'Monospace', monospace;">
+                </div>
+            </div>
+            
+            <!-- Palette and History Controls -->
+            <div class="flex flex-wrap items-center gap-3 pt-3 border-t border-gray-700">
+                <span class="text-sm font-semibold text-gray-300 mr-2">Palette:</span>
+                <div id="palette-container" class="flex flex-wrap gap-2">
+                    <!-- Palette items inserted by JS -->
+                </div>
+
+                <div class="flex items-center gap-2 ml-auto">
+                    <!-- Undo/Redo -->
+                    <button id="undo-button" onclick="undo()" class="tool-button px-3 py-2 rounded-lg text-sm disabled:opacity-30" disabled>
+                        <i class="ph ph-arrow-counter-clockwise text-lg"></i>
+                    </button>
+                    <button id="redo-button" onclick="redo()" class="tool-button px-3 py-2 rounded-lg text-sm disabled:opacity-30" disabled>
+                        <i class="ph ph-arrow-clockwise text-lg"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Action and Persistence Buttons -->
+            <div class="flex flex-wrap items-center gap-3 pt-4 border-t border-gray-700">
+                 <!-- Grid Size Selector -->
+                 <div class="flex items-center space-x-2">
+                    <label for="size-input" class="text-sm font-semibold text-gray-300">Size (Cols):</label>
+                    <input id="size-input" type="number" min="10" max="100" value="50"
+                           class="w-16 h-10 text-center text-sm rounded bg-gray-700 border-2 border-gray-600 focus:outline-none focus:border-accent-yellow"
+                           style="color: var(--text-green);" onchange="resizeGrid(this.value)">
+                </div>
+                
+                <span id="size-display" class="font-mono text-sm text-accent-yellow mr-4">50 x 25</span>
+
+                <!-- Action Buttons -->
+                <div class="flex-grow flex gap-3 justify-end">
+                    <button onclick="clearGrid()" class="action-button px-4 py-2 rounded-lg font-bold flex items-center">
+                        <i class="ph ph-trash text-lg mr-1"></i> Clear
+                    </button>
+                    <button onclick="saveGrid()" class="action-button px-4 py-2 rounded-lg font-bold flex items-center">
+                        <i class="ph ph-floppy-disk text-lg mr-1"></i> Save
+                    </button>
+                    <button onclick="loadGrid()" class="action-button px-4 py-2 rounded-lg font-bold flex items-center">
+                        <i class="ph ph-upload-simple text-lg mr-1"></i> Load
+                    </button>
+                    <button onclick="copyToClipboard()" class="action-button px-4 py-2 rounded-lg font-bold flex items-center">
+                        <i class="ph ph-copy text-lg mr-1"></i> Copy Text
+                    </button>
+                </div>
+            </div>
+
+            <!-- Advanced Controls Toggle -->
+            <div class="pt-4 border-t border-gray-700">
+                <button onclick="toggleAdvancedControls()" class="w-full action-button px-4 py-2 rounded-lg font-bold flex items-center justify-center">
+                    Advanced Controls <i id="advanced-toggle-icon" class="ph ph-caret-down text-lg ml-2 transition-transform"></i>
+                </button>
+            </div>
+
+            <!-- Advanced Controls Panel (Initially Hidden) -->
+            <div id="advanced-controls" class="hidden pt-4 border-t border-gray-700 space-y-4">
+                <h3 class="text-lg font-semibold text-accent-yellow">Brush & Output Settings</h3>
+                
+                <!-- Brush Size -->
+                <div class="flex items-center gap-4">
+                    <label class="text-sm font-semibold text-gray-300">Brush Size (Pencil/Eraser):</label>
+                    <select id="brush-size" onchange="setBrushSize(this.value)"
+                            class="p-2 rounded bg-gray-700 border-2 border-gray-600 focus:outline-none focus:border-accent-yellow text-sm"
+                            style="color: var(--text-green);">
+                        <option value="1">1x1</option>
+                        <option value="2">2x2</option>
+                        <option value="3">3x3</option>
+                    </select>
+                    <span class="text-xs text-gray-400">Applies to Pencil & Eraser.</span>
+                </div>
+
+                <!-- Live Output Preview -->
+                <div class="space-y-2">
+                    <h4 class="text-sm font-semibold text-gray-300">Live Output Preview (Non-Editable)</h4>
+                    <pre id="live-output" class="w-full h-40"></pre>
+                </div>
+                
+                <!-- Import/Export Raw Text -->
+                <div class="space-y-2">
+                    <h4 class="text-sm font-semibold text-gray-300">Import / Export Raw Text</h4>
+                    <textarea id="export-textarea" 
+                              class="w-full h-32 p-2 rounded bg-gray-700 border-2 border-gray-600 font-mono text-sm focus:outline-none"
+                              style="color: var(--text-green); resize: vertical;"></textarea>
+                    <div class="flex gap-3">
+                        <button onclick="importArt()" class="action-button px-4 py-2 rounded-lg font-bold flex items-center">
+                            <i class="ph ph-arrow-circle-down text-lg mr-1"></i> Import Art
+                        </button>
+                        <button onclick="updateExportTextarea()" class="action-button px-4 py-2 rounded-lg font-bold flex items-center">
+                            <i class="ph ph-arrows-counter-clockwise text-lg mr-1"></i> Refresh Text
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+
+        <!-- ASCII Canvas -->
+        <div id="ascii-canvas-container" class="relative">
+            <div id="ascii-canvas" class="w-full mx-auto" style="aspect-ratio: 50 / 25;">
+                <!-- Grid Cells will be inserted here by JavaScript -->
+            </div>
+        </div>
+
+        <!-- Message Box Modal (for alert() replacement) -->
+        <div id="messageModal" class="fixed inset-0 bg-black bg-opacity-70 hidden items-center justify-center p-4 z-50">
+            <div class="bg-gray-800 p-6 rounded-xl shadow-2xl max-w-sm w-full border-4 border-accent-yellow text-center">
+                <h3 id="modalTitle" class="text-xl font-bold text-accent-yellow mb-3">Notice</h3>
+                <p id="modalMessage" class="text-gray-200 mb-4">Message content.</p>
+                <button onclick="hideModal()" class="action-button px-4 py-2 rounded-lg font-semibold">
+                    OK
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- Global Firebase Config (MUST BE USED) ---
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        let app, db, auth, userId = null;
+        let isAuthReady = false;
+
+        // --- Configuration & State ---
+        let GRID_SIZE = { COLS: 50, ROWS: 25 };
+        const MAX_ROWS = 100;
+
+        let asciiGrid = [];      // The current canvas state
+        let history = [];        // Array of past asciiGrid states
+        let historyIndex = -1;   // Current position in history
+        const MAX_HISTORY = 50;  // Limit history size
+
+        let isDrawing = false;
+        let currentTool = 'pencil'; // 'pencil', 'eraser', 'fill'
+        let currentColor = '#';
+        let currentBrushSize = 1; // New: 1, 2, or 3
+        let currentPalette = ['#', '█', '░', '/', '\\', '|', '-', '+', 'O', ' ']; // Includes space for erase
+
+        // --- DOM Elements ---
+        const canvas = document.getElementById('ascii-canvas');
+        const charInput = document.getElementById('char-input');
+        const sizeInput = document.getElementById('size-input');
+        const sizeDisplay = document.getElementById('size-display');
+        const paletteContainer = document.getElementById('palette-container');
+        const undoButton = document.getElementById('undo-button');
+        const redoButton = document.getElementById('redo-button');
+        const authStatus = document.getElementById('auth-status');
+        const advancedControls = document.getElementById('advanced-controls');
+        const advancedToggleIcon = document.getElementById('advanced-toggle-icon');
+        const brushSizeInput = document.getElementById('brush-size');
+        const exportTextarea = document.getElementById('export-textarea');
+        const liveOutput = document.getElementById('live-output');
+
+
+        // --- Utility Functions ---
+
+        function showModal(title, message) {
+            document.getElementById('modalTitle').textContent = title;
+            document.getElementById('modalMessage').textContent = message;
+            document.getElementById('messageModal').classList.remove('hidden');
+            document.getElementById('messageModal').classList.add('flex');
+        }
+
+        function hideModal() {
+            document.getElementById('messageModal').classList.remove('flex');
+            document.getElementById('messageModal').classList.add('hidden');
+        }
+        
+        function updateHistoryButtons() {
+            undoButton.disabled = historyIndex <= 0;
+            redoButton.disabled = historyIndex >= history.length - 1;
+        }
+        
+        function getAsciiText() {
+            return asciiGrid.map(row => row.join('')).join('\n');
+        }
+
+        // --- Firebase Initialization & Authentication (MUST be done first) ---
+
+        async function initFirebase() {
+            if (Object.keys(firebaseConfig).length === 0) {
+                authStatus.textContent = '===============';
+                isAuthReady = true;
+                return;
+            }
+
+            try {
+                // setLogLevel('debug'); // For debugging Firestore operations
+                app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+
+                // Sign in using custom token or anonymously
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
+
+                onAuthStateChanged(auth, (user) => {
+                    if (user) {
+                        userId = user.uid;
+                        authStatus.textContent = `Auth: Logged in (User ID: ${userId.substring(0, 8)}...)`;
+                    } else {
+                        userId = crypto.randomUUID();
+                        authStatus.textContent = `Auth: Anonymous (Guest ID: ${userId.substring(0, 8)}...)`;
+                    }
+                    isAuthReady = true;
+                });
+            } catch (error) {
+                console.error("Firebase Initialization Error:", error);
+                authStatus.textContent = 'Auth: Failed to initialize.';
+                isAuthReady = true;
+                // Continue application without persistence
+            }
+        }
+
+        // --- Grid Core Logic ---
+
+        function initGrid() {
+            // Read COLS from input field, clamp rows
+            const newCols = parseInt(sizeInput.value);
+            GRID_SIZE.COLS = newCols;
+            GRID_SIZE.ROWS = Math.round(newCols * 0.5); // Maintain 2:1 aspect ratio
+            GRID_SIZE.ROWS = Math.min(GRID_SIZE.ROWS, MAX_ROWS);
+
+            // Update display
+            sizeDisplay.textContent = `${GRID_SIZE.COLS} x ${GRID_SIZE.ROWS}`;
+            
+            // Re-initialize the 2D array with spaces
+            asciiGrid = Array.from({ length: GRID_SIZE.ROWS }, () => 
+                Array(GRID_SIZE.COLS).fill(' ')
+            );
+            
+            // Render the grid structure
+            renderGrid();
+            
+            // Save initial state to history (for immediate undo)
+            saveState();
+        }
+
+        function renderGrid() {
+            canvas.style.gridTemplateColumns = `repeat(${GRID_SIZE.COLS}, 1fr)`;
+            canvas.innerHTML = ''; 
+
+            for (let r = 0; r < GRID_SIZE.ROWS; r++) {
+                for (let c = 0; c < GRID_SIZE.COLS; c++) {
+                    const cell = document.createElement('span');
+                    cell.className = 'cell';
+                    cell.id = `cell-${r}-${c}`;
+                    cell.textContent = asciiGrid[r][c];
+                    cell.dataset.row = r;
+                    cell.dataset.col = c;
+                    canvas.appendChild(cell);
+                }
+            }
+            updateLivePreview(); // New: Update preview after re-rendering grid
+        }
+        
+        function updateLivePreview() {
+            liveOutput.textContent = getAsciiText();
+            updateExportTextarea(); // Also keep export area updated
+        }
+
+        // --- Persistence (Firestore) ---
+
+        function getDocPath() {
+            if (!userId || !db) return null;
+            // Private User Data Path: /artifacts/{appId}/users/{userId}/{your_collection_name}/{documentId}
+            return doc(db, `artifacts/${appId}/users/${userId}/ascii_art/latest`);
+        }
+
+        async function saveGrid() {
+            if (!isAuthReady || !db) {
+                showModal("Save Failed", "Firebase is not initialized or authenticated yet.");
+                return;
+            }
+            try {
+                // Flatten the 2D array into a single string for storage simplicity
+                const flatGrid = getAsciiText();
+                
+                const data = {
+                    gridData: flatGrid,
+                    cols: GRID_SIZE.COLS,
+                    rows: GRID_SIZE.ROWS,
+                    timestamp: new Date().toISOString()
+                };
+
+                await setDoc(getDocPath(), data);
+                showModal("Save Successful", "Your ASCII art has been saved to the cloud!");
+            } catch (e) {
+                console.error("Error saving document:", e);
+                showModal("Save Error", "Could not save art. Check console for details.");
+            }
+        }
+
+        async function loadGrid() {
+            if (!isAuthReady || !db) {
+                showModal("Load Failed", "Firebase is not initialized or authenticated yet.");
+                return;
+            }
+            try {
+                const docSnap = await getDoc(getDocPath());
+
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    const flatGrid = data.gridData;
+                    
+                    // Reconstruct the 2D array
+                    const rowsData = flatGrid.split('\n');
+                    
+                    // Adjust grid size to loaded size
+                    GRID_SIZE.COLS = data.cols;
+                    GRID_SIZE.ROWS = data.rows;
+                    sizeInput.value = data.cols;
+                    sizeDisplay.textContent = `${GRID_SIZE.COLS} x ${GRID_SIZE.ROWS}`;
+
+                    // Populate the grid array
+                    asciiGrid = rowsData.map(rowStr => Array.from(rowStr.padEnd(GRID_SIZE.COLS, ' ')).slice(0, GRID_SIZE.COLS));
+
+                    // Re-render the canvas entirely
+                    renderGrid();
+                    clearHistory();
+                    saveState();
+                    showModal("Load Successful", "Your latest ASCII art has been loaded!");
+                } else {
+                    showModal("Load Failed", "No saved art found for this user.");
+                }
+            } catch (e) {
+                console.error("Error loading document:", e);
+                showModal("Load Error", "Could not load art. Check console for details.");
+            }
+        }
+        
+        // --- History / Undo/Redo ---
+        
+        function saveState() {
+            // Truncate history if we're not at the latest point
+            if (historyIndex < history.length - 1) {
+                history = history.slice(0, historyIndex + 1);
+            }
+
+            // Create a deep copy of the current grid state
+            const state = asciiGrid.map(row => [...row]);
+            history.push(state);
+            historyIndex++;
+
+            // Limit history size
+            if (history.length > MAX_HISTORY) {
+                history.shift();
+                historyIndex--;
+            }
+            updateHistoryButtons();
+        }
+
+        function clearHistory() {
+            history = [];
+            historyIndex = -1;
+            updateHistoryButtons();
+        }
+        
+        function applyState(newIndex) {
+            historyIndex = newIndex;
+            const state = history[historyIndex];
+            
+            // Reconstruct the grid and render
+            GRID_SIZE.COLS = state[0].length;
+            GRID_SIZE.ROWS = state.length;
+            sizeInput.value = GRID_SIZE.COLS;
+            sizeDisplay.textContent = `${GRID_SIZE.COLS} x ${GRID_SIZE.ROWS}`;
+            
+            asciiGrid = state.map(row => [...row]);
+            renderGrid();
+            updateHistoryButtons();
+            updateLivePreview(); // New: Update preview after state change
+        }
+
+        function undo() {
+            if (historyIndex > 0) {
+                applyState(historyIndex - 1);
+            }
+        }
+
+        function redo() {
+            if (historyIndex < history.length - 1) {
+                applyState(historyIndex + 1);
+            }
+        }
+
+        // --- Tools and Drawing Logic ---
+        
+        function setTool(toolName) {
+            currentTool = toolName;
+            
+            // Update button styles
+            document.querySelectorAll('.tool-button').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`tool-${toolName}`).classList.add('active');
+            
+            // Set cursor based on tool
+            canvas.style.cursor = (toolName === 'fill') ? 'bucket' : 'crosshair';
+        }
+        
+        function setCharacter(char) {
+            currentColor = char.trim().charAt(0) || ' ';
+            charInput.value = currentColor;
+            setTool('pencil'); // Switch back to pencil automatically
+        }
+        
+        function setBrushSize(size) {
+            currentBrushSize = parseInt(size);
+        }
+
+        /**
+         * Draws a brush stroke (1x1, 2x2, or 3x3) centered at (rCenter, cCenter).
+         */
+        function drawBrush(rCenter, cCenter) {
+            let charToDraw;
+            if (currentTool === 'eraser') {
+                charToDraw = ' ';
+            } else if (currentTool === 'pencil') {
+                charToDraw = currentColor;
+            } else {
+                return; // Only pencil and eraser use the brush
+            }
+
+            const halfSize = Math.floor(currentBrushSize / 2);
+            let hasChanged = false;
+            
+            for (let r = rCenter - halfSize; r <= rCenter + halfSize; r++) {
+                for (let c = cCenter - halfSize; c <= cCenter + halfSize; c++) {
+                    // Bounds check
+                    if (r >= 0 && r < GRID_SIZE.ROWS && c >= 0 && c < GRID_SIZE.COLS) {
+                        if (asciiGrid[r][c] !== charToDraw) {
+                            asciiGrid[r][c] = charToDraw;
+                            const cellElement = document.getElementById(`cell-${r}-${c}`);
+                            if (cellElement) {
+                                cellElement.textContent = charToDraw;
+                            }
+                            hasChanged = true;
+                        }
+                    }
+                }
+            }
+            
+            if (hasChanged) {
+                updateLivePreview();
+            }
+        }
+        
+        /**
+         * Flood fills a region starting from (r, c).
+         */
+        function fillBucket(r, c) {
+            const targetChar = asciiGrid[r][c];
+            if (targetChar === currentColor) return; // Already the desired character
+
+            const queue = [[r, c]];
+            const cellsToUpdate = [];
+
+            while (queue.length > 0) {
+                const [row, col] = queue.shift();
+
+                // Bounds check
+                if (row < 0 || row >= GRID_SIZE.ROWS || col < 0 || col >= GRID_SIZE.COLS) continue;
+
+                // Color check
+                if (asciiGrid[row][col] !== targetChar) continue;
+
+                // Update and mark as visited 
+                asciiGrid[row][col] = currentColor;
+                cellsToUpdate.push({r: row, c: col});
+
+                // Add neighbors to the queue
+                queue.push([row + 1, col]);
+                queue.push([row - 1, col]);
+                queue.push([row, col + 1]);
+                queue.push([row, col - 1]);
+            }
+            
+            // Re-render only the affected cells for performance
+            cellsToUpdate.forEach(({r, c}) => {
+                const cellElement = document.getElementById(`cell-${r}-${c}`);
+                if (cellElement) {
+                    cellElement.textContent = currentColor;
+                }
+            });
+            
+            updateLivePreview();
+            saveState();
+        }
+
+
+        // --- Event Handlers ---
+
+        function handlePointerDown(e) {
+            e.preventDefault();
+            const cellElement = e.target.closest('.cell');
+            if (!cellElement) return;
+            
+            const r = parseInt(cellElement.dataset.row);
+            const c = parseInt(cellElement.dataset.col);
+
+            if (currentTool === 'fill') {
+                saveState(); // Save state before fill operation
+                fillBucket(r, c);
+                return;
+            }
+            
+            // Start drawing (pencil/eraser)
+            isDrawing = true;
+            drawBrush(r, c); // Use drawBrush now
+            canvas.setPointerCapture(e.pointerId); 
+            
+            // Save state after the first draw action in the drag sequence
+            saveState();
+        }
+
+        function handlePointerMove(e) {
+            if (!isDrawing) return;
+            const element = document.elementFromPoint(e.clientX, e.clientY);
+            if (element && element.classList.contains('cell')) {
+                const r = parseInt(element.dataset.row);
+                const c = parseInt(element.dataset.col);
+                drawBrush(r, c); // Use drawBrush now
+            }
+        }
+
+        function handlePointerUp(e) {
+            if (isDrawing) {
+                isDrawing = false;
+            }
+            if (e.pointerId !== undefined) {
+                canvas.releasePointerCapture(e.pointerId);
+            }
+        }
+        
+        function toggleAdvancedControls() {
+            const isHidden = advancedControls.classList.toggle('hidden');
+            if (isHidden) {
+                advancedToggleIcon.classList.remove('rotate-180');
+            } else {
+                advancedToggleIcon.classList.add('rotate-180');
+            }
+        }
+        
+        function importArt() {
+            const text = exportTextarea.value;
+            if (!text) {
+                showModal("Import Failed", "The text area is empty. Paste your ASCII art first.");
+                return;
+            }
+
+            // Save current state for undo
+            saveState();
+
+            const lines = text.split('\n');
+            const newRows = lines.length;
+            
+            // Determine the maximum width needed
+            const newCols = lines.reduce((max, line) => Math.max(max, Array.from(line).length), 0);
+            
+            if (newCols > 100 || newRows > 100) {
+                 showModal("Import Failed", `Maximum size is 100x100. This art is ${newCols}x${newRows}.`);
+                 return;
+            }
+
+            // Apply new grid dimensions
+            GRID_SIZE.COLS = newCols;
+            GRID_SIZE.ROWS = newRows;
+            sizeInput.value = newCols;
+            sizeDisplay.textContent = `${GRID_SIZE.COLS} x ${GRID_SIZE.ROWS}`;
+
+            // Initialize new grid array
+            asciiGrid = Array.from({ length: GRID_SIZE.ROWS }, () => 
+                Array(GRID_SIZE.COLS).fill(' ')
+            );
+
+            // Copy imported lines into the new grid
+            for (let r = 0; r < newRows; r++) {
+                const line = Array.from(lines[r]);
+                for (let c = 0; c < GRID_SIZE.COLS; c++) {
+                    if (line[c]) {
+                        asciiGrid[r][c] = line[c];
+                    }
+                }
+            }
+
+            renderGrid();
+            updateLivePreview();
+            showModal("Import Successful", `Art imported! Grid resized to ${newCols}x${newRows}.`);
+        }
+        
+        function updateExportTextarea() {
+            exportTextarea.value = getAsciiText();
+        }
+
+
+        // --- Control Functions ---
+
+        function clearGrid() {
+            saveState();
+            initGrid(); // Re-initializes with spaces and saves state
+        }
+        
+        function resizeGrid(newCols) {
+            newCols = parseInt(newCols);
+            if (isNaN(newCols) || newCols < 10 || newCols > 100) {
+                showModal("Invalid Size", "Columns must be between 10 and 100.");
+                sizeInput.value = GRID_SIZE.COLS; // Reset input field
+                return;
+            }
+            saveState();
+            initGrid();
+        }
+
+        function copyToClipboard() {
+            const asciiText = getAsciiText();
+            
+            // Also update the export textarea
+            exportTextarea.value = asciiText;
+
+            navigator.clipboard.writeText(asciiText)
+                .then(() => showModal("Copied!", "ASCII art copied to clipboard as plain text."))
+                .catch(err => {
+                    console.error('Copy failed, using fallback:', err);
+                    const tempInput = document.createElement('textarea');
+                    tempInput.value = asciiText;
+                    document.body.appendChild(tempInput);
+                    tempInput.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(tempInput);
+                    showModal("Copied!", "ASCII art copied via old-school method.");
+                });
+        }
+        
+        // --- Initialization and Event Setup ---
+
+        function setupListeners() {
+            // Input change listener for active character
+            charInput.addEventListener('input', (e) => setCharacter(e.target.value));
+
+            // Drawing Listeners on the canvas container
+            canvas.addEventListener('pointerdown', handlePointerDown);
+            canvas.addEventListener('pointermove', handlePointerMove);
+            document.addEventListener('pointerup', handlePointerUp);
+        }
+        
+        function renderPalette() {
+            paletteContainer.innerHTML = '';
+            currentPalette.forEach(char => {
+                const btn = document.createElement('button');
+                btn.textContent = char === ' ' ? 'SPC' : char;
+                btn.className = `tool-button px-3 py-1 rounded-md text-lg font-mono hover:bg-gray-700`;
+                btn.onclick = () => setCharacter(char);
+                paletteContainer.appendChild(btn);
+            });
+        }
+
+        // --- Execution ---
+        initFirebase().then(() => {
+            // Initialize grid after auth is set up
+            initGrid();
+            renderPalette();
+            setupListeners();
+            brushSizeInput.value = currentBrushSize; // Ensure select matches state
+        });
+
+        
+// 💒 1. Disable right-click
+document.addEventListener('contextmenu', e => e.preventDefault());
+
+// 💒 2. Disable inspect / save / print shortcuts
+document.addEventListener('keydown', e => {
+  if (
+    (e.ctrlKey && ['s','u','p','S','U','P'].includes(e.key)) || // Ctrl+S, Ctrl+U, Ctrl+P
+    e.key === 'F12' ||                                          // DevTools
+    (e.ctrlKey && e.shiftKey && ['I','J','C'].includes(e.key))  // Ctrl+Shift+I/J/C
+  ) {
+    e.preventDefault();
+    sparkle(e.clientX, e.clientY);
+  }
+});
+
+// 💒 3. Block drag saving of images
+document.addEventListener('dragstart', e => e.preventDefault());
+document.querySelectorAll('img').forEach(img => img.setAttribute('draggable', 'false'));
+
+// 💒 4. Disable text selection & copying
+document.addEventListener('copy', e => e.preventDefault());
+document.addEventListener('cut', e => e.preventDefault());
+document.addEventListener('selectstart', e => e.preventDefault());
+document.body.style.userSelect = 'none';
+document.body.style.webkitUserSelect = 'none';
+
+// 💒 5. Detect if DevTools is open
+setInterval(() => {
+  if (
+    window.outerWidth - window.innerWidth > 160 ||
+    window.outerHeight - window.innerHeight > 160
+  ) {
+    document.body.innerHTML = `
+      <div style="text-align:center;margin-top:20%;font-size:2rem;color:#d6336c;">
+        💖 Please close developer tools to continue 💖
+      </div>`;
+  }
+}, 1000);
+
+        
+        // Expose controls to global scope for HTML calls
+        window.setTool = setTool;
+        window.clearGrid = clearGrid;
+        window.resizeGrid = resizeGrid;
+        window.copyToClipboard = copyToClipboard;
+        window.saveGrid = saveGrid;
+        window.loadGrid = loadGrid;
+        window.undo = undo;
+        window.redo = redo;
+        window.hideModal = hideModal;
+        window.toggleAdvancedControls = toggleAdvancedControls; // New
+        window.setBrushSize = setBrushSize; // New
+        window.importArt = importArt; // New
+        window.updateExportTextarea = updateExportTextarea; // New
+        
+    </script>
+    
+    <!-- Phosphor Icon Library -->
+    <script src="https://unpkg.com/@phosphor-icons/web@2.0.3/dist/index_sans_css.js"></script>
+</body>
+</html>
+<script>console.log('Hello JS');</script></body></html>

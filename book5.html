@@ -1,0 +1,1358 @@
+<html><head><style>body { font-family: monospace; background:#141414; color:#fff; }</style></head><body><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Echo of Silence | Elias Vance</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Lora:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Light Theme (Default) */
+            --text-main: #1f2937;
+            --text-secondary: #4b5563;
+            --bg: #ffffff;
+            --bg-secondary: #f9fafb;
+            --bg-tertiary: #f3f4f6;
+            --accent: #111827; 
+            --accent-inverse: #ffffff;
+            --border: #e5e7eb;
+            --highlight: #e5e7eb;
+            --progress-color: #1f2937;
+        }
+
+        /* Dark Theme overrides */
+        [data-theme="dark"] {
+            --text-main: #f9fafb;
+            --text-secondary: #9ca3af;
+            --bg: #111827;
+            --bg-secondary: #1f2937;
+            --bg-tertiary: #374151;
+            --accent: #ffffff;
+            --accent-inverse: #111827;
+            --border: #374151;
+            --highlight: #374151;
+            --progress-color: #ffffff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--text-main);
+            background: var(--bg);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        h1, h2, h3, h4 {
+            font-family: 'Lora', serif;
+            color: var(--text-main);
+            line-height: 1.2;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+            transition: color 0.2s;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        /* Feature 4: Reading Progress Bar */
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 4px;
+            background: var(--progress-color);
+            width: 0%;
+            z-index: 1002;
+            transition: width 0.1s;
+        }
+
+        /* Utilities */
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        .fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+        }
+
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-block;
+            padding: 14px 28px;
+            background: var(--accent);
+            color: var(--accent-inverse);
+            font-weight: 500;
+            border-radius: 4px;
+            transition: all 0.2s;
+            border: 1px solid var(--accent);
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            background: var(--bg);
+            color: var(--accent);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 14px 28px;
+            border-radius: 4px;
+            font-weight: 500;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .btn-outline:hover {
+            border-color: var(--text-main);
+            background: var(--bg-secondary);
+        }
+
+        .btn-sm {
+            padding: 8px 16px;
+            font-size: 0.85rem;
+        }
+
+        /* Navigation */
+        nav {
+            padding: 20px 0;
+            background: var(--bg);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+
+        .nav-inner {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-family: 'Lora', serif;
+            font-weight: 600;
+            font-size: 1.25rem;
+            letter-spacing: -0.02em;
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 32px;
+        }
+
+        .nav-links a {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .nav-links a:hover {
+            color: var(--text-main);
+        }
+
+        /* Feature 4: Theme Toggle */
+        .theme-toggle {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4px;
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            cursor: pointer;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .bar {
+            width: 24px;
+            height: 2px;
+            background-color: var(--text-main);
+            transition: 0.3s;
+        }
+
+        .mobile-menu {
+            position: fixed;
+            top: 70px;
+            left: 0;
+            width: 100%;
+            background: var(--bg);
+            border-bottom: 1px solid var(--border);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            transform: translateY(-150%);
+            transition: transform 0.3s ease-in-out, background-color 0.3s ease;
+            z-index: 90;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .mobile-menu.active {
+            transform: translateY(0);
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 80px 0 60px;
+        }
+
+        .hero-grid {
+            display: grid;
+            grid-template-columns: 1.1fr 0.9fr;
+            gap: 80px;
+            align-items: center;
+        }
+
+        .hero-content h1 {
+            font-size: 3.75rem;
+            margin-bottom: 24px;
+            line-height: 1.1;
+            letter-spacing: -0.02em;
+        }
+
+        .subtitle {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            margin-bottom: 32px;
+            font-weight: 400;
+            max-width: 500px;
+        }
+
+        .hero-actions {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 40px;
+            align-items: center;
+        }
+
+        /* Feature 1: Audio Player (Minimal) */
+        .audio-player-wrapper {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 16px;
+            border: 1px solid var(--border);
+            border-radius: 50px;
+            margin-bottom: 32px;
+            background: var(--bg-secondary);
+            cursor: pointer;
+            transition: border-color 0.3s, background-color 0.3s;
+        }
+
+        .audio-player-wrapper:hover {
+            border-color: var(--text-main);
+        }
+
+        .audio-player-wrapper.playing {
+            border-color: var(--accent);
+            background: var(--bg);
+        }
+
+        .play-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--text-main);
+            color: var(--bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            transition: transform 0.2s;
+        }
+
+        .audio-label {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-main);
+            min-width: 160px; /* Prevent layout shift */
+        }
+
+        /* Audio Wave Animation */
+        .sound-wave {
+            display: flex;
+            gap: 3px;
+            height: 16px;
+            align-items: center;
+        }
+
+        .sound-bar {
+            width: 3px;
+            background: var(--text-secondary);
+            border-radius: 2px;
+            height: 4px;
+            transition: height 0.2s, background-color 0.2s;
+        }
+
+        .audio-player-wrapper.playing .sound-bar {
+            background: var(--accent);
+            animation: wave 1s infinite ease-in-out;
+        }
+
+        @keyframes wave {
+            0%, 100% { height: 4px; }
+            50% { height: 16px; }
+        }
+
+        .audio-player-wrapper.playing .sound-bar:nth-child(1) { animation-delay: 0.0s; }
+        .audio-player-wrapper.playing .sound-bar:nth-child(2) { animation-delay: 0.2s; }
+        .audio-player-wrapper.playing .sound-bar:nth-child(3) { animation-delay: 0.4s; }
+        .audio-player-wrapper.playing .sound-bar:nth-child(4) { animation-delay: 0.1s; }
+        .audio-player-wrapper.playing .sound-bar:nth-child(5) { animation-delay: 0.3s; }
+
+        .hero-meta {
+            display: flex;
+            gap: 40px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            border-top: 1px solid var(--border);
+            padding-top: 24px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .hero-image-wrapper {
+            position: relative;
+            background: var(--bg-secondary);
+            border-radius: 4px;
+            box-shadow: 0 30px 60px -15px rgba(0,0,0,0.1);
+            transform: rotate(-2deg);
+            transition: transform 0.5s ease;
+        }
+
+        .hero-image-wrapper:hover {
+            transform: rotate(0deg) scale(1.02);
+        }
+
+        /* Feature 3: Countdown Timer */
+        .countdown-container {
+            background: var(--bg-secondary);
+            padding: 40px 0;
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            text-align: center;
+        }
+
+        .countdown-title {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+        }
+
+        .countdown-grid {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+        }
+
+        .count-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .count-val {
+            font-family: 'Lora', serif;
+            font-size: 2.5rem;
+            line-height: 1;
+            color: var(--text-main);
+        }
+
+        .count-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 8px;
+        }
+
+        /* Section Generic */
+        .section {
+            padding: 100px 0;
+        }
+
+        .section-header {
+            text-align: center;
+            max-width: 600px;
+            margin: 0 auto 64px;
+        }
+
+        .section-header h2 {
+            font-size: 2.5rem;
+            margin-bottom: 16px;
+        }
+
+        /* About / Text */
+        .text-block {
+            max-width: 700px;
+            margin: 0 auto;
+            font-family: 'Lora', serif;
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            line-height: 1.8;
+        }
+
+        .text-block p {
+            margin-bottom: 24px;
+        }
+
+        .drop-cap {
+            float: left;
+            font-size: 4rem;
+            line-height: 0.8;
+            margin-right: 12px;
+            margin-top: 4px;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        /* New Feature: Atmospheric Moodboard */
+        .moodboard-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 24px;
+            margin-top: 60px;
+        }
+
+        .mood-item {
+            position: relative;
+            overflow: hidden;
+            border-radius: 4px;
+        }
+
+        .mood-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.7s ease;
+            filter: grayscale(20%);
+        }
+
+        .mood-item:hover img {
+            transform: scale(1.05);
+            filter: grayscale(0%);
+        }
+
+        /* Grid Layout for images */
+        .mood-1 { grid-column: span 8; height: 400px; }
+        .mood-2 { grid-column: span 4; height: 400px; }
+        .mood-3 { grid-column: span 4; height: 300px; }
+        .mood-4 { grid-column: span 4; height: 300px; }
+        .mood-5 { grid-column: span 4; height: 300px; }
+
+        /* Reviews */
+        .reviews {
+            background: var(--bg-secondary);
+            padding: 100px 0;
+        }
+
+        .reviews-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 32px;
+        }
+
+        .review-card {
+            background: var(--bg);
+            padding: 40px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            transition: transform 0.3s ease;
+        }
+
+        .review-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px -10px rgba(0,0,0,0.05);
+        }
+
+        .stars {
+            color: var(--text-main);
+            font-size: 1rem;
+            margin-bottom: 20px;
+            letter-spacing: 2px;
+        }
+
+        .quote {
+            font-size: 1.1rem;
+            margin-bottom: 24px;
+            font-style: italic;
+            color: var(--text-main);
+            line-height: 1.6;
+        }
+
+        .source {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        /* Feature 3: Book Tour Table */
+        .tour-table-wrapper {
+            max-width: 900px;
+            margin: 0 auto;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .tour-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr auto;
+            padding: 24px;
+            border-bottom: 1px solid var(--border);
+            align-items: center;
+            background: var(--bg);
+            transition: background 0.2s;
+        }
+
+        .tour-row:last-child {
+            border-bottom: none;
+        }
+
+        .tour-row:hover {
+            background: var(--bg-secondary);
+        }
+
+        .tour-date { font-weight: 600; color: var(--text-main); }
+        .tour-city { color: var(--text-secondary); }
+        .tour-venue { color: var(--text-secondary); font-style: italic; font-family: 'Lora', serif; }
+
+        /* Feature 3: FAQ Accordion */
+        .faq-grid {
+            max-width: 800px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        details {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        summary {
+            padding: 24px;
+            cursor: pointer;
+            font-weight: 600;
+            list-style: none;
+            position: relative;
+            padding-right: 40px;
+        }
+
+        summary::-webkit-details-marker {
+            display: none;
+        }
+
+        summary::after {
+            content: '+';
+            position: absolute;
+            right: 24px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-weight: 400;
+            font-size: 1.5rem;
+        }
+
+        details[open] summary::after {
+            content: '-';
+        }
+
+        .faq-content {
+            padding: 0 24px 24px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            border-top: 1px solid var(--border);
+            padding-top: 16px;
+        }
+
+        /* Author */
+        .author-grid {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 80px;
+            align-items: center;
+        }
+
+        .author-img {
+            border-radius: 4px;
+            aspect-ratio: 3/4;
+            object-fit: cover;
+            filter: grayscale(100%);
+            transition: filter 0.5s ease;
+        }
+
+        .author-img:hover {
+            filter: grayscale(0%);
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5); /* Simple tint */
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .modal-content {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            width: 90%;
+            max-width: 700px;
+            max-height: 80vh;
+            overflow-y: auto;
+            padding: 60px;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.2);
+            position: relative;
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: translateY(0);
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: transparent;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-secondary);
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background-color: var(--accent);
+            color: var(--accent-inverse);
+            padding: 16px 32px;
+            border-radius: 50px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            opacity: 0;
+            transition: all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+            z-index: 2000;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--accent);
+            color: var(--accent-inverse);
+            padding: 100px 0 40px;
+            text-align: center;
+        }
+
+        .footer-content {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        footer h2 {
+            color: var(--accent-inverse);
+            font-size: 2.5rem;
+            margin-bottom: 16px;
+        }
+
+        .newsletter {
+            display: flex;
+            gap: 8px;
+            margin: 40px 0 64px;
+        }
+
+        .newsletter input {
+            flex: 1;
+            padding: 14px 20px;
+            border-radius: 4px;
+            border: none;
+            outline: none;
+            font-family: 'Inter', sans-serif;
+            font-size: 1rem;
+        }
+
+        .newsletter button {
+            background: var(--bg);
+            color: var(--text-main);
+            border: none;
+            padding: 14px 28px;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .newsletter button:hover {
+            background: var(--highlight);
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 32px;
+            color: #9CA3AF;
+            font-size: 0.9rem;
+        }
+
+        .footer-links a:hover {
+            color: white;
+        }
+
+        /* Feature 4: Sticky Buy Bar */
+        .sticky-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: var(--bg);
+            border-top: 1px solid var(--border);
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+            z-index: 99;
+            box-shadow: 0 -4px 10px rgba(0,0,0,0.05);
+        }
+
+        .sticky-bar.visible {
+            transform: translateY(0);
+        }
+
+        .sticky-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .nav-links { display: none; }
+            .mobile-menu-btn { display: flex; }
+            
+            .hero-grid, .reviews-grid, .author-grid {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+            
+            .hero-content { order: 2; text-align: center; }
+            .hero-image-wrapper { order: 1; max-width: 280px; margin: 0 auto; transform: rotate(0deg); }
+            
+            .hero-actions { justify-content: center; flex-direction: column; }
+            .audio-player-wrapper { display: inline-flex; } 
+            .hero-meta { justify-content: center; font-size: 0.75rem; }
+            
+            .section { padding: 80px 0; }
+            
+            h1 { font-size: 2.75rem; }
+            
+            .modal-content { padding: 30px; }
+
+            .tour-row {
+                grid-template-columns: 1fr;
+                gap: 8px;
+                text-align: center;
+            }
+            .tour-row > * { text-align: center; }
+            
+            .sticky-info { display: none; } 
+            .sticky-bar { justify-content: center; }
+
+            .mood-1, .mood-2, .mood-3, .mood-4, .mood-5 {
+                grid-column: span 12;
+                height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Feature 4: Progress Bar -->
+    <div class="progress-bar" id="progressBar"></div>
+
+    <!-- Nav -->
+    <nav>
+        <div class="container nav-inner">
+            <a href="#" class="logo">ELIAS VANCE</a>
+            
+            <!-- Desktop Menu -->
+            <div class="nav-links">
+                <a href="#tour">Tour</a>
+                <a href="#reviews">Reviews</a>
+                <a href="#author">Author</a>
+                <a href="#faq">FAQ</a>
+            </div>
+
+            <div class="nav-actions">
+                <!-- Feature 4: Dark Mode Toggle -->
+                <button class="theme-toggle" id="themeToggle" title="Toggle Theme">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                </button>
+
+                <a href="#buy" class="btn btn-sm" style="display: none;">Buy</a> 
+
+                <!-- Feature 1: Mobile Menu Toggle -->
+                <button class="mobile-menu-btn" id="mobileToggle">
+                    <div class="bar"></div>
+                    <div class="bar"></div>
+                    <div class="bar"></div>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Feature 1: Mobile Menu Overlay -->
+    <div class="mobile-menu" id="mobileMenu">
+        <a href="#tour" onclick="toggleMobileMenu()">Tour</a>
+        <a href="#reviews" onclick="toggleMobileMenu()">Reviews</a>
+        <a href="#author" onclick="toggleMobileMenu()">Author</a>
+        <a href="#faq" onclick="toggleMobileMenu()">FAQ</a>
+        <a href="#buy" onclick="toggleMobileMenu()" style="font-weight: 600;">Buy Now</a>
+    </div>
+
+    <!-- Feature 3: Prologue Modal -->
+    <div class="modal-overlay" id="prologueModal">
+        <div class="modal-content">
+            <button class="close-modal" id="closeModal">&times;</button>
+            <h3 style="text-align: center; margin-bottom: 30px; font-size: 1.8rem;">Prologue: The Tide</h3>
+            <div class="text-block" style="font-size: 1.1rem;">
+                <p>The lighthouse had been dark for thirty years. That was the official story. The story written in the town archives, printed in the tourist brochures, and muttered by the fishermen who drank too much at The Rusty Anchor.</p>
+                <p>But Clara knew different. Because Clara was watching it burn.</p>
+                <p>Not with fire. Fire would have been clean. Fire would have been loud. This was a cold burn, a silent, white phosphorescence that seemed to eat the stone from the inside out. It pulsed like a heartbeat, slow and rhythmic, matching the pounding in her own chest.</p>
+                <p>She tightened her grip on the railing of the cliff walk. The wind here didn't just blow; it bit. It carried the taste of salt and... something else. Ash? No, darker. Old earth and things that had been buried too long.</p>
+                <div style="text-align: center; margin-top: 40px;">
+                    <a href="#buy" class="btn" style="width: 100%;" onclick="document.getElementById('prologueModal').classList.remove('active')">Pre-order to Continue Reading</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hero -->
+    <header class="hero fade-in">
+        <div class="container">
+            <div class="hero-grid">
+                <div class="hero-content">
+                    <h1>The Echo of Silence</h1>
+                    <p class="subtitle">A haunting literary mystery about memory, loss, and the secrets we keep to protect the ones we love.</p>
+                    
+                    <!-- Feature 1: Audio Sample -->
+                    <div class="audio-player-wrapper" id="audioPlayerBtn">
+                        <div class="play-icon" id="playIcon">▶</div>
+                        <div class="audio-label" id="audioLabel">Listen to a Sample (2m 14s)</div>
+                        <div class="sound-wave">
+                            <div class="sound-bar" style="height: 8px;"></div>
+                            <div class="sound-bar" style="height: 12px;"></div>
+                            <div class="sound-bar" style="height: 6px;"></div>
+                            <div class="sound-bar" style="height: 10px;"></div>
+                            <div class="sound-bar" style="height: 14px;"></div>
+                        </div>
+                        <audio id="audioSource" src="assets/audio/sampleaudio.mp3" preload="none"></audio>
+                    </div>
+
+                    <div class="hero-actions">
+                        <a href="#buy" class="btn">Get the Hardcover</a>
+                        <button id="openModal" class="btn-outline">Read Prologue</button>
+                    </div>
+
+                    <div class="hero-meta">
+                        <div><strong>Pages</strong><br>342</div>
+                        <div><strong>Publisher</strong><br>Viking Press</div>
+                        <div><strong>Released</strong><br>Oct 2025</div>
+                    </div>
+                </div>
+                <div class="hero-image-wrapper">
+                    <img src="https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=800&auto=format&fit=crop" alt="The Echo of Silence Book Cover">
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Feature 3: Countdown Section -->
+    <section class="countdown-container fade-in">
+        <div class="container">
+            <div class="countdown-title">Book Release Countdown</div>
+            <div class="countdown-grid">
+                <div class="count-item">
+                    <div class="count-val" id="days">00</div>
+                    <div class="count-label">DAYS</div>
+                </div>
+                <div class="count-item">
+                    <div class="count-val" id="hours">00</div>
+                    <div class="count-label">HRS</div>
+                </div>
+                <div class="count-item">
+                    <div class="count-val" id="minutes">00</div>
+                    <div class="count-label">MINS</div>
+                </div>
+                <div class="count-item">
+                    <div class="count-val" id="seconds">00</div>
+                    <div class="count-label">SECS</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="section fade-in">
+        <div class="container">
+            <div class="section-header">
+                <h2>About the Book</h2>
+                <p style="color: var(--text-secondary);">New York Times Bestseller</p>
+            </div>
+            <div class="text-block">
+                <p><span class="drop-cap">C</span>lara Reed has spent her entire life running from the quiet. In the bustling streets of London, she found comfort in the chaos, a symphony of distraction that kept her own thoughts at bay.</p>
+                <p>But when a mysterious inheritance brings her back to the coastal village of Blackwood Bay, the silence she feared becomes her only companion. There, amidst the salt air and the crashing waves, she discovers a journal left behind by a man she never knew—her father.</p>
+                <p><strong>The Echo of Silence</strong> is a lyrical exploration of forgiveness, heritage, and the courage it takes to listen to your own heart when the world stops making noise.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- New Feature: Atmospheric Moodboard -->
+    <section class="section fade-in" style="padding-top: 0;">
+        <div class="container">
+            <div class="section-header" style="margin-bottom: 30px;">
+                <h2>The Setting</h2>
+                <p style="color: var(--text-secondary);">Blackwood Bay, Maine</p>
+            </div>
+            <div class="moodboard-grid">
+                <div class="mood-item mood-1"><img src="https://images.unsplash.com/photo-1470770841072-f978cf4d019e?q=80&w=1470&auto=format&fit=crop" alt="Foggy Coast"></div>
+                <div class="mood-item mood-2"><img src="https://images.unsplash.com/photo-1522679056866-8dbbc8774a9d?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8bGlnaHRob3VzZXxlbnwwfHwwfHx8MA%3D%3D" alt="Lighthouse detail"></div>
+                <div class="mood-item mood-3"><img src="https://images.unsplash.com/photo-1547623641-d2c56c03e2a7?q=80&w=800&auto=format&fit=crop" alt="Stormy Waves"></div>
+                <div class="mood-item mood-4"><img src="https://images.unsplash.com/photo-1516475429286-465d815a0df7?q=80&w=800&auto=format&fit=crop" alt="Old Paper texture"></div>
+                <div class="mood-item mood-5"><img src="https://images.unsplash.com/photo-1505506874110-6a7a69069a08?q=80&w=800&auto=format&fit=crop" alt="Dark Ocean"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Feature 3: Book Tour Section -->
+    <section id="tour" class="section fade-in" style="background: var(--bg-secondary);">
+        <div class="container">
+            <div class="section-header">
+                <h2>Book Tour</h2>
+                <p style="color: var(--text-secondary);">Meet Elias on the road.</p>
+            </div>
+            <div class="tour-table-wrapper">
+                <div class="tour-row">
+                    <div class="tour-date">Oct 15, 2025</div>
+                    <div class="tour-city">New York, NY</div>
+                    <div class="tour-venue">Strand Bookstore</div>
+                    <div><a href="#" class="btn-outline btn-sm">Tickets</a></div>
+                </div>
+                <div class="tour-row">
+                    <div class="tour-date">Oct 18, 2025</div>
+                    <div class="tour-city">Boston, MA</div>
+                    <div class="tour-venue">Brookline Booksmith</div>
+                    <div><a href="#" class="btn-outline btn-sm">Tickets</a></div>
+                </div>
+                <div class="tour-row">
+                    <div class="tour-date">Oct 22, 2025</div>
+                    <div class="tour-city">Chicago, IL</div>
+                    <div class="tour-venue">The Dial Bookshop</div>
+                    <div><a href="#" class="btn-outline btn-sm">Sold Out</a></div>
+                </div>
+                <div class="tour-row">
+                    <div class="tour-date">Oct 25, 2025</div>
+                    <div class="tour-city">Seattle, WA</div>
+                    <div class="tour-venue">Elliott Bay</div>
+                    <div><a href="#" class="btn-outline btn-sm">Tickets</a></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Reviews -->
+    <section id="reviews" class="reviews fade-in">
+        <div class="container">
+            <div class="section-header">
+                <h2>Praise</h2>
+            </div>
+            <div class="reviews-grid">
+                <div class="review-card">
+                    <div class="stars">★★★★★</div>
+                    <p class="quote">"Deeply moving and beautifully written. A modern classic in the making."</p>
+                    <p class="source">The New York Times</p>
+                </div>
+                <div class="review-card">
+                    <div class="stars">★★★★★</div>
+                    <p class="quote">"Vance has a way with words that makes you feel the salt spray on your face."</p>
+                    <p class="source">The Guardian</p>
+                </div>
+                <div class="review-card">
+                    <div class="stars">★★★★★</div>
+                    <p class="quote">"I couldn't put it down. A mystery wrapped in a love letter to the ocean."</p>
+                    <p class="source">NPR Books</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Author -->
+    <section id="author" class="section fade-in">
+        <div class="container">
+            <div class="author-grid">
+                <img src="https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?q=80&w=800&auto=format&fit=crop" alt="Elias Vance" class="author-img">
+                <div class="author-info">
+                    <h2>About the Author</h2>
+                    <p class="subtitle">Elias Vance is an award-winning novelist.</p>
+                    <div class="text-block" style="margin: 0;">
+                        <p>Born in a small fishing village in Maine, Elias developed a fascination with the ocean and its secrets at a young age. His debut novel, <em>The Light Keeper</em>, won the Pen/Hemingway Award.</p>
+                        <p>He currently lives in Brooklyn with his wife and two dogs, spending his days writing and his nights searching for the perfect cup of coffee.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Feature 3: FAQ Section -->
+    <section id="faq" class="section fade-in">
+        <div class="container">
+            <div class="section-header">
+                <h2>Frequently Asked Questions</h2>
+            </div>
+            <div class="faq-grid">
+                <details>
+                    <summary>Is this a standalone novel?</summary>
+                    <div class="faq-content">Yes, The Echo of Silence is a complete standalone story with no planned sequels.</div>
+                </details>
+                <details>
+                    <summary>Will there be an audiobook version?</summary>
+                    <div class="faq-content">Absolutely. The audiobook is narrated by the award-winning Julia Whelan and will be available on release day.</div>
+                </details>
+                <details>
+                    <summary>Do you ship internationally?</summary>
+                    <div class="faq-content">Direct orders from this site ship to the US, UK, and Canada. For other regions, please use your local retailer.</div>
+                </details>
+                <details>
+                    <summary>Are signed copies available?</summary>
+                    <div class="faq-content">Signed copies are limited to the first 1,000 pre-orders and specific tour dates.</div>
+                </details>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer id="buy">
+        <div class="container footer-content fade-in">
+            <h2>Join the Newsletter</h2>
+            <p style="color: #9CA3AF;">Get updates on book tours, signed copies, and new releases.</p>
+            
+            <form class="newsletter" onsubmit="event.preventDefault(); showToast('Welcome to the inner circle.');">
+                <input type="email" placeholder="email@example.com" required>
+                <button type="submit">Subscribe</button>
+            </form>
+
+            <div class="footer-links">
+                <a href="#">Twitter</a>
+                <a href="#">Instagram</a>
+                <a href="#">Goodreads</a>
+                <a href="#">Contact</a>
+            </div>
+            
+            <div style="margin-top: 40px; font-size: 0.8rem; color: #6B7280;">
+                &copy; 2025 Elias Vance. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <!-- Feature 4: Sticky Buy Bar -->
+    <div class="sticky-bar" id="stickyBar">
+        <div class="container" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+            <div class="sticky-info">
+                <span style="font-family: 'Lora', serif; font-weight: 600; font-size: 1.1rem;">The Echo of Silence</span>
+                <span style="color: var(--text-secondary); font-size: 0.9rem;">by Elias Vance</span>
+            </div>
+            <a href="#buy" class="btn">Pre-order Now</a>
+        </div>
+    </div>
+
+    <!-- Toast Notification Element -->
+    <div id="toast" class="toast"></div>
+
+    <script>
+        // --- Feature 1: Mobile Menu Toggle ---
+        const mobileBtn = document.getElementById('mobileToggle');
+        const mobileMenu = document.getElementById('mobileMenu');
+
+        function toggleMobileMenu() {
+            mobileMenu.classList.toggle('active');
+        }
+
+        mobileBtn.addEventListener('click', toggleMobileMenu);
+
+        // --- Feature 3: Modal Logic ---
+        const modal = document.getElementById('prologueModal');
+        const openBtn = document.getElementById('openModal');
+        const closeBtn = document.getElementById('closeModal');
+
+        openBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden'; 
+        });
+
+        closeBtn.addEventListener('click', () => {
+            modal.classList.remove('active');
+            document.body.style.overflow = 'auto'; 
+        });
+
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.classList.remove('active');
+                document.body.style.overflow = 'auto';
+            }
+        });
+
+        // --- Feature 2: Scroll Animation ---
+        const observerOptions = {
+            root: null,
+            rootMargin: '0px',
+            threshold: 0.1
+        };
+
+        const observer = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    observer.unobserve(entry.target); 
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.fade-in').forEach(el => {
+            observer.observe(el);
+        });
+
+        // --- Feature 3: Countdown Timer ---
+        const countdownDate = new Date("Oct 31, 2026 00:00:00").getTime();
+
+        const updateCountdown = () => {
+            const now = new Date().getTime();
+            const gap = countdownDate - now;
+
+            // Handle expired date
+            if (gap < 0) {
+                document.getElementById('days').innerText = "00";
+                document.getElementById('hours').innerText = "00";
+                document.getElementById('minutes').innerText = "00";
+                document.getElementById('seconds').innerText = "00";
+                return;
+            }
+
+            const second = 1000;
+            const minute = second * 60;
+            const hour = minute * 60;
+            const day = hour * 24;
+
+            const d = Math.floor(gap / day);
+            const h = Math.floor((gap % day) / hour);
+            const m = Math.floor((gap % hour) / minute);
+            const s = Math.floor((gap % minute) / second);
+
+            document.getElementById('days').innerText = d < 10 ? '0'+d : d;
+            document.getElementById('hours').innerText = h < 10 ? '0'+h : h;
+            document.getElementById('minutes').innerText = m < 10 ? '0'+m : m;
+            document.getElementById('seconds').innerText = s < 10 ? '0'+s : s;
+        };
+
+        setInterval(updateCountdown, 1000);
+        updateCountdown(); // Run immediately
+
+        // --- Feature 4: Theme Toggle ---
+        const themeBtn = document.getElementById('themeToggle');
+        const html = document.documentElement;
+        let isDark = false;
+
+        themeBtn.addEventListener('click', () => {
+            isDark = !isDark;
+            html.setAttribute('data-theme', isDark ? 'dark' : 'light');
+        });
+
+        // --- Feature 4: Scroll Progress & Sticky Bar ---
+        const progressBar = document.getElementById('progressBar');
+        const stickyBar = document.getElementById('stickyBar');
+        const heroSection = document.querySelector('.hero');
+
+        window.addEventListener('scroll', () => {
+            // Progress Bar
+            const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+            const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const scrolled = (scrollTop / scrollHeight) * 100;
+            progressBar.style.width = scrolled + "%";
+
+            // Sticky Bar Visibility
+            const heroBottom = heroSection.getBoundingClientRect().bottom;
+            if (heroBottom < 0) {
+                stickyBar.classList.add('visible');
+            } else {
+                stickyBar.classList.remove('visible');
+            }
+        });
+
+        // --- Toast Notification Logic ---
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // --- Feature 1: Functional Audio Player ---
+        const audioBtn = document.getElementById('audioPlayerBtn');
+        const audioSource = document.getElementById('audioSource');
+        const playIcon = document.getElementById('playIcon');
+        const audioLabel = document.getElementById('audioLabel');
+        let isPlaying = false;
+
+        audioBtn.addEventListener('click', () => {
+            if (!isPlaying) {
+                audioSource.play().then(() => {
+                    isPlaying = true;
+                    audioBtn.classList.add('playing');
+                    playIcon.textContent = '⏸'; // Pause icon
+                    audioLabel.textContent = 'Now Playing: Chapter 1';
+                    showToast('Playing audio sample...');
+                }).catch(error => {
+                    console.error("Audio playback failed:", error);
+                    showToast('Audio file not found.');
+                });
+            } else {
+                audioSource.pause();
+                isPlaying = false;
+                audioBtn.classList.remove('playing');
+                playIcon.textContent = '▶'; // Play icon
+                audioLabel.textContent = 'Paused';
+            }
+        });
+
+        // Reset UI when audio ends
+        audioSource.addEventListener('ended', () => {
+            isPlaying = false;
+            audioBtn.classList.remove('playing');
+            playIcon.textContent = '▶';
+            audioLabel.textContent = 'Listen to a Sample (2m 14s)';
+        });
+
+        
+// 💒 1. Disable right-click
+document.addEventListener('contextmenu', e => e.preventDefault());
+
+// 💒 2. Disable inspect / save / print shortcuts
+document.addEventListener('keydown', e => {
+  if (
+    (e.ctrlKey && ['s','u','p','S','U','P'].includes(e.key)) || // Ctrl+S, Ctrl+U, Ctrl+P
+    e.key === 'F12' ||                                          // DevTools
+    (e.ctrlKey && e.shiftKey && ['I','J','C'].includes(e.key))  // Ctrl+Shift+I/J/C
+  ) {
+    e.preventDefault();
+    sparkle(e.clientX, e.clientY);
+  }
+});
+
+// 💒 3. Block drag saving of images
+document.addEventListener('dragstart', e => e.preventDefault());
+document.querySelectorAll('img').forEach(img => img.setAttribute('draggable', 'false'));
+
+// 💒 4. Disable text selection & copying
+document.addEventListener('copy', e => e.preventDefault());
+document.addEventListener('cut', e => e.preventDefault());
+document.addEventListener('selectstart', e => e.preventDefault());
+document.body.style.userSelect = 'none';
+document.body.style.webkitUserSelect = 'none';
+
+// 💒 5. Detect if DevTools is open
+setInterval(() => {
+  if (
+    window.outerWidth - window.innerWidth > 160 ||
+    window.outerHeight - window.innerHeight > 160
+  ) {
+    document.body.innerHTML = `
+      <div style="text-align:center;margin-top:20%;font-size:2rem;color:#d6336c;">
+        💖 Please close developer tools to continue 💖
+      </div>`;
+  }
+}, 1000);
+
+    </script>
+
+</body>
+</html><script>console.log('Hello JS');</script></body></html>

@@ -1,0 +1,688 @@
+<html><head><style>body { font-family: monospace; background:#141414; color:#fff; }</style></head><body><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fake Headline Generator</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Load Tone.js for sound effects -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <!-- Library to convert HTML element to an image for sharing/downloading -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dom-to-image/2.6.0/dom-to-image.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght=700;900&display=swap" rel="stylesheet">
+    <style>
+        /* Define the sensational color scheme (Black, White, Red) */
+        :root {
+            --bg-color: #FFFFFF;
+            --accent-color: #C82020; /* Tabloid Red */
+            --text-color: #1a1a1a;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: background-color 0.5s ease;
+            height: 100vh;
+        }
+
+        /* Styling for the main interactive element */
+        #main-display-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-grow: 1;
+            padding: 1rem;
+        }
+
+        .main-display-button {
+            border: 4px solid var(--text-color);
+            color: var(--text-color);
+            background-color: var(--accent-color);
+            box-shadow: 10px 10px 0 0 var(--text-color);
+            transition: all 0.1s ease-in-out;
+            cursor: pointer;
+            width: 90vw;
+            max-width: 600px;
+            aspect-ratio: 1 / 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            line-height: 1;
+            padding: 2rem;
+            border-radius: 12px;
+        }
+
+        .main-display-button:active {
+            box-shadow: 2px 2px 0 0 var(--text-color);
+            transform: translate(8px, 8px);
+        }
+
+        #main-display-title {
+            font-size: clamp(2rem, 10vw, 4rem);
+            font-weight: 900;
+            text-align: center;
+            line-height: 1;
+        }
+
+        /* Styling for the headline text display */
+        .headline-text {
+            font-size: clamp(2rem, 7vw, 3.5rem);
+            font-weight: 900;
+            text-align: center;
+            line-height: 1.1;
+            color: var(--accent-color); /* Red headline for drama */
+            text-transform: uppercase;
+        }
+        
+        /* Animation for the headline reveal */
+        @keyframes stamp {
+            0% { transform: scale(3) rotate(-5deg); opacity: 0; }
+            80% { transform: scale(1.05) rotate(1deg); opacity: 1; }
+            100% { transform: scale(1) rotate(0); opacity: 1; }
+        }
+        .stamped {
+            animation: stamp 0.3s ease-out;
+        }
+
+        /* Wiggle effect (Easter Egg) */
+        .wiggle {
+            animation: wiggle 0.2s 3;
+        }
+
+        @keyframes wiggle {
+            0%, 100% { transform: translate(0, 0) rotate(0); }
+            25% { transform: translate(3px, 3px) rotate(1deg); }
+            75% { transform: translate(-3px, -3px) rotate(-1deg); }
+        }
+
+        .control-button {
+            transition: all 0.1s;
+            background-color: var(--accent-color);
+            color: white; /* White text on red buttons */
+            border: 2px solid var(--text-color);
+            box-shadow: 4px 4px 0 0 var(--text-color);
+            font-size: 1rem;
+            font-weight: 700;
+            border-radius: 8px;
+        }
+
+        .control-button:active {
+            box-shadow: 1px 1px 0 0 var(--text-color);
+            transform: translate(3px, 3px);
+        }
+
+        .control-button:disabled {
+            background-color: #f1f1f1;
+            color: #ccc;
+            border-color: #ccc;
+            box-shadow: none;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        /* Floating Button Styling */
+        .floating-button {
+            width: 56px;
+            height: 56px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: var(--accent-color);
+            color: white;
+            border: 2px solid var(--text-color);
+            box-shadow: 4px 4px 0 0 var(--text-color);
+            border-radius: 9999px; /* Fully rounded */
+            transition: all 0.1s ease-in-out;
+            cursor: pointer;
+        }
+
+        .floating-button:active {
+            box-shadow: 1px 1px 0 0 var(--text-color);
+            transform: translate(3px, 3px);
+        }
+        
+        .floating-button:disabled {
+            background-color: #f1f1f1;
+            color: #ccc;
+            border-color: #ccc;
+            box-shadow: none;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Hide the annoying scrollbar on mobile */
+        ::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* Style for temporary messages */
+        .temp-message {
+             animation: fade-in-out 2.5s ease-out;
+        }
+
+        @keyframes fade-in-out {
+            0% { opacity: 0; transform: translate(-50%, 10px); }
+            10% { opacity: 1; transform: translate(-50%, 0); }
+            90% { opacity: 1; transform: translate(-50%, 0); }
+            100% { opacity: 0; transform: translate(-50%, 10px); }
+        }
+        
+    </style>
+</head>
+<body class="flex flex-col h-screen overflow-hidden">
+
+    <!-- Instructions / Hints -->
+    <div id="instructions" class="p-4 pt-6 text-center text-sm sm:text-base max-w-xl mx-auto">
+       <div align="center">Don't read the fine print. **Tap the headline box** to reveal today's most unbelievably fake news! Look for the floating button to generate another scoop.</div>
+    </div>
+
+    <!-- Main Interactive Display Container -->
+    <div id="main-display-container">
+        <!-- This div serves as the clickable headline generator button -->
+        <div id="main-button" class="main-display-button">
+            <div id="headline-display" class="w-full h-full flex justify-center items-center">
+                <span id="main-display-title" class="text-white"><div align="centre">TAP FOR THE TRUTH</div></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- FLOATING CONTROLS -->
+    <div class="fixed bottom-6 right-6 flex flex-col space-y-3 z-50">
+        <!-- Floating Share Button -->
+        <button id="floating-share-button" class="floating-button" disabled title="Share Scoop (Image)">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
+                <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
+                <polyline points="16 6 12 2 8 6"></polyline>
+                <line x1="12" y1="2" x2="12" y2="15"></line>
+            </svg>
+        </button>
+        
+        <!-- Floating Generate Button -->
+        <button id="floating-generate-button" class="floating-button" disabled title="Generate Another">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
+                <polyline points="1 4 1 10 7 10"></polyline>
+                <polyline points="23 20 23 14 17 14"></polyline>
+                <path d="M22 18h-2"></path><path d="M19.16 16.58a7 7 0 0 0-11.96-3.83"></path>
+                <path d="M2 6h2"></path><path d="M4.84 7.42a7 7 0 0 0 11.96 3.83"></path>
+            </svg>
+        </button>
+    </div>
+
+    <!-- Controls and Footer Section (Only for Reset now) -->
+    <div class="p-4 border-t-2 border-gray-900 bg-white shadow-xl flex justify-center items-end gap-2">
+        
+        <!-- Reset Button -->
+        <button id="reset-button" class="control-button px-6 py-3 rounded-lg w-full max-w-sm" disabled>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 inline-block mr-2">
+                <path d="M21.5 2v6h-6"></path>
+                <path d="M2.5 22v-6h6"></path>
+                <path d="M19 13a7 7 0 1 0 3.5 3.5"></path>
+                <path d="M2 11a7 7 0 1 1 3.5-3.5"></path>
+            </svg>
+            NEW PAPER (RESET)
+        </button>
+    </div>
+
+    <!-- Quirky Easter Egg Title Toggle -->
+    <div id="title-toggle" class="absolute bottom-1 left-1 text-xs text-gray-500 cursor-pointer p-1 transition duration-300 hover:text-red-500">
+ 
+    </div>
+    
+    <script>
+        // --- CONSTANTS AND STATE ---
+
+        // The bank of words for endless combinations (DRAMATICALLY EXPANDED FOR 10X+ VARIETY)
+        const HEADLINE_WORD_BANKS = {
+            // 1. SUBJECTS (People, Creatures, or Objects) - 70+ Entries
+            SUBJECT: [
+                "Celebrity Chef", "Sentient Toaster", "Deep-Sea Squid", "Local Mayor", "Time Traveler", "Space Tourist", "Office Pigeon", "Taco Truck", "AI Intern", "Talking Dog", "Giant Baby", "Haunted Sock Puppet", "Invisible Squirrel", "Viral Dance Grandma", "Pretzel Enthusiast", "Robot Librarian", "Tiny House Guru", "The Earthworm Collective", 
+                "Billionaire Ghost", "Alien Tax Collector", "World's Best Dad", "A Single Potato", "Mascot Who Quit", "Silent Film Star", "Poodle with a PhD", "Cosmic Dust Bunny", "Reclusive Artist", "Shadowy Organization", "The CEO of Mondays", "A Confused Octopus", "Cabbage Patch Kid", "The Last Unicorn", "Moon-Based Colony", "Disgruntled Janitor",
+                "The Vatican's Parrot", "A Quantum Physicist", "The World's Oldest Teenager", "Vampire Accountant", "Local Weather Man", "Subway Sandwich Artist", "The Lost Atlantis Tourist Board", "A sentient cloud", "The City's Water Supply", "A Rogue Roomba", "The Statue of Liberty's Left Foot", "A Medieval Knight", "The Secret Service Cat", "A Disappointed Emoji", "A 1980s Arcade Game", "The Planet Pluto", "An Anti-Gravity Banana", "The Forgotten Spice Girl",
+                "A Flamboyant Alpaca", "The Neighborhood Watch Gopher", "A Conspiracy Theorist's Cat", "The World Chess Champion", "A Decommissioned Satellite", "The Lost City of Zucchini", "An Angry Garden Gnome", "The Spirit of Disco", "The Prime Minister's Hairdresser", "The Inventor of the Cronut", "A Renaissance Sculpture", "A Sarcastic Street Sign", "The Queen of Mars", "A Self-Driving Shopping Cart", "The Last Known Dinosaur Egg"
+            ],
+            
+            // 2. ACTIONS/VERBS (Dramatic Verbs) - 70+ Entries
+            ACTION_VERB: [
+                "confesses love to", "flees the country after", "was spotted fighting", "finally admits to", "attempts to unionize", "is secretly funding", "stole the pants of", "declared war on", "married", "teleports to", "loses argument with", "claims to be", "is now dating", "has been replaced by", "is trapped inside",
+                "denies involvement with", "sued for emotional damages by", "discovers the true identity of", "was last seen arguing with", "is actually just three kids in a trench coat", "secretly loves", "finally finished knitting", "escaped a jail made of", "blames all their failures on", "invents a machine to talk to", "ran away with", "unmasked the villainy of",
+                "demands a recount from", "was hypnotized by", "predicts the end of", "is selling the rights to", "was caught whispering sweet nothings to", "defied the laws of", "must apologize to", "is secretly building an army of", "was last seen covered in", "is trying to broker peace with", "accused of stealing recipes from", "can no longer remember", "just gave a TED Talk on",
+                "vandalized the property of", "is now obsessed with", "unlocked the secrets of", "has been cloning", "refuses to acknowledge", "is permanently stuck in", "was forced to negotiate with", "reveals shocking truths about", "hijacked the broadcast of", "swapped identities with", "just adopted a pack of", "broke up with a photograph of", "is desperately searching for", "can only speak in riddles to", "was last seen dancing with"
+            ],
+            
+            // 3. ADJECTIVES (for shock value) - 60+ Entries
+            ADJECTIVE: [
+                "Shocking", "Unbelievable", "Brave", "Massive", "Tiny", "Cursed", "Ancient", "Secret", "Explosive", "Naked", "Vicious", "Invisible", "Cosmic", "Haunting", "Gravely Serious", "Flamboyant", "Deep-Fried", "Laser-Guided",
+                "Self-Aware", "Hypnotic", "Suspiciously Damp", "Forbidden", "Illegal", "Unlicensed", "Emotional", "Peculiar", "Mysterious", "Inter-Dimensional", "Radioactive", "Forgotten", "Gargantuan", "Microscopic",
+                "Illogical", "Uncanny", "Preposterous", "Controversial", "Mind-Bending", "Existential", "Dehydrated", "Chromatic", "Warp-Speed", "Velvet", "Smoldering", "Polka-Dotted", "Reversible",
+                "Translucent", "Time-Warping", "Bejeweled", "Malfunctioning", "Undercover", "Volatile", "Overdue", "Psychic", "Mischievous", "Highly Dubious", "Authentically Fake", "Biodegradable", "Cynical", "Monochromatic"
+            ],
+            
+            // 4. OUTCOMES/OBJECTS - 70+ Entries
+            OUTCOME: [
+                "The Moon", "a bowl of cereal", "your neighbor's dog", "the Queen of England", "all known physics", "a missing shoe", "a potted plant", "a rogue algorithm", "a rubber chicken", "the concept of time", "a used umbrella", "a jar of pickles", "the last remaining Blockbuster", "a suspiciously shiny rock", "their own past self",
+                "a forgotten VHS tape", "the entire concept of breakfast", "a slightly damp sponge", "the color blue", "the Bermuda Triangle", "an unsigned traffic ticket", "a bag of marshmallows", "a very disappointed cloud", "the history of socks", "a parallel universe where everyone is fine", "the secret recipe for dirt", "a poorly drawn map", "a motivational poster",
+                "a sentient rubber band ball", "the collective consciousness of ants", "the national debt", "a time capsule from the future", "the original plan for the pyramids", "a stack of pancakes", "a conspiracy theory website", "a 7-Eleven Slurpee machine", "the spirit of grunge music", "a flock of garden gnomes", "the forgotten 8th day of the week", "the sound barrier", "a velvet painting of Elvis", "the internet of things", "a very expensive mistake",
+                "a highly specialized spork", "the missing city of El Dorado", "the Nobel Prize for Knitting", "the complete works of Shakespeare (in Klingon)", "a time-share condo in the Andromeda Galaxy", "an overly enthusiastic traffic cone", "the secret handshake of the Illuminati", "a bottle of invisible ink", "the source of all static electricity", "a perfectly ripe avocado", "a collection of sentient dust", "the emotional stability of a teacup"
+            ],
+            
+            // 5. REACTIONS/CLOSURES - 50+ Entries
+            REACTION: [
+                "leaving only a single clue: a flip-flop", "claims it was 'performance art'", "says 'no comment,' then winks", "under investigation by the FBI (Feline Bureau of Investigation)", "and is now a billionaire", "and it's somehow worse than expected",
+                "sources say they 'saw it coming'", "in a move described as 'highly irregular'", "and the world will never be the same", "much to the delight of local children", "and has yet to apologize for it", "forcing everyone to rethink everything",
+                "insisting it was 'just a prank'", "sparking global outrage and confusion", "while wearing a tuxedo made of lettuce", "leading to a class-action lawsuit", "and dissolving into thin air", "much to the chagrin of all scientists", "but the public is still divided", "experts are baffled and slightly impressed",
+                "before immediately regretting it", "in a desperate bid for attention", "causing a sudden spike in mayonnaise sales", "forcing immediate mandatory nap time", "using only a tiny rubber mallet", "and demands a public apology from gravity", "vowing to never speak of it again", "citing a lack of adequate parking", "and now speaks fluent dolphin", "despite a court-ordered restraining order", "and is currently hiding in a treehouse", "only to be disappointed by the lack of cheese", "which is considered a severe violation of intergalactic law"
+            ],
+
+            // 6. LOCATIONS (Specific) - 50+ Entries
+            LOCATION: [
+                "in a suburban garage", "on the International Space Station", "under a park bench", "inside a vintage arcade cabinet", "at a local farmers' market", "on top of a bus in Dublin", "near a suspiciously quiet drainpipe", "behind a Denny's at 3 AM", "at the bottom of a cereal box",
+                "near a dumpster behind the theatre", "on a forgotten iceberg in the Arctic", "inside the White House broom closet", "during a Zoom meeting", "in the middle of a national holiday parade", "at an intergalactic truck stop",
+                "beneath a large oak tree", "in the third aisle of a hardware store", "at a poorly attended dog show", "on live national television", "inside a vending machine", "at a high school reunion", "on the roof of a local library", "at a remote research facility", "in the pocket of a discarded jacket",
+                "at the bottom of a bowl of soup", "on a secret military moon base", "next to a water cooler in accounting", "in the VIP section of a laundromat", "inside a perfectly baked croissant", "under a stack of unpaid bills", "at the annual convention for sad clowns", "on a slightly damp Tuesday afternoon", "just outside the bounds of reality", "at the world's largest rubber band ball factory", "inside a forgotten gym locker", "on the back of a large turtle", "during the last five minutes of a terrible movie"
+            ],
+        };
+
+        // Define headline structures (the core of the "1000 generators")
+        const HEADLINE_TEMPLATES = [
+            // Template 1: Standard Tabloid (Gossip/Bizarre Action)
+            (w) => `${w.ADJECTIVE()} ${w.SUBJECT()} ${w.ACTION_VERB()} ${w.OUTCOME()}!`,
+            
+            // Template 2: Breaking World News (Catastrophe/Magnitude)
+            (w) => `MASS HYSTERIA: ${w.SUBJECT()} ${w.ACTION_VERB()} ${w.OUTCOME()} ${w.REACTION()}.`,
+
+            // Template 3: Human Interest / Weird Local Story
+            (w) => `${w.ADJECTIVE()} ${w.SUBJECT()} ${w.REACTION()} ${w.LOCATION()}.`,
+
+            // Template 4: Science/Mystery/Unexplained
+            (w) => `U.F.O? ${w.SUBJECT()} ${w.ACTION_VERB()} ${w.OUTCOME()} ${w.LOCATION()}?`,
+
+            // Template 5: Clickbait/Question
+            (w) => `CAN YOU BELIEVE IT? ${w.SUBJECT()} ${w.ACTION_VERB()} ${w.OUTCOME()}.`,
+
+            // Template 6: Double Subject Drama
+            (w) => `${w.SUBJECT()} AND ${w.SUBJECT()} ARE TRAPPED INSIDE ${w.OUTCOME()}.`,
+
+            // Template 7: Existential Dread
+            (w) => `SHOCK REPORT: ${w.ADJECTIVE()} ${w.SUBJECT()} ${w.ACTION_VERB()} ${w.OUTCOME()} AND IT CHANGES EVERYTHING.`,
+
+            // Template 8: Passive Scandal
+            (w) => `WHY WAS ${w.SUBJECT()} CAUGHT ${w.ADJECTIVE()} ${w.ACTION_VERB()} ${w.LOCATION()}?`,
+
+            // Template 9: Urgent Warning
+            (w) => `WARNING: ${w.SUBJECT()} CLAIMS ${w.OUTCOME()} WILL BE ${w.ADJECTIVE()}!`,
+
+            // Template 10: Celebrity Gossip
+            (w) => `GASP! ${w.SUBJECT()} ${w.ACTION_VERB()} ${w.SUBJECT()}! ${w.REACTION()}.`,
+
+            // Template 11: Local Oddity
+            (w) => `ONLY IN ${w.LOCATION().toUpperCase()}: A ${w.SUBJECT()} ${w.REACTION()}.`,
+
+            // Template 12: Retro Disaster
+            (w) => `THE 80s ARE BACK! ${w.ADJECTIVE()} ${w.OUTCOME()} ${w.ACTION_VERB()} ${w.LOCATION()}.`,
+
+            // Template 13: Meta-Gossip
+            (w) => `EXCLUSIVE: ${w.SUBJECT()} ${w.ACTION_VERB()} ${w.OUTCOME()} TO AVOID ${w.ADJECTIVE()} SCANDAL.`,
+
+            // Template 14: Tech Panic
+            (w) => `AI FEARS: ${w.SUBJECT()} ${w.REACTION()} AFTER IT ${w.ACTION_VERB()} ${w.OUTCOME()}.`,
+        ];
+
+        let gameState = 'initial'; // 'initial', 'brief_shown'
+        let currentHeadline = '';
+        let wiggleCounter = 0; // For the Easter Egg
+
+        // --- DOM ELEMENTS ---
+        const mainButton = document.getElementById('main-button');
+        const headlineDisplay = document.getElementById('headline-display');
+        const instructionsDiv = document.getElementById('instructions');
+        
+        // Footer Buttons
+        const resetButton = document.getElementById('reset-button');
+        
+        // Floating Buttons
+        const floatingShareButton = document.getElementById('floating-share-button');
+        const floatingGenerateButton = document.getElementById('floating-generate-button');
+        
+        const titleToggle = document.getElementById('title-toggle');
+
+        // --- HELPER FUNCTIONS ---
+
+        /** Simple utility to get a random item from a list. */
+        const getRandom = (arr) => arr[Math.floor(Math.random() * arr.length)];
+        
+        /** Wrapper to access random words from the banks easily. */
+        const word = new Proxy({}, {
+            get: (target, prop) => () => getRandom(HEADLINE_WORD_BANKS[prop])
+        });
+
+        // Helper function for text copy (fallback only)
+        const copyTextToClipboard = (text) => {
+            const tempInput = document.createElement('textarea');
+            tempInput.value = text;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            try {
+                document.execCommand('copy');
+            } catch (err) {
+                console.error('Copy failed', err);
+            }
+            document.body.removeChild(tempInput);
+        };
+
+
+        // --- TONE.JS SETUP (Minimal Sound Effects) ---
+        const scoopSynth = new Tone.PolySynth(Tone.Synth, {
+            oscillator: { type: "sawtooth" },
+            envelope: { release: 0.05, attack: 0.01 }
+        }).toDestination();
+
+        const boingSynth = new Tone.Synth({
+            oscillator: { type: "sine" },
+            envelope: { attack: 0.005, decay: 0.2, sustain: 0.0, release: 0.1 }
+        }).toDestination();
+        
+        /** Plays the urgent "Scoop!" sound sequence. */
+        const playScoopSound = () => {
+            const now = Tone.now();
+            scoopSynth.triggerAttackRelease("G4", "16n", now);
+            scoopSynth.triggerAttackRelease("D4", "16n", now + 0.1);
+            scoopSynth.triggerAttackRelease("C4", "16n", now + 0.2);
+            scoopSynth.triggerAttackRelease("F4", "8n", now + 0.3);
+        };
+
+        /** Plays the comical 'boing' sound for the easter egg. */
+        const playWiggleBoing = () => {
+            boingSynth.triggerAttackRelease("G5", "16n");
+            boingSynth.triggerAttackRelease("C6", "16n", Tone.now() + 0.05);
+        };
+
+        // --- CORE LOGIC ---
+
+        /** Generates a random, sensational newspaper headline using a random template. */
+        const generateHeadlineText = () => {
+            const template = getRandom(HEADLINE_TEMPLATES);
+            // Apply the random template function using the word getter proxy
+            let headline = template(word);
+            
+            // Final capitalization and cleanup
+            headline = headline.toUpperCase();
+            // Ensure first letter of the headline is capped if it starts with a word bank item
+            headline = headline.charAt(0).toUpperCase() + headline.slice(1);
+
+            return headline;
+        };
+
+        /** Generates and displays the fake headline. This is used for "Generate Another". */
+        const generateHeadline = () => {
+            // Only runs if the game is initialized or a brief is already shown
+            if (gameState === 'initial') {
+                gameState = 'brief_shown';
+                mainButton.classList.add('pointer-events-none');
+            }
+
+            // Generate the new headline
+            currentHeadline = generateHeadlineText();
+
+            // Display the headline with a stamp animation
+            headlineDisplay.innerHTML = `<span class="headline-text stamped">${currentHeadline}</span>`;
+            
+            // Change button appearance to newspaper article box
+            mainButton.style.backgroundColor = 'var(--bg-color)';
+            mainButton.style.color = 'var(--accent-color)';
+            
+            instructionsDiv.textContent = "STOP THE PRESSES! This fake news needs to go viral.";
+            
+            // Enable controls
+            resetButton.disabled = false;
+            floatingShareButton.disabled = false;
+            floatingGenerateButton.disabled = false;
+            
+            playScoopSound();
+            
+            // Reset wiggle counter for the new headline
+            wiggleCounter = 0;
+        };
+
+        /** Resets the app to its initial state. This is used for "New Paper". */
+        const resetApp = () => {
+            gameState = 'initial';
+            currentHeadline = '';
+
+            // Reset display to initial title
+            headlineDisplay.innerHTML = `<span id="main-display-title" class="text-white">TAP FOR THE TRUTH</span>`;
+            
+            // Reset button appearance
+            mainButton.style.backgroundColor = 'var(--accent-color)';
+            mainButton.style.color = 'var(--text-color)';
+            mainButton.classList.remove('wiggle');
+            mainButton.classList.remove('pointer-events-none');
+            
+            // Reset instruction text
+            instructionsDiv.innerHTML = "Don't read the fine print. **Tap the headline box** to reveal today's most unbelievably fake news! Look for the floating button to generate another scoop.";
+            
+            // Disable controls
+            resetButton.disabled = true;
+            floatingShareButton.disabled = true;
+            floatingGenerateButton.disabled = true;
+            
+            wiggleCounter = 0;
+        };
+        
+        /** Converts the headline box to an image and triggers native share/download. */
+        const shareHeadline = async () => {
+            if (gameState !== 'brief_shown') return;
+            
+            const button = floatingShareButton;
+            button.disabled = true;
+            const originalIcon = button.innerHTML;
+            button.innerHTML = '...'; // Loading indicator
+
+            try {
+                const headlineElement = document.getElementById('main-button');
+                // Convert the HTML element to a base64 PNG image
+                // Ensure domToImage is loaded before calling it
+                if (typeof domToImage === 'undefined') {
+                    throw new Error("dom-to-image library not loaded.");
+                }
+
+                const dataUrl = await domToImage.toPng(headlineElement);
+
+                const shareText = `BREAKING FAKE NEWS: "${currentHeadline}" #SensationalScoop`;
+
+                // 1. Check for Native Share API support
+                if (navigator.share) {
+                    const blob = await (await fetch(dataUrl)).blob();
+                    const file = new File([blob], 'sensational_scoop.png', { type: 'image/png' });
+
+                    // Check if we can share files (required for native share)
+                    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                         await navigator.share({
+                            files: [file],
+                            title: 'Sensational Scoop',
+                            text: shareText
+                        });
+                        
+                    } else {
+                        // Fallback 1a: Native share text only (for environments that don't allow file sharing)
+                        await navigator.share({
+                            title: 'Sensational Scoop',
+                            text: shareText
+                        });
+                        // Then proceed to download image
+                        triggerImageDownload(dataUrl);
+                        showTemporaryMessage("Image downloaded! (Text shared natively)");
+                    }
+
+                } else {
+                    // 2. Fallback: Download the image and copy text
+                    triggerImageDownload(dataUrl);
+                    copyTextToClipboard(shareText);
+                    showTemporaryMessage("Image downloaded! Text copied to clipboard.");
+                }
+
+                // Success visual feedback (brief checkmark)
+                button.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>`; // Checkmark Icon
+                setTimeout(() => button.innerHTML = originalIcon, 1500);
+
+            } catch (err) {
+                console.error('Sharing or image generation failed:', err);
+                if (err.name !== 'AbortError') { // Ignore user canceling native share
+                    // Error visual feedback
+                    button.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>`; // X icon
+                    setTimeout(() => button.innerHTML = originalIcon, 1500);
+                    showTemporaryMessage("Share failed or device unsupported.", true);
+                }
+            } finally {
+                button.disabled = false;
+            }
+        };
+
+        /** Helper to trigger a download for a data URL. */
+        const triggerImageDownload = (dataUrl) => {
+            const link = document.createElement('a');
+            link.download = 'sensational_scoop.png';
+            link.href = dataUrl;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        };
+
+        /** Helper to show a temporary notification message. */
+        const showTemporaryMessage = (text, isError = false) => {
+            const message = document.createElement('div');
+            message.textContent = text;
+            const baseClass = "fixed bottom-20 left-1/2 -translate-x-1/2 px-4 py-2 rounded-lg shadow-xl temp-message z-50";
+            message.className = baseClass + (isError ? " bg-red-700 text-white" : " bg-gray-900 text-white");
+            document.body.appendChild(message);
+            
+            setTimeout(() => message.remove(), 2500);
+        };
+
+
+        // --- EVENT LISTENERS ---
+
+        // Main Button Click - Only runs the first time
+        mainButton.addEventListener('click', () => {
+            if (gameState === 'initial') {
+                generateHeadline();
+            }
+        });
+
+        // Controls
+        resetButton.addEventListener('click', resetApp);
+        floatingShareButton.addEventListener('click', shareHeadline);
+        floatingGenerateButton.addEventListener('click', generateHeadline);
+        
+        // Title Toggle Easter Egg
+        titleToggle.addEventListener('click', () => {
+            // Briefly show a wink/disappearing effect
+            titleToggle.textContent = '(o-o) -- poof --';
+            titleToggle.classList.remove('text-gray-500');
+            titleToggle.classList.add('text-red-500');
+
+            setTimeout(() => {
+                titleToggle.style.display = 'none';
+            }, 500);
+        });
+
+
+        // --- EASTER EGG: WIGGLE/SHAKE DETECTION (Mouse movement for Desktop, DeviceMotion for Mobile) ---
+        let lastX = 0, lastY = 0;
+        const WIGGLE_THRESHOLD = 50; // Distance/Velocity threshold
+
+        // Desktop Wiggle (Mouse Movement)
+        document.addEventListener('mousemove', (e) => {
+            if (gameState !== 'brief_shown') return;
+
+            const dx = Math.abs(e.clientX - lastX);
+            const dy = Math.abs(e.clientY - lastY);
+
+            // Check for rapid movement (jiggle)
+            if (dx > WIGGLE_THRESHOLD || dy > WIGGLE_THRESHOLD) {
+                if (wiggleCounter < 1) { // Limit to one wiggle per headline shown
+                    mainButton.classList.add('wiggle');
+                    playWiggleBoing();
+                    setTimeout(() => mainButton.classList.remove('wiggle'), 700);
+                    wiggleCounter++;
+                }
+            }
+            lastX = e.clientX;
+            lastY = e.clientY;
+        });
+
+        // Mobile Wiggle (Device Motion)
+        let lastAccel = { x: 0, y: 0, z: 0 };
+        const SHAKE_THRESHOLD = 20;
+
+        window.addEventListener('devicemotion', (e) => {
+            if (gameState !== 'brief_shown' || !e.acceleration) return;
+
+            const acceleration = e.accelerationIncludingGravity;
+            const deltaX = Math.abs(acceleration.x - lastAccel.x);
+            const deltaY = Math.abs(acceleration.y - lastAccel.y);
+            const deltaZ = Math.abs(acceleration.z - lastAccel.z);
+
+            if ((deltaX > SHAKE_THRESHOLD || deltaY > SHAKE_THRESHOLD || deltaZ > SHAKE_THRESHOLD)) {
+                if (wiggleCounter < 1) {
+                    mainButton.classList.add('wiggle');
+                    playWiggleBoing();
+                    setTimeout(() => mainButton.classList.remove('wiggle'), 700);
+                    wiggleCounter++;
+                }
+            }
+
+            lastAccel.x = acceleration.x;
+            lastAccel.y = acceleration.y;
+            lastAccel.z = acceleration.z;
+        });
+        
+        // Initialize the app when the page loads
+        window.onload = resetApp;
+        
+        
+// 💒 1. Disable right-click
+document.addEventListener('contextmenu', e => e.preventDefault());
+
+// 💒 2. Disable inspect / save / print shortcuts
+document.addEventListener('keydown', e => {
+  if (
+    (e.ctrlKey && ['s','u','p','S','U','P'].includes(e.key)) || // Ctrl+S, Ctrl+U, Ctrl+P
+    e.key === 'F12' ||                                          // DevTools
+    (e.ctrlKey && e.shiftKey && ['I','J','C'].includes(e.key))  // Ctrl+Shift+I/J/C
+  ) {
+    e.preventDefault();
+    sparkle(e.clientX, e.clientY);
+  }
+});
+
+// 💒 3. Block drag saving of images
+document.addEventListener('dragstart', e => e.preventDefault());
+document.querySelectorAll('img').forEach(img => img.setAttribute('draggable', 'false'));
+
+// 💒 4. Disable text selection & copying
+document.addEventListener('copy', e => e.preventDefault());
+document.addEventListener('cut', e => e.preventDefault());
+document.addEventListener('selectstart', e => e.preventDefault());
+document.body.style.userSelect = 'none';
+document.body.style.webkitUserSelect = 'none';
+
+// 💒 5. Detect if DevTools is open
+setInterval(() => {
+  if (
+    window.outerWidth - window.innerWidth > 160 ||
+    window.outerHeight - window.innerHeight > 160
+  ) {
+    document.body.innerHTML = `
+      <div style="text-align:center;margin-top:20%;font-size:2rem;color:#d6336c;">
+        💖 Please close developer tools to continue 💖
+      </div>`;
+  }
+}, 1000);
+
+    </script>
+</body>
+</html>
+<script>console.log('Hello JS');</script></body></html>
